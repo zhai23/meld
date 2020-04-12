@@ -35,7 +35,7 @@ try:
     import distro
 except ImportError:
     python_version = tuple(int(x) for x in platform.python_version_tuple()[:2])
-    if python_version >= (3, 8):
+    if python_version >= (3, 8) and platform.system() == 'Linux':
         print(
             'Missing build requirement "distro" Python module; '
             'install paths may be incorrect', file=sys.stderr)
