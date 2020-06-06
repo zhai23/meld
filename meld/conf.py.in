@@ -29,6 +29,13 @@ if CONFIGURED == 'True':
 DATADIR_IS_UNINSTALLED = False
 PYTHON_REQUIREMENT_TUPLE = (3, 6)
 
+# libgtksourceview pulls in all other dependencies except librsvg,
+# which is dynamically loaded plugin, so it is listed explicitly
+MELD_WINDOWS_TOPLEVEL_REUIRED_DLLS = [
+    'libgtksourceview-4-0.dll',
+    'librsvg-2-2.dll'
+]
+
 
 # Installed from main script
 def no_translation(gettext_string: str) -> str:

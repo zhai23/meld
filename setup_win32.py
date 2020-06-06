@@ -9,6 +9,17 @@ import sysconfig
 
 from cx_Freeze import Executable, setup
 
+# Copy conf.py in place if necessary
+base_path = pathlib.Path(__file__).parent
+conf_path = base_path / 'meld' / 'conf.py'
+
+if not conf_path.exists():
+    import shutil
+    shutil.copyfile(conf_path.with_suffix('.py.in'), conf_path)
+
+import meld.build_helpers  # noqa: E402
+import meld.conf  # noqa: E402
+
 
 def get_non_python_libs():
     """Returns list of tuples containing extra dependencies required to run
@@ -22,12 +33,12 @@ def get_non_python_libs():
     """
     local_bin = os.path.join(sys.prefix, "bin")
 
-    inst_root = []  # local paths of files "to put at freezed root"
     inst_lib = []  # local paths of files "to put at freezed 'lib' subdir"
 
-    if 'mingw' in sysconfig.get_platform():
+    if sys.platform == 'win32':
         # dll imported by dll dependencies expected to be auto-resolved later
-        inst_root = [os.path.join(local_bin, 'libgtksourceview-4-0.dll')]
+        for dll in meld.conf.MELD_WINDOWS_TOPLEVEL_REUIRED_DLLS:
+            inst_lib.append(os.path.join(local_bin, dll))
 
         # required for communicating multiple instances
         inst_lib.append(os.path.join(local_bin, 'gdbus.exe'))
@@ -39,8 +50,6 @@ def get_non_python_libs():
             inst_lib.append(os.path.join(local_bin, 'gspawn-win64-helper.exe'))
 
     return [
-            (f, os.path.basename(f)) for f in inst_root
-        ] + [
             (f, os.path.join('lib', os.path.basename(f))) for f in inst_lib
         ]
 
@@ -69,9 +78,7 @@ for data_dir in gtk_data_dirs:
 
 manually_added_libs = {
     # add libgdk_pixbuf-2.0-0.dll manually to forbid auto-pulling of gdiplus.dll
-    "libgdk_pixbuf-2.0-0.dll": os.path.join(sys.prefix, 'bin'),
-    # librsvg is needed for SVG loading in gdkpixbuf
-    "librsvg-2-2.dll": os.path.join(sys.prefix, 'bin'),
+    "lib/libgdk_pixbuf-2.0-0.dll": os.path.join(sys.prefix, 'bin'),
 }
 
 for lib, possible_path in manually_added_libs.items():
@@ -133,17 +140,6 @@ if 'mingw' in sysconfig.get_platform():
     console_executable_options.update({
          "targetName": "MeldConsole.exe",
     })
-
-# Copy conf.py in place if necessary
-base_path = pathlib.Path(__file__).parent
-conf_path = base_path / 'meld' / 'conf.py'
-
-if not conf_path.exists():
-    import shutil
-    shutil.copyfile(conf_path.with_suffix('.py.in'), conf_path)
-
-import meld.build_helpers  # noqa: E402
-import meld.conf  # noqa: E402
 
 
 setup(
