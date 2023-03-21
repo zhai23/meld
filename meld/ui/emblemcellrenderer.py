@@ -16,7 +16,7 @@
 
 from typing import Dict, Tuple
 import gi
-import 
+import cairo
 gi.require_foreign('cairo')
 from gi.repository import Gdk, GdkPixbuf, GObject, Gtk
 
