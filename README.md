@@ -93,6 +93,25 @@ which will create the file `dist/Meld-VERSION-ARCH.msi`.
 Developing
 ----------
 
+## Setting up the Dev environment ##
+
+First install PyGObject related packages:
+```
+sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0 python-gi-dev python3-cairo-dev
+sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0
+```
+
+For other operating system, see https://pygobject.readthedocs.io/en/latest/getting_started.html#ubuntu-getting-started
+
+Now install meld specific development tools
+`sudo apt install intltool libgtksourceview-4-dev gtksourceview-4 meson ninja itstool appstream-util`
+
+Finally install the python packages:
+
+`python3 -m pip install -r dev-requirements.txt`
+
+
+
 It's easy to get started developing Meld. From a git checkout, just run
 `bin/meld`.
 
