@@ -41,7 +41,6 @@ log = logging.getLogger(__name__)
 # import of _, rather than the non-unicode gettext.
 optparse._ = _
 
-
 class MeldApp(Gtk.Application):
 
     def __init__(self):
