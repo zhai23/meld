@@ -64,7 +64,7 @@ def has_data(self):
     return "build_data" in self.distribution.cmdclass
 
 
-command_base.command.build.Build.sub_commands.extend([
+command_base.command.build.build.sub_commands.extend([
     ("build_i18n", has_i18n),
     ("build_icons", has_icons),
     ("build_help", has_help),
