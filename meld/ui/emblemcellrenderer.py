@@ -15,8 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Dict, Tuple
-
-import cairo
+import gi
+import 
+gi.require_foreign('cairo')
 from gi.repository import Gdk, GdkPixbuf, GObject, Gtk
 
 
