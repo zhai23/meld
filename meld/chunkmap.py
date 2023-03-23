@@ -17,9 +17,7 @@ import collections
 import logging
 from typing import List, Mapping, Tuple
 
-import gi
 import cairo
-gi.require_foreign('cairo')
 from gi.repository import Gdk, GObject, Gtk
 
 from meld.settings import get_meld_settings

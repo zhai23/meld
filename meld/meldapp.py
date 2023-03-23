@@ -19,8 +19,6 @@ import logging
 import optparse
 import os
 
-import gi
-
 from gi.repository import Gdk, Gio, GLib, Gtk
 
 import meld.accelerators
