@@ -63,32 +63,6 @@ are unofficial native builds available from the
 [Meld for OSX](https://yousseb.github.io/meld/) project.
 
 
-Building
---------
-
-Meld uses [meson](https://mesonbuild.com/) build system. Use the following
-commands to build Meld from the source directory:
-
-```sh
-$ meson _build
-$ cd _build
-$ ninja
-```
-
-You can then install Meld system-wide by running:
-
-```sh
-$ ninja install
-```
-
-A Windows installer can be built with command
-
-```powershell
-C:\Python34\python.exe setup_win32.py bdist_msi
-```
-
-which will create the file `dist/Meld-VERSION-ARCH.msi`.
-
 
 Developing
 ----------
@@ -112,8 +86,6 @@ Finally install the python packages:
 python3 -m pip install -r dev-requirements.txt
 ```
 
-
-
 It's easy to get started developing Meld. From a git checkout, just run
 `bin/meld`.
 
@@ -125,6 +97,45 @@ default build + run development flow using Flatpak should work.
 To run the unit tests simply run:
 `pytest`
 
+
+Building
+--------
+
+Meld uses [meson](https://mesonbuild.com/) build system. Use the following
+commands to build Meld from the source directory:
+
+```sh
+$ meson _build
+$ cd _build
+$ ninja
+```
+
+## Running locally build version ##
+After building, assuming you are in the build directory, 
+you can run your modified version via:
+
+```sh
+./bin/meld
+```
+
+You can then install Meld system-wide by running:
+
+```sh
+$ ninja install
+```
+
+You can create a distribution package by running:
+```sh
+$ ninja distro
+```
+
+A Windows installer can be built with command
+
+```powershell
+C:\Python34\python.exe setup_win32.py bdist_msi
+```
+
+which will create the file `dist/Meld-VERSION-ARCH.msi`.
 
 
 Contributing
