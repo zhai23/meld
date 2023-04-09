@@ -111,7 +111,7 @@ $ ninja
 ```
 
 ## Running locally build version ##
-After building, assuming you are in the build directory, 
+After building, assuming you are in the build directory,
 you can run your modified version via:
 
 ```sh
