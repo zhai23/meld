@@ -18,9 +18,7 @@
 
 <p>
 <app>Meld</app> lets you compare two or three text files side-by-side. You can
-start a new file comparison by selecting the
-<guiseq><gui style="menu">File</gui><gui style="menuitem">New...</gui></guiseq>
-menu item.
+start a new file comparison using the new comparison button on the toolbar.
 </p>
 
 <p>
@@ -41,9 +39,9 @@ the areas around and between your files give you a visual overview and actions
 to help you handle changes between the files.
 </p>
 <p>
-On the left and right-hand sides of the window, there are two small vertical
+On the right-hand side of the window, there are small vertical
 bars showing various coloured blocks. These bars are designed to give you an
-overview of all of the differences between your two files. Each coloured block
+overview of all of the differences between your files. Each coloured block
 represents a section that is inserted, deleted, changed or in conflict between
 your files, depending on the block's colour used.
 </p>
@@ -67,14 +65,14 @@ changed.
 </p>
 <p>
 You can tell whether your files have been saved since they last changed by
-the save icon that appears next to the file name above each file. Also, the
-notebook label will show an asterisk (<code>*</code>) after any file that
+the save icon that appears next to the file name above each file. Also, if you
+have multiple comparisons open, their
+notebook labels will show an asterisk (<code>*</code>) after any file that
 hasn't been saved.
 </p>
 <p>
-You can save the current file by selecting the
-<guiseq><gui style="menu">File</gui><gui style="menuitem">Save</gui></guiseq>
-menu item, or using the <keyseq><key>Ctrl</key><key>S</key></keyseq> keyboard
+You can save the current file by selecting the save button above the file being
+compared, or using the <keyseq><key>Ctrl</key><key>S</key></keyseq> keyboard
 shortcut.
 </p>
 <note>
