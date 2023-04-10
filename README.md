@@ -105,9 +105,19 @@ Meld uses [meson](https://mesonbuild.com/) build system. Use the following
 commands to build Meld from the source directory:
 
 ```sh
-$ meson setup _build
-$ cd _build
+$ meson setup build
+$ cd build
 $ ninja
+```
+
+To see meson configuration settings, run:
+```sh
+$ meson configure build
+```
+
+To change the meson configuration settings, run:
+```sh
+$ meson configure build -D<name>=<value>
 ```
 
 ## Running locally build version ##
