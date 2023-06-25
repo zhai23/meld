@@ -18,8 +18,11 @@ import io
 import logging
 import optparse
 import os
+import gi
 
-from gi.repository import Gdk, Gio, GLib, Gtk
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Gdk, Gio, GLib, Gtk, Adw
 
 import meld.accelerators
 import meld.conf
@@ -37,7 +40,7 @@ log = logging.getLogger(__name__)
 optparse._ = _
 
 
-class MeldApp(Gtk.Application):
+class MeldApp(Adw.Application):
 
     def __init__(self):
         super().__init__(
@@ -46,20 +49,20 @@ class MeldApp(Gtk.Application):
         )
         GLib.set_application_name(meld.conf.APPLICATION_NAME)
         GLib.set_prgname(meld.conf.APPLICATION_ID)
-        Gtk.Window.set_default_icon_name(meld.conf.APPLICATION_ID)
+        Adw.Window.set_default_icon_name(meld.conf.APPLICATION_ID)
         self.set_resource_base_path(meld.conf.RESOURCE_BASE)
 
         provider = Gtk.CssProvider()
         provider.load_from_resource(self.make_resource_path('meld.css'))
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), provider,
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(), provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def make_resource_path(self, resource_path: str) -> str:
         return f'{self.props.resource_base_path}/{resource_path}'
 
     def do_startup(self):
-        Gtk.Application.do_startup(self)
+        Adw.Application.do_startup(self)
         meld.accelerators.register_accels(self)
 
         actions = (
@@ -74,8 +77,8 @@ class MeldApp(Gtk.Application):
             self.add_action(action)
 
         # Keep clipboard contents after application exit
-        clip = Gtk.Clipboard.get_default(Gdk.Display.get_default())
-        clip.set_can_store(None)
+        clip = Gdk.Display().get_default().get_clipboard()
+        # clip.set_can_store(None) TODO
 
         self.new_window()
 
@@ -105,7 +108,7 @@ class MeldApp(Gtk.Application):
         return 0
 
     def do_window_removed(self, widget):
-        Gtk.Application.do_window_removed(self, widget)
+        Adw.Application.do_window_removed(self, widget)
         if not len(self.get_windows()):
             self.quit()
 

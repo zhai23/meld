@@ -18,6 +18,8 @@ import logging
 from typing import List, Mapping, Tuple
 
 import cairo
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, GObject, Gtk
 
 from meld.settings import get_meld_settings
@@ -228,7 +230,7 @@ class ChunkMap(Gtk.DrawingArea):
         else:
             adj.set_value(location)
 
-    def do_button_press_event(self, event: Gdk.EventButton) -> bool:
+    def do_button_press_event(self, event) -> bool:
         if event.button == 1:
             self._scroll_fraction(event.y)
             self.grab_add()
@@ -237,7 +239,7 @@ class ChunkMap(Gtk.DrawingArea):
 
         return False
 
-    def do_button_release_event(self, event: Gdk.EventButton) -> bool:
+    def do_button_release_event(self, event) -> bool:
         if event.button == 1:
             self.grab_remove()
             self._have_grab = False
@@ -245,7 +247,7 @@ class ChunkMap(Gtk.DrawingArea):
 
         return False
 
-    def do_motion_notify_event(self, event: Gdk.EventMotion) -> bool:
+    def do_motion_notify_event(self, event) -> bool:
         if self._have_grab:
             self._scroll_fraction(event.y, animate=False)
 

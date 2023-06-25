@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <template class="NotebookLabel" parent="GtkEventBox">
-    <property name="events">GDK_BUTTON_PRESS_MASK</property>
-    <signal name="button-press-event" handler="on_label_button_press_event" swapped="no"/>
+  <template class="NotebookLabel" parent="GtkWidget">
     <child>
       <object class="GtkBox" id="box">
         <child type="center">
@@ -13,15 +11,18 @@
         </child>
         <child>
           <object class="GtkButton" id="close_button">
-            <property name="relief">none</property>
             <property name="focus-on-click">0</property>
             <property name="tooltip_text" translatable="1">Close Tab</property>
-            <property name="image">close_symbolic_image</property>
             <signal name="clicked" handler="on_close_button_clicked" swapped="no"/>
             <style>
               <class name="small-button"/>
               <class name="flat"/>
             </style>
+            <child>
+              <object class ="GtkImage">
+                <property name="icon_name">close_symbolic_image</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>

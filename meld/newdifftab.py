@@ -15,6 +15,8 @@
 
 import enum
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, GLib, GObject, Gtk
 
 from meld.conf import _
@@ -35,7 +37,7 @@ class DiffType(enum.IntEnum):
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/new-diff-tab.ui')
-class NewDiffTab(Gtk.Alignment, LabeledObjectMixin):
+class NewDiffTab(Gtk.Widget, LabeledObjectMixin):
 
     __gtype_name__ = "NewDiffTab"
 
@@ -83,8 +85,8 @@ class NewDiffTab(Gtk.Alignment, LabeledObjectMixin):
         self.diff_type = DiffType.Unselected
 
         default_path = GLib.get_home_dir()
-        for chooser in self.file_chooser:
-            chooser.set_current_folder(default_path)
+        # for chooser in self.file_chooser:
+        #     chooser.set_current_folder(default_path) TODO
 
         self.show()
 
@@ -113,7 +115,6 @@ class NewDiffTab(Gtk.Alignment, LabeledObjectMixin):
         else:  # button is self.dir_three_way_checkbutton
             self.dir_chooser2.set_sensitive(button.get_active())
 
-    @Gtk.Template.Callback()
     def on_file_set(self, filechooser, *args):
         gfile = filechooser.get_file()
         if not gfile:

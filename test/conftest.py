@@ -12,6 +12,8 @@ def default_icon_theme():
     # Our tests need to run on a system with no default display, so all
     # our display-specific get_default() stuff will break.
 
+    import gi
+    gi.require_version("Gtk", "4.0")
     from gi.repository import Gtk
     with mock.patch(
             'gi.repository.Gtk.IconTheme.get_default',

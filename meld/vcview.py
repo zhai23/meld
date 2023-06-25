@@ -24,6 +24,8 @@ import sys
 import tempfile
 from typing import Tuple
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk, Pango
 
 from meld import tree
@@ -115,7 +117,7 @@ class VcTreeStore(tree.DiffTreeStore):
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/vcview.ui')
-class VcView(Gtk.VBox, tree.TreeviewCommon, MeldDoc):
+class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
     __gtype_name__ = "VcView"
 

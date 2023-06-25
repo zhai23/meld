@@ -36,8 +36,9 @@ class SavedWindowState(GObject.GObject):
         type=bool, nick='Is window fullscreen', default=False)
 
     def bind(self, window):
-        window.connect('size-allocate', self.on_size_allocate)
-        window.connect('window-state-event', self.on_window_state_event)
+        # TODO use property state notifications
+        # window.connect('size-allocate', self.on_size_allocate)
+        # window.connect('window-state-event', self.on_window_state_event)
 
         # Don't re-read from gsettings after initialisation; we've seen
         # what looked like issues with buggy debounce here.

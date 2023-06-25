@@ -16,6 +16,8 @@
 
 import os
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.module import get_introspection_module
 from gi.repository import Gdk, GLib, GObject, Pango
 

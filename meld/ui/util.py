@@ -16,7 +16,10 @@
 import logging
 from typing import List
 
-from gi.repository import Gio, GObject, Gtk
+import gi
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Gio, GObject, Gtk, Adw
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +53,7 @@ def map_widgets_into_lists(widget, widgetnames):
 
 
 def extract_accel_from_menu_item(
-        model: Gio.MenuModel, item: int, app: Gtk.Application):
+        model: Gio.MenuModel, item: int, app: Adw.Application):
 
     accel, action, target = None, None, None
 
@@ -68,7 +71,7 @@ def extract_accel_from_menu_item(
         app.set_accels_for_action(detailed_action_name, [accel])
 
 
-def extract_accels_from_menu(model: Gio.MenuModel, app: Gtk.Application):
+def extract_accels_from_menu(model: Gio.MenuModel, app: Adw.Application):
     for i in range(model.get_n_items()):
         extract_accel_from_menu_item(model, i, app)
 

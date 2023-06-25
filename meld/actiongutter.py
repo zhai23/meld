@@ -16,6 +16,8 @@
 import bisect
 from typing import Dict, Optional
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, GdkPixbuf, GObject, Gtk
 
 from meld.conf import _
@@ -77,7 +79,7 @@ class ActionGutter(Gtk.DrawingArea):
             GObject.ParamFlags.WRITABLE |
             GObject.ParamFlags.CONSTRUCT_ONLY
         ),
-        default=Gtk.IconLookupFlags.DIR_LTR,
+        default=Gtk.IconLookupFlags.FORCE_REGULAR,
     )
     def icon_direction(self):
         return self._icon_direction

@@ -21,6 +21,8 @@ import math
 from enum import Enum
 from typing import Optional, Tuple, Type
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource
 
 # TODO: Don't from-import whole modules
@@ -108,7 +110,7 @@ class CursorDetails:
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/filediff.ui')
-class FileDiff(Gtk.VBox, MeldDoc):
+class FileDiff(Gtk.Box, MeldDoc):
     """Two or three way comparison of text files"""
 
     __gtype_name__ = "FileDiff"
@@ -505,7 +507,7 @@ class FileDiff(Gtk.VBox, MeldDoc):
         self.connect("notify::ignore-blank-lines", self.refresh_comparison)
 
     def do_realize(self):
-        Gtk.VBox().do_realize(self)
+        Gtk.Box().do_realize(self)
 
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/filediff-menus.ui')

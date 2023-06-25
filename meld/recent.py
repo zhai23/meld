@@ -32,6 +32,8 @@ import sys
 import tempfile
 from typing import List, Tuple
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, GLib, Gtk
 
 import meld.misc
@@ -58,8 +60,9 @@ class RecentFiles:
 
     def __init__(self):
         self.recent_manager = Gtk.RecentManager.get_default()
-        self.recent_filter = Gtk.RecentFilter()
-        self.recent_filter.add_mime_type(self.mime_type)
+        self.recent_filter = None # TODO
+        # self.recent_filter = Gtk.RecentFilter()
+        # self.recent_filter.add_mime_type(self.mime_type)
         self._stored_comparisons = {}
         self.app_exec = os.path.abspath(sys.argv[0])
 
@@ -200,30 +203,30 @@ class RecentFiles:
             gfile_uris = tuple(gfile.get_uri() for gfile in gfiles)
             self._stored_comparisons[recent_type, gfile_uris] = item_uri
 
-    def _filter_items(self, recent_filter, items):
-        getters = {Gtk.RecentFilterFlags.URI: "uri",
-                   Gtk.RecentFilterFlags.DISPLAY_NAME: "display_name",
-                   Gtk.RecentFilterFlags.MIME_TYPE: "mime_type",
-                   Gtk.RecentFilterFlags.APPLICATION: "applications",
-                   Gtk.RecentFilterFlags.GROUP: "groups",
-                   Gtk.RecentFilterFlags.AGE: "age"}
-        needed = recent_filter.get_needed()
-        attrs = [v for k, v in getters.items() if needed & k]
+    def _filter_items(self, recent_filter, items): # TODO
+        # getters = {Gtk.RecentFilterFlags.URI: "uri",
+        #            Gtk.RecentFilterFlags.DISPLAY_NAME: "display_name",
+        #            Gtk.RecentFilterFlags.MIME_TYPE: "mime_type",
+        #            Gtk.RecentFilterFlags.APPLICATION: "applications",
+        #            Gtk.RecentFilterFlags.GROUP: "groups",
+        #            Gtk.RecentFilterFlags.AGE: "age"}
+        # needed = recent_filter.get_needed()
+        # attrs = [v for k, v in getters.items() if needed & k]
 
         filtered_items = []
-        for i in items:
-            filter_data = {}
-            for attr in attrs:
-                filter_data[attr] = getattr(i, "get_" + attr)()
-            filter_info = Gtk.RecentFilterInfo()
-            filter_info.contains = needed
-            for f, v in filter_data.items():
-                # https://bugzilla.gnome.org/show_bug.cgi?id=695970
-                if isinstance(v, list):
-                    continue
-                setattr(filter_info, f, v)
-            if recent_filter.filter(filter_info):
-                filtered_items.append(i)
+        # for i in items:
+        #     filter_data = {}
+        #     for attr in attrs:
+        #         filter_data[attr] = getattr(i, "get_" + attr)()
+        #     filter_info = Gtk.RecentFilterInfo()
+        #     filter_info.contains = needed
+        #     for f, v in filter_data.items():
+        #         # https://bugzilla.gnome.org/show_bug.cgi?id=695970
+        #         if isinstance(v, list):
+        #             continue
+        #         setattr(filter_info, f, v)
+        #     if recent_filter.filter(filter_info):
+        #         filtered_items.append(i)
         return filtered_items
 
     def __str__(self):

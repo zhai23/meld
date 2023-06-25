@@ -30,6 +30,8 @@ from decimal import Decimal
 from mmap import ACCESS_COPY, mmap
 from typing import DefaultDict, List, NamedTuple, Optional, Tuple
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk
 
 # TODO: Don't from-import whole modules
@@ -360,7 +362,7 @@ class ComparisonMarker(NamedTuple):
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/dirdiff.ui')
-class DirDiff(Gtk.VBox, tree.TreeviewCommon, MeldDoc):
+class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
     __gtype_name__ = "DirDiff"
 

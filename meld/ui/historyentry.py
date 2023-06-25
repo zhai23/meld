@@ -17,6 +17,8 @@ import configparser
 import os
 import sys
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import GLib, GObject, Gtk, Pango
 
 # This file started off as a Python translation of:

@@ -14,6 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import GObject, Gtk
 
 from meld.recent import RecentFiles
@@ -45,7 +47,7 @@ class RecentSelector(Gtk.Grid):
         return Gtk.Grid.do_realize(self)
 
     def custom_recent_filter_func(
-            self, filter_info: Gtk.RecentFilterInfo) -> bool:
+            self, filter_info) -> bool:
         """Filter function for Meld-specific files
 
         Normal GTK recent filter rules are all OR-ed together to check
@@ -61,7 +63,7 @@ class RecentSelector(Gtk.Grid):
 
         return True
 
-    def make_recent_filter(self) -> Gtk.RecentFilter:
+    def make_recent_filter(self):
         recent_filter = Gtk.RecentFilter()
         recent_filter.add_custom(
             (
@@ -80,12 +82,12 @@ class RecentSelector(Gtk.Grid):
         # the RecentChooser to re-evaluate the filter.
         self.recent_chooser.set_filter(self.make_recent_filter())
 
-    @Gtk.Template.Callback()
+    # @Gtk.Template.Callback() TODO
     def on_selection_changed(self, *args):
         have_selection = bool(self.recent_chooser.get_current_uri())
         self.open_button.set_sensitive(have_selection)
 
-    @Gtk.Template.Callback()
+    # @Gtk.Template.Callback() TODO
     def on_activate(self, *args):
         uri = self.recent_chooser.get_current_uri()
         if uri:

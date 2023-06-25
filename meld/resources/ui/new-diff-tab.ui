@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <template class="NewDiffTab" parent="GtkAlignment">
+  <template class="NewDiffTab" parent="GtkWidget">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
-    <property name="yalign">0.25</property>
-    <property name="xscale">0</property>
-    <property name="yscale">0</property>
     <child>
       <object class="GtkBox" id="vbox6">
         <property name="orientation">vertical</property>
@@ -16,7 +13,6 @@
           <object class="GtkLabel" id="label2">
             <property name="vexpand">1</property>
             <property name="label" translatable="1">New comparison</property>
-            <property name="xalign">0</property>
             <style>
               <class name="new-diff-title"/>
             </style>
@@ -37,7 +33,6 @@
                 <child>
                   <object class="GtkToggleButton" id="button_type_file">
                     <property name="hexpand">1</property>
-                    <property name="use-action-appearance">False</property>
                     <property name="focusable">1</property>
                     <property name="receives-default">1</property>
                     <signal name="toggled" handler="on_button_type_toggled" swapped="no"/>
@@ -69,7 +64,6 @@
                 <child>
                   <object class="GtkToggleButton" id="button_type_dir">
                     <property name="hexpand">1</property>
-                    <property name="use-action-appearance">False</property>
                     <property name="focusable">1</property>
                     <property name="receives-default">1</property>
                     <signal name="toggled" handler="on_button_type_toggled" swapped="no"/>
@@ -101,7 +95,6 @@
                 <child>
                   <object class="GtkToggleButton" id="button_type_vc">
                     <property name="hexpand">1</property>
-                    <property name="use-action-appearance">False</property>
                     <property name="focusable">1</property>
                     <property name="receives-default">1</property>
                     <signal name="toggled" handler="on_button_type_toggled" swapped="no"/>
@@ -169,7 +162,6 @@
                         <child>
                           <object class="GtkCheckButton" id="file_three_way_checkbutton">
                             <property name="label" translatable="1">_3-way comparison</property>
-                            <property name="use-action-appearance">False</property>
                             <property name="focusable">1</property>
                             <property name="use-underline">1</property>
                             <signal name="toggled" handler="on_three_way_checkbutton_toggled" swapped="no"/>
@@ -180,13 +172,10 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkFileChooserButton" id="file_chooser0">
+                          <object class="GtkButton" id="file_chooser0">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="create-folders">False</property>
-                            <property name="local-only">False</property>
-                            <property name="title" translatable="1">Select First File</property>
-                            <signal name="file-set" handler="on_file_set" swapped="no"/>
+                            <property name="label" translatable="1">Select First File</property>
                             <layout>
                               <property name="column">0</property>
                               <property name="row">0</property>
@@ -194,13 +183,10 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkFileChooserButton" id="file_chooser1">
+                          <object class="GtkButton" id="file_chooser1">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="create-folders">False</property>
-                            <property name="local-only">False</property>
-                            <property name="title" translatable="1">Select Second File</property>
-                            <signal name="file-set" handler="on_file_set" swapped="no"/>
+                            <property name="label" translatable="1">Select Second File</property>
                             <layout>
                               <property name="column">1</property>
                               <property name="row">0</property>
@@ -208,14 +194,11 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkFileChooserButton" id="file_chooser2">
+                          <object class="GtkButton" id="file_chooser2">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
-                            <property name="create-folders">False</property>
-                            <property name="local-only">False</property>
-                            <property name="title" translatable="1">Select Third File</property>
-                            <signal name="file-set" handler="on_file_set" swapped="no"/>
+                            <property name="label" translatable="1">Select Third File</property>
                             <layout>
                               <property name="column">2</property>
                               <property name="row">0</property>
@@ -241,12 +224,10 @@
                         <property name="column-spacing">12</property>
                         <property name="column-homogeneous">1</property>
                         <child>
-                          <object class="GtkFileChooserButton" id="dir_chooser0">
+                          <object class="GtkButton" id="dir_chooser0">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="action">select-folder</property>
-                            <property name="create-folders">False</property>
-                            <property name="title" translatable="1">Select First Folder</property>
+                            <property name="label" translatable="1">Select First Folder</property>
                             <layout>
                               <property name="column">0</property>
                               <property name="row">0</property>
@@ -254,12 +235,10 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkFileChooserButton" id="dir_chooser1">
+                          <object class="GtkButton" id="dir_chooser1">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="action">select-folder</property>
-                            <property name="create-folders">False</property>
-                            <property name="title" translatable="1">Select Second Folder</property>
+                            <property name="label" translatable="1">Select Second Folder</property>
                             <layout>
                               <property name="column">1</property>
                               <property name="row">0</property>
@@ -267,13 +246,11 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkFileChooserButton" id="dir_chooser2">
+                          <object class="GtkButton" id="dir_chooser2">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can-focus">False</property>
-                            <property name="action">select-folder</property>
-                            <property name="create-folders">False</property>
-                            <property name="title" translatable="1">Select Third Folder</property>
+                            <property name="label" translatable="1">Select Third Folder</property>
                             <layout>
                               <property name="column">2</property>
                               <property name="row">0</property>
@@ -283,7 +260,6 @@
                         <child>
                           <object class="GtkCheckButton" id="dir_three_way_checkbutton">
                             <property name="label" translatable="1">_3-way comparison</property>
-                            <property name="use-action-appearance">False</property>
                             <property name="focusable">1</property>
                             <property name="use-underline">1</property>
                             <signal name="toggled" handler="on_three_way_checkbutton_toggled" swapped="no"/>
@@ -312,12 +288,10 @@
                         <property name="column-spacing">12</property>
                         <property name="column-homogeneous">1</property>
                         <child>
-                          <object class="GtkFileChooserButton" id="vc_chooser0">
+                          <object class="GtkButton" id="vc_chooser0">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="action">select-folder</property>
-                            <property name="create-folders">False</property>
-                            <property name="title" translatable="1">Select A Version-Controlled Folder</property>
+                            <property name="label" translatable="1">Select A Version-Controlled Folder</property>
                             <layout>
                               <property name="column">0</property>
                               <property name="row">0</property>
@@ -348,33 +322,25 @@
           </object>
         </child>
         <child>
-          <object class="GtkHButtonBox" id="hbuttonbox2">
+          <object class="GtkBox" id="hbuttonbox2">
             <property name="valign">center</property>
+            <property name="halign">end</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="spacing">6</property>
-            <property name="layout-style">end</property>
             <child>
               <object class="GtkButton" id="button_new_blank">
                 <property name="label" translatable="1">_Blank comparison</property>
-                <property name="use-action-appearance">False</property>
                 <property name="sensitive">0</property>
                 <property name="focusable">1</property>
                 <property name="receives-default">1</property>
                 <property name="use-underline">1</property>
                 <signal name="clicked" handler="on_button_new_blank_clicked" swapped="no"/>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-                <property name="secondary">True</property>
-              </packing>
             </child>
             <child>
               <object class="GtkButton" id="button_compare">
                 <property name="label" translatable="1">C_ompare</property>
-                <property name="use-action-appearance">False</property>
                 <property name="sensitive">0</property>
                 <property name="focusable">1</property>
                 <property name="receives-default">1</property>
@@ -384,11 +350,6 @@
                   <class name="suggested-action"/>
                 </style>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
         </child>

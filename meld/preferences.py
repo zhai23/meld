@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, GLib, GObject, Gtk, GtkSource
 
 from meld.conf import _
@@ -117,7 +119,7 @@ class FilterList(Gtk.Box, EditableListWidget):
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/column-list.ui')
-class ColumnList(Gtk.VBox, EditableListWidget):
+class ColumnList(Gtk.Box, EditableListWidget):
 
     __gtype_name__ = "ColumnList"
 

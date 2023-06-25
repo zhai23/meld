@@ -17,6 +17,8 @@
 import logging
 from enum import Enum
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource, Pango
 
 from meld.meldbuffer import MeldBuffer
@@ -165,19 +167,19 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
             Gdk.ModifierType.SHIFT_MASK),
 
         # We replace the default line movement behaviour of Alt+Up/Down
-        (Gdk.KEY_Up, Gdk.ModifierType.MOD1_MASK),
-        (Gdk.KEY_KP_Up, Gdk.ModifierType.MOD1_MASK),
-        (Gdk.KEY_KP_Up, Gdk.ModifierType.MOD1_MASK |
+        (Gdk.KEY_Up, Gdk.ModifierType.ALT_MASK),
+        (Gdk.KEY_KP_Up, Gdk.ModifierType.ALT_MASK),
+        (Gdk.KEY_KP_Up, Gdk.ModifierType.ALT_MASK |
             Gdk.ModifierType.SHIFT_MASK),
-        (Gdk.KEY_Down, Gdk.ModifierType.MOD1_MASK),
-        (Gdk.KEY_KP_Down, Gdk.ModifierType.MOD1_MASK),
-        (Gdk.KEY_KP_Down, Gdk.ModifierType.MOD1_MASK |
+        (Gdk.KEY_Down, Gdk.ModifierType.ALT_MASK),
+        (Gdk.KEY_KP_Down, Gdk.ModifierType.ALT_MASK),
+        (Gdk.KEY_KP_Down, Gdk.ModifierType.ALT_MASK |
             Gdk.ModifierType.SHIFT_MASK),
         # ...and Alt+Left/Right
-        (Gdk.KEY_Left, Gdk.ModifierType.MOD1_MASK),
-        (Gdk.KEY_KP_Left, Gdk.ModifierType.MOD1_MASK),
-        (Gdk.KEY_Right, Gdk.ModifierType.MOD1_MASK),
-        (Gdk.KEY_KP_Right, Gdk.ModifierType.MOD1_MASK),
+        (Gdk.KEY_Left, Gdk.ModifierType.ALT_MASK),
+        (Gdk.KEY_KP_Left, Gdk.ModifierType.ALT_MASK),
+        (Gdk.KEY_Right, Gdk.ModifierType.ALT_MASK),
+        (Gdk.KEY_KP_Right, Gdk.ModifierType.ALT_MASK),
         # ...and Ctrl+Page Up/Down
         (Gdk.KEY_Page_Up, Gdk.ModifierType.CONTROL_MASK),
         (Gdk.KEY_KP_Page_Up, Gdk.ModifierType.CONTROL_MASK),

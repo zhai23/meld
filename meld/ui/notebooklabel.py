@@ -14,11 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, GObject, Gtk
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/notebook-label.ui')
-class NotebookLabel(Gtk.EventBox):
+class NotebookLabel(Gtk.Widget):
 
     __gtype_name__ = 'NotebookLabel'
 
@@ -48,7 +50,6 @@ class NotebookLabel(Gtk.EventBox):
             GObject.BindingFlags.DEFAULT | GObject.BindingFlags.SYNC_CREATE,
         )
 
-    @Gtk.Template.Callback()
     def on_label_button_press_event(self, widget, event):
         # Middle-click on the tab closes the tab.
         if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:

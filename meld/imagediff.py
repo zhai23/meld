@@ -19,6 +19,8 @@ import logging
 from collections.abc import Sequence
 from typing import Optional
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, GdkPixbuf, Gio, GObject, Gtk, GtkSource
 
 # TODO: Don't from-import whole modules
@@ -77,7 +79,7 @@ def files_are_images(gfiles):
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/imagediff.ui')
-class ImageDiff(Gtk.VBox, MeldDoc):
+class ImageDiff(Gtk.Box, MeldDoc):
     """Two or three way comparison of image files"""
 
     __gtype_name__ = "ImageDiff"

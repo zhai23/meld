@@ -16,9 +16,12 @@
 
 import logging
 import os
+import gi
 from typing import Any, Dict, Optional, Sequence
 
-from gi.repository import Gdk, Gio, GLib, Gtk
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Gdk, Gio, GLib, Gtk, Adw
 
 # Import support module to get all builder-constructed widgets in the namespace
 import meld.ui.gladesupport  # noqa: F401
@@ -46,7 +49,7 @@ log = logging.getLogger(__name__)
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/appwindow.ui')
-class MeldWindow(Gtk.ApplicationWindow):
+class MeldWindow(Adw.ApplicationWindow):
 
     __gtype_name__ = 'MeldWindow'
 
@@ -98,13 +101,14 @@ class MeldWindow(Gtk.ApplicationWindow):
             for attr in ('stop', 'hide', 'show', 'start'):
                 setattr(self.spinner, attr, lambda *args: True)
 
-        self.drag_dest_set(
-            Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT |
-            Gtk.DestDefaults.DROP,
-            None, Gdk.DragAction.COPY)
-        self.drag_dest_add_uri_targets()
-        self.connect(
-            "drag_data_received", self.on_widget_drag_data_received)
+        # TODO use Gtk.DropTarget
+        # self.drag_dest_set(
+        #     Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT |
+        #     Gtk.DestDefaults.DROP,
+        #     None, Gdk.DragAction.COPY)
+        # self.drag_dest_add_uri_targets()
+        # self.connect(
+        #     "drag_data_received", self.on_widget_drag_data_received)
 
         self.window_state = SavedWindowState()
         self.window_state.bind(self)
@@ -119,24 +123,24 @@ class MeldWindow(Gtk.ApplicationWindow):
             style_context.add_class("devel")
 
     def do_realize(self):
-        Gtk.ApplicationWindow.do_realize(self)
+        Adw.ApplicationWindow.do_realize(self)
 
         app = self.get_application()
         menu = app.get_menu_by_id("gear-menu")
         self.gear_menu_button.set_popover(
-            Gtk.Popover.new_from_model(self.gear_menu_button, menu))
+            Gtk.PopoverMenu.new_from_model(menu))
 
         filter_model = app.get_menu_by_id("text-filter-menu")
         self.text_filter_button.set_popover(
-            Gtk.Popover.new_from_model(self.text_filter_button, filter_model))
+            Gtk.PopoverMenu.new_from_model(filter_model))
 
         filter_menu = app.get_menu_by_id("folder-status-filter-menu")
         self.folder_filter_button.set_popover(
-            Gtk.Popover.new_from_model(self.folder_filter_button, filter_menu))
+            Gtk.PopoverMenu.new_from_model(filter_menu))
 
         vc_filter_model = app.get_menu_by_id('vc-status-filter-menu')
         self.vc_filter_button.set_popover(
-            Gtk.Popover.new_from_model(self.vc_filter_button, vc_filter_model))
+            Gtk.PopoverMenu.new_from_model(vc_filter_model))
 
         meld_settings = get_meld_settings()
         self.update_text_filters(meld_settings)
@@ -208,15 +212,20 @@ class MeldWindow(Gtk.ApplicationWindow):
             self.idle_hooked = GLib.idle_add(self.on_idle)
 
     @Gtk.Template.Callback()
-    def on_delete_event(self, *extra):
+    def on_close_request(self, window):
         should_cancel = False
         # Delete pages from right-to-left.  This ensures that if a version
         # control page is open in the far left page, it will be closed last.
-        for page in reversed(self.notebook.get_children()):
-            self.notebook.set_current_page(self.notebook.page_num(page))
-            response = page.on_delete_event()
-            if response == Gtk.ResponseType.CANCEL:
-                should_cancel = True
+        child = self.notebook.get_last_child()
+        while child:
+            page = self.notebook.get_page(child)
+            if page is not None:
+                page_num = self.notebook.page_num(page)
+                self.notebook.set_current_page(page_num)
+                response = page.on_delete_event()
+                if response == Gtk.ResponseType.CANCEL:
+                    should_cancel = True
+            child = child.get_prev_sibling()
 
         should_cancel = should_cancel or self.has_pages()
         if should_cancel:
@@ -243,7 +252,11 @@ class MeldWindow(Gtk.ApplicationWindow):
         if hasattr(newdoc, 'scheduler'):
             self.scheduler.add_task(newdoc.scheduler)
 
-        self.view_toolbar.foreach(self.view_toolbar.remove)
+        child = self.view_toolbar.get_first_child()
+        while child:
+            self.view_toolbar.remove(child)
+            child = self.view_toolbar.get_first_child()
+
         if hasattr(newdoc, 'toolbar_actions'):
             self.view_toolbar.add(newdoc.toolbar_actions)
 
@@ -316,7 +329,10 @@ class MeldWindow(Gtk.ApplicationWindow):
     def _append_page(self, page):
         nbl = NotebookLabel(page=page)
         self.notebook.append_page(page, nbl)
-        self.notebook.child_set_property(page, 'tab-expand', True)
+        id = page.choosers_notebook.get_current_page()
+        widg = page.choosers_notebook.get_nth_page(id)
+        page.choosers_notebook.get_page(widg).set_property("tab-expand", True)
+        # self.notebook.child_set_property(page, 'tab-expand', True) TODO
 
         # Change focus to the newly created page only if the user is on a
         # DirDiff or VcView page, or if it's a new tab page. This prevents

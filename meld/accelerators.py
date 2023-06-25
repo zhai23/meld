@@ -1,7 +1,10 @@
 
 from typing import Dict, Sequence, Union
 
-from gi.repository import Gtk
+import gi
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Gtk, Adw
 
 VIEW_ACCELERATORS: Dict[str, Union[str, Sequence[str]]] = {
     'app.quit': '<Primary>Q',
@@ -60,7 +63,7 @@ VIEW_ACCELERATORS: Dict[str, Union[str, Sequence[str]]] = {
 }
 
 
-def register_accels(app: Gtk.Application):
+def register_accels(app: Adw.Application):
     for name, accel in VIEW_ACCELERATORS.items():
         accel = accel if isinstance(accel, tuple) else (accel,)
         app.set_accels_for_action(name, accel)

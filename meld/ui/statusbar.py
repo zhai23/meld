@@ -37,7 +37,11 @@ class MeldStatusMenuButton(Gtk.MenuButton):
     """
 
     css_provider = Gtk.CssProvider()
-    css_provider.load_from_data(style)
+    try:
+        css_provider.load_from_data(style)
+    except TypeError:
+        # Older GTK4 bindings had the wrong introspection data.
+        css_provider.load_from_data(style.decode(), -1)
 
     def get_label(self):
         return self._label.get_text()
@@ -139,7 +143,7 @@ class MeldStatusBar(Gtk.Statusbar):
     def do_realize(self):
         Gtk.Statusbar.do_realize(self)
 
-        self.box_box = Gtk.HBox(homogeneous=False, spacing=6)
+        self.box_box = Gtk.Box(homogeneous=False, spacing=6)
         self.pack_end(self.box_box, False, True, 0)
         self.box_box.pack_end(
             self.construct_line_display(), False, True, 0)

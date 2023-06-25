@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, Gio, GObject, Gtk
 
 KEYBINDING_FLAGS = GObject.SignalFlags.RUN_LAST | GObject.SignalFlags.ACTION
@@ -92,16 +94,20 @@ class MeldNotebook(Gtk.Notebook):
         self.popup_menu = builder.get_object("tab-menu")
 
         provider = Gtk.CssProvider()
-        provider.load_from_data(self.css)
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), provider,
+        try:
+            provider.load_from_data(self.css)
+        except TypeError:
+            # Older GTK4 bindings had the wrong introspection data.
+            provider.load_from_data(self.css.decode(), -1)
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(), provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         stylecontext = self.get_style_context()
         stylecontext.add_class('meld-notebook')
 
-        self.connect('button-press-event', self.on_button_press_event)
-        self.connect('popup-menu', self.on_popup_menu)
+        # self.connect('button-press-event', self.on_button_press_event) TODO
+        # self.connect('popup-menu', self.on_popup_menu)
         self.connect('page-added', self.on_page_added)
         self.connect('page-removed', self.on_page_removed)
 
@@ -162,4 +168,4 @@ class MeldNotebook(Gtk.Notebook):
         # Only update the window title if the current page is active
         if self.get_current_page() == self.page_num(page):
             self.emit('page-label-changed', text)
-        self.child_set_property(page, "menu-label", text)
+        # self.child_set_property(page, "menu-label", text) TODO

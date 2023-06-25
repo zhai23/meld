@@ -21,6 +21,8 @@
 
 from typing import Optional
 
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk, Pango
 
 from meld.conf import _
@@ -31,14 +33,14 @@ def layout_text_and_icon(
     secondary_text: Optional[str] = None,
     icon_name: Optional[str] = None,
 ):
-    hbox_content = Gtk.HBox(homogeneous=False, spacing=8)
+    hbox_content = Gtk.Box(homogeneous=False, spacing=8)
 
     if icon_name:
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DIALOG)
         image.set_alignment(0.5, 0.5)
         hbox_content.pack_start(image, False, False, 0)
 
-    vbox = Gtk.VBox(homogeneous=False, spacing=6)
+    vbox = Gtk.Box(homogeneous=False, spacing=6)
 
     primary_label = Gtk.Label(
         label="<b>{}</b>".format(primary_text),
@@ -68,7 +70,7 @@ def layout_text_and_icon(
     return hbox_content
 
 
-class MsgAreaController(Gtk.HBox):
+class MsgAreaController(Gtk.Box):
     __gtype_name__ = "MsgAreaController"
 
     def __init__(self):

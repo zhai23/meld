@@ -2,6 +2,8 @@
 from unittest import mock
 
 import pytest
+import gi
+gi.require_version("Gtk", "4.0")
 from gi.repository import GtkSource
 
 
