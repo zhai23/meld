@@ -1,26 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <template class="ImageDiff" parent="GtkVBox">
+  <requires lib="gtk" version="4.0"/>
+  <template class="GtkBox" parent="GtkVBox">
+    <property name="orientation">vertical</property>
     <property name="visible">True</property>
     <property name="can-focus">False</property>
     <child>
-      <!-- n-columns=3 n-rows=1 -->
       <object class="GtkGrid" id="grid_main">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="row-homogeneous">True</property>
-        <property name="column-homogeneous">True</property>
+        <property name="vexpand">1</property>
+        <property name="row-homogeneous">1</property>
+        <property name="column-homogeneous">1</property>
         <child>
           <object class="GtkScrolledWindow" id="scroll_window0">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="focusable">1</property>
             <property name="shadow-type">in</property>
-            <child>
+            <property name="child">
               <object class="GtkViewport" id="viewport0">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkEventBox" id="image_event_box0">
                     <property name="visible">True</property>
@@ -30,8 +25,7 @@
                     <signal name="popup-menu" handler="on_imageview_popup_menu" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="image_main0">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
+                        <property name="focusable">1</property>
                         <property name="stock">gtk-missing-image</property>
                         <signal name="button-press-event" handler="on_imageview_button_press_event" swapped="no"/>
                         <signal name="focus-in-event" handler="on_imageview_focus_in_event" swapped="no"/>
@@ -42,22 +36,19 @@
                   </object>
                 </child>
               </object>
-            </child>
+            </property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
           </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">0</property>
-          </packing>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scroll_window1">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="focusable">1</property>
             <property name="shadow-type">in</property>
-            <child>
+            <property name="child">
               <object class="GtkViewport" id="viewport1">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkEventBox" id="image_event_box1">
                     <property name="visible">True</property>
@@ -66,8 +57,7 @@
                     <signal name="popup-menu" handler="on_imageview_popup_menu" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="image_main1">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
+                        <property name="focusable">1</property>
                         <property name="stock">gtk-missing-image</property>
                         <signal name="button-press-event" handler="on_imageview_button_press_event" swapped="no"/>
                         <signal name="focus-in-event" handler="on_imageview_focus_in_event" swapped="no"/>
@@ -78,22 +68,19 @@
                   </object>
                 </child>
               </object>
-            </child>
+            </property>
+            <layout>
+              <property name="column">1</property>
+              <property name="row">0</property>
+            </layout>
           </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">0</property>
-          </packing>
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scroll_window2">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
+            <property name="focusable">1</property>
             <property name="shadow-type">in</property>
-            <child>
+            <property name="child">
               <object class="GtkViewport" id="viewport2">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
                 <child>
                   <object class="GtkEventBox" id="image_event_box2">
                     <property name="visible">True</property>
@@ -102,8 +89,7 @@
                     <signal name="popup-menu" handler="on_imageview_popup_menu" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="image_main2">
-                        <property name="visible">True</property>
-                        <property name="can-focus">True</property>
+                        <property name="focusable">1</property>
                         <property name="stock">gtk-missing-image</property>
                         <signal name="button-press-event" handler="on_imageview_button_press_event" swapped="no"/>
                         <signal name="focus-in-event" handler="on_imageview_focus_in_event" swapped="no"/>
@@ -114,19 +100,14 @@
                   </object>
                 </child>
               </object>
-            </child>
+            </property>
+            <layout>
+              <property name="column">2</property>
+              <property name="row">0</property>
+            </layout>
           </object>
-          <packing>
-            <property name="left-attach">2</property>
-            <property name="top-attach">0</property>
-          </packing>
         </child>
       </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">2</property>
-      </packing>
     </child>
   </template>
   <object class="GtkAdjustment" id="pane_adjustment0"/>

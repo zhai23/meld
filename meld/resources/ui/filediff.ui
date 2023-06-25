@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk" version="4.0"/>
   <requires lib="meld.ui.gladesupport" version="0.0"/>
-  <object class="GtkAdjustment" id="pane_adjustment0">
-  </object>
-  <object class="GtkAdjustment" id="pane_adjustment1">
-  </object>
-  <object class="GtkAdjustment" id="pane_adjustment2">
-  </object>
-  <template class="FileDiff" parent="GtkVBox">
+  <object class="GtkAdjustment" id="pane_adjustment0"/>
+  <object class="GtkAdjustment" id="pane_adjustment1"/>
+  <object class="GtkAdjustment" id="pane_adjustment2"/>
+  <template class="GtkBox" parent="GtkVBox">
+    <property name="orientation">vertical</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <signal name="key-press-event" handler="on_key_event" swapped="no"/>
     <signal name="key-release-event" handler="on_key_event" swapped="no"/>
     <child>
       <object class="DiffGrid" id="grid">
+        <property name="vexpand">1</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <style>
@@ -23,40 +21,32 @@
         </style>
         <child>
           <object class="GtkActionBar" id="file_toolbar2">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="GtkToggleButton" id="readonlytoggle2">
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">This file can not be written to. You may click here to unlock this file and make changes anyway, but these changes must be saved to a new file.</property>
+                <property name="visible">0</property>
+                <property name="tooltip_text" translatable="1">This file can not be written to. You may click here to unlock this file and make changes anyway, but these changes must be saved to a new file.</property>
                 <signal name="toggled" handler="on_readonly_button_toggled" swapped="no"/>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">changes-prevent-symbolic</property>
-                    <property name="visible">true</property>
                   </object>
                 </child>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="file_save_button2">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Save file in this pane</property>
+                <property name="focusable">1</property>
+                <property name="tooltip_text" translatable="1">Save file in this pane</property>
                 <signal name="clicked" handler="on_file_save_button_clicked" swapped="no"/>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">document-save-symbolic</property>
-                    <property name="visible">true</property>
                   </object>
                 </child>
               </object>
             </child>
             <child type="center">
               <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="orientation">horizontal</property>
-                <property name="homogeneous">False</property>
                 <style>
                   <class name="linked"/>
                 </style>
@@ -68,7 +58,7 @@
                     <property name="action">GTK_FILE_CHOOSER_ACTION_OPEN</property>
                     <property name="local-only">False</property>
                     <property name="dialog_label">Select File</property>
-                    <property name="tooltip_text" translatable="yes">Open file in this pane</property>
+                    <property name="tooltip_text" translatable="1">Open file in this pane</property>
                     <signal name="file-selected" handler="on_file_selected" swapped="no"/>
                   </object>
                 </child>
@@ -76,7 +66,7 @@
                   <object class="PathLabel" id="filelabel2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">File 3</property>
+                    <property name="label" translatable="1">File 3</property>
                   </object>
                 </child>
               </object>
@@ -92,40 +82,32 @@
         </child>
         <child>
           <object class="GtkActionBar" id="file_toolbar1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="GtkToggleButton" id="readonlytoggle1">
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">This file can not be written to. You may click here to unlock this file and make changes anyway, but these changes must be saved to a new file.</property>
+                <property name="visible">0</property>
+                <property name="tooltip_text" translatable="1">This file can not be written to. You may click here to unlock this file and make changes anyway, but these changes must be saved to a new file.</property>
                 <signal name="toggled" handler="on_readonly_button_toggled" swapped="no"/>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">changes-prevent-symbolic</property>
-                    <property name="visible">true</property>
                   </object>
                 </child>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="file_save_button1">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Save file in this pane</property>
+                <property name="focusable">1</property>
+                <property name="tooltip_text" translatable="1">Save file in this pane</property>
                 <signal name="clicked" handler="on_file_save_button_clicked" swapped="no"/>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">document-save-symbolic</property>
-                    <property name="visible">true</property>
                   </object>
                 </child>
               </object>
             </child>
             <child type="center">
               <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="orientation">horizontal</property>
-                <property name="homogeneous">False</property>
                 <style>
                   <class name="linked"/>
                 </style>
@@ -137,7 +119,7 @@
                     <property name="action">GTK_FILE_CHOOSER_ACTION_OPEN</property>
                     <property name="local-only">False</property>
                     <property name="dialog_label">Select File</property>
-                    <property name="tooltip_text" translatable="yes">Open file in this pane</property>
+                    <property name="tooltip_text" translatable="1">Open file in this pane</property>
                     <signal name="file-selected" handler="on_file_selected" swapped="no"/>
                   </object>
                 </child>
@@ -145,7 +127,7 @@
                   <object class="PathLabel" id="filelabel1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">File 2</property>
+                    <property name="label" translatable="1">File 2</property>
                   </object>
                 </child>
               </object>
@@ -161,40 +143,32 @@
         </child>
         <child>
           <object class="GtkActionBar" id="file_toolbar0">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <child>
               <object class="GtkToggleButton" id="readonlytoggle0">
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">This file can not be written to. You may click here to unlock this file and make changes anyway, but these changes must be saved to a new file.</property>
+                <property name="visible">0</property>
+                <property name="tooltip_text" translatable="1">This file can not be written to. You may click here to unlock this file and make changes anyway, but these changes must be saved to a new file.</property>
                 <signal name="toggled" handler="on_readonly_button_toggled" swapped="no"/>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">changes-prevent-symbolic</property>
-                    <property name="visible">true</property>
                   </object>
                 </child>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="file_save_button0">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Save file in this pane</property>
+                <property name="focusable">1</property>
+                <property name="tooltip_text" translatable="1">Save file in this pane</property>
                 <signal name="clicked" handler="on_file_save_button_clicked" swapped="no"/>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">document-save-symbolic</property>
-                    <property name="visible">true</property>
                   </object>
                 </child>
               </object>
             </child>
             <child type="center">
               <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="orientation">horizontal</property>
-                <property name="homogeneous">False</property>
                 <style>
                   <class name="linked"/>
                 </style>
@@ -206,7 +180,7 @@
                     <property name="action">GTK_FILE_CHOOSER_ACTION_OPEN</property>
                     <property name="local-only">False</property>
                     <property name="dialog_label">Select File</property>
-                    <property name="tooltip_text" translatable="yes">Open file in this pane</property>
+                    <property name="tooltip_text" translatable="1">Open file in this pane</property>
                     <signal name="file-selected" handler="on_file_selected" swapped="no"/>
                   </object>
                 </child>
@@ -214,7 +188,7 @@
                   <object class="PathLabel" id="filelabel0">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">File 1</property>
+                    <property name="label" translatable="1">File 1</property>
                   </object>
                 </child>
               </object>
@@ -229,26 +203,19 @@
           </packing>
         </child>
         <child>
-          <object class="GtkVBox" id="vbox0">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
+          <object class="GtkBox" id="vbox0">
+            <property name="orientation">vertical</property>
+            <property name="can_focus">0</property>
             <child>
               <object class="MsgAreaController" id="msgarea_mgr0">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkScrolledWindow" id="scrolledwindow0">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
+                <property name="hexpand">1</property>
+                <property name="vexpand">1</property>
                 <property name="vadjustment">pane_adjustment0</property>
                 <signal name="size-allocate" handler="on_scrolledwindow_size_allocate" swapped="no"/>
                 <child>
@@ -264,11 +231,6 @@
                   </object>
                 </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
           <packing>
@@ -277,26 +239,19 @@
           </packing>
         </child>
         <child>
-          <object class="GtkVBox" id="vbox2">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
+          <object class="GtkBox" id="vbox2">
+            <property name="orientation">vertical</property>
+            <property name="can_focus">0</property>
             <child>
               <object class="MsgAreaController" id="msgarea_mgr2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkScrolledWindow" id="scrolledwindow2">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
+                <property name="hexpand">1</property>
+                <property name="vexpand">1</property>
                 <property name="vadjustment">pane_adjustment2</property>
                 <signal name="size-allocate" handler="on_scrolledwindow_size_allocate" swapped="no"/>
                 <child>
@@ -312,11 +267,6 @@
                   </object>
                 </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
           <packing>
@@ -325,26 +275,19 @@
           </packing>
         </child>
         <child>
-          <object class="GtkVBox" id="vbox1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
+          <object class="GtkBox" id="vbox1">
+            <property name="orientation">vertical</property>
+            <property name="can_focus">0</property>
             <child>
               <object class="MsgAreaController" id="msgarea_mgr1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkScrolledWindow" id="scrolledwindow1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
+                <property name="hexpand">1</property>
+                <property name="vexpand">1</property>
                 <property name="vadjustment">pane_adjustment1</property>
                 <signal name="size-allocate" handler="on_scrolledwindow_size_allocate" swapped="no"/>
                 <child>
@@ -360,11 +303,6 @@
                   </object>
                 </child>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
           <packing>
@@ -374,8 +312,6 @@
         </child>
         <child>
           <object class="GtkActionBar" id="dummy_toolbar_linkmap0">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <style>
               <class name="meld-actionbar"/>
             </style>
@@ -400,8 +336,6 @@
         </child>
         <child>
           <object class="GtkActionBar" id="dummy_toolbar_linkmap1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <style>
               <class name="meld-actionbar"/>
             </style>
@@ -439,8 +373,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="dummy_statusbar0">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <style>
               <class name="meld-status-bar"/>
             </style>
@@ -466,8 +398,6 @@
         </child>
         <child>
           <object class="GtkLabel" id="dummy_statusbar1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <style>
               <class name="meld-status-bar"/>
             </style>
@@ -493,8 +423,6 @@
         </child>
         <child>
           <object class="GtkActionBar" id="dummy_toolbar_actiongutter0">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <style>
               <class name="meld-actionbar"/>
             </style>
@@ -506,8 +434,6 @@
         </child>
         <child>
           <object class="GtkActionBar" id="dummy_toolbar_actiongutter1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <style>
               <class name="meld-actionbar"/>
             </style>
@@ -519,8 +445,6 @@
         </child>
         <child>
           <object class="GtkActionBar" id="dummy_toolbar_actiongutter2">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <style>
               <class name="meld-actionbar"/>
             </style>
@@ -532,8 +456,6 @@
         </child>
         <child>
           <object class="GtkActionBar" id="dummy_toolbar_actiongutter3">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <style>
               <class name="meld-actionbar"/>
             </style>
@@ -601,19 +523,15 @@
         </child>
         <child>
           <object class="GtkRevealer" id="toolbar_sourcemap_revealer">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="reveal-child">True</property>
-            <property name="transition-type">GTK_REVEALER_TRANSITION_TYPE_SLIDE_RIGHT</property>
-            <child>
+            <property name="reveal-child">1</property>
+            <property name="transition-type">slide-right</property>
+            <property name="child">
               <object class="GtkActionBar" id="dummy_toolbar_sourcemap">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <style>
                   <class name="meld-actionbar"/>
                 </style>
               </object>
-            </child>
+            </property>
           </object>
           <packing>
             <property name="left_attach">9</property>
@@ -622,20 +540,13 @@
         </child>
         <child>
           <object class="GtkRevealer" id="sourcemap_revealer">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="reveal-child">True</property>
-            <property name="transition-type">GTK_REVEALER_TRANSITION_TYPE_SLIDE_RIGHT</property>
-            <child>
+            <property name="reveal-child">1</property>
+            <property name="transition-type">slide-right</property>
+            <property name="child">
               <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="orientation">horizontal</property>
                 <child>
                   <object class="GtkBox" id="sourcemap_hbox">
-                    <property name="visible">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="orientation">horizontal</property>
+                    <property name="visible">0</property>
                     <property name="spacing">2</property>
                     <style>
                       <class name="sourcemap-container"/>
@@ -662,9 +573,6 @@
                 </child>
                 <child>
                   <object class="GtkBox" id="chunkmap_hbox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="orientation">horizontal</property>
                     <property name="spacing">2</property>
                     <style>
                       <class name="sourcemap-container"/>
@@ -702,7 +610,7 @@
                   </object>
                 </child>
               </object>
-            </child>
+            </property>
           </object>
           <packing>
             <property name="left_attach">9</property>
@@ -711,19 +619,15 @@
         </child>
         <child>
           <object class="GtkRevealer" id="statusbar_sourcemap_revealer">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="reveal-child">True</property>
-            <property name="transition-type">GTK_REVEALER_TRANSITION_TYPE_SLIDE_RIGHT</property>
-            <child>
+            <property name="reveal-child">1</property>
+            <property name="transition-type">slide-right</property>
+            <property name="child">
               <object class="GtkLabel" id="dummy_statusbar_sourcemap">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <style>
                   <class name="meld-status-bar"/>
                 </style>
               </object>
-            </child>
+            </property>
           </object>
           <packing>
             <property name="left_attach">9</property>
@@ -777,11 +681,6 @@
           <placeholder/>
         </child>
       </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
     </child>
   </template>
 </interface>
