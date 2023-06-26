@@ -128,18 +128,18 @@ class MeldApp(Adw.Application):
             uri = "https://meld.app/help/"
         else:
             uri = "help:meld"
-        Gtk.show_uri(
-            Gdk.Screen.get_default(), uri, Gtk.get_current_event_time())
+        launcher = Gtk.UriLauncher()
+        launcher.set_uri(uri)
+        launcher.launch(None, None)
 
     def about_callback(self, action, parameter):
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/about-dialog.ui')
         dialog = builder.get_object('about-dialog')
         dialog.set_version(meld.conf.__version__)
-        dialog.set_logo_icon_name(meld.conf.APPLICATION_ID)
+        dialog.set_application_icon(meld.conf.APPLICATION_ID)
         dialog.set_transient_for(self.get_active_window())
-        dialog.run()
-        dialog.destroy()
+        dialog.present()
 
     def quit_callback(self, action, parameter):
         for window in self.get_windows():

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <object class="GtkAboutDialog" id="about-dialog">
-    <property name="type_hint">dialog</property>
+  <object class="AdwAboutWindow" id="about-dialog">
     <property name="copyright" translatable="1">Copyright © 2002-2009 Stephen Kennedy
 Copyright © 2009-2022 Kai Willadsen</property>
     <property name="website">https://meld.app/</property>
-    <property name="authors">Stephen Kennedy
+    <property name="developers">Stephen Kennedy
 Kai Willadsen
 Vincent Legoll</property>
     <property name="translator_credits" translatable="1">translator-credits</property>
