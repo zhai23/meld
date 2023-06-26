@@ -216,16 +216,14 @@ class MeldWindow(Adw.ApplicationWindow):
         should_cancel = False
         # Delete pages from right-to-left.  This ensures that if a version
         # control page is open in the far left page, it will be closed last.
-        child = self.notebook.get_last_child()
-        while child:
-            page = self.notebook.get_page(child)
-            if page is not None:
-                page_num = self.notebook.page_num(page)
-                self.notebook.set_current_page(page_num)
-                response = page.on_delete_event()
-                if response == Gtk.ResponseType.CANCEL:
-                    should_cancel = True
-            child = child.get_prev_sibling()
+        pages = self.notebook.get_pages()
+        for page in reversed(pages):
+            child = page.get_child()
+            page_num = self.notebook.page_num(child)
+            self.notebook.set_current_page(page_num)
+            response = child.on_delete_event()
+            if response == Gtk.ResponseType.CANCEL:
+                should_cancel = True
 
         should_cancel = should_cancel or self.has_pages()
         if should_cancel:
