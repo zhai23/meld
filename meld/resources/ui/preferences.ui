@@ -15,604 +15,299 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <template class="PreferencesDialog" parent="GtkDialog">
-    <property name="border_width">0</property>
+  <template class="PreferencesDialog" parent="AdwPreferencesWindow">
     <property name="title" translatable="1">Preferences</property>
     <property name="modal">1</property>
     <property name="destroy_with_parent">1</property>
-    <property name="type_hint">dialog</property>
-    <property name="use-header-bar">1</property>
-    <signal name="response" handler="on_response" swapped="no"/>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header_bar">
-        <property name="title" translatable="1">Preferences</property>
-      </object>
-    </child>
-    <child internal-child="content_area">
-      <object class="GtkBox" id="dialog-vbox4">
-        <property name="border-width">0</property>
-        <property name="orientation">vertical</property>
+
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title">Editor</property>
         <child>
-          <object class="GtkNotebook" id="notebook">
-            <property name="vexpand">1</property>
-            <property name="show_border">0</property>
+          <object class="GtkBox" id="editor_tab">
+            <property name="margin-start">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
             <child>
-              <object class="GtkNotebookPage">
-                <property name="child">
-                  <object class="GtkBox" id="editor_tab">
-                    <property name="border_width">12</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">12</property>
+              <object class="GtkBox" id="vbox20">
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label32">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Font</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="vexpand">1</property>
                     <child>
-                      <object class="GtkBox" id="vbox20">
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="label32">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Font</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="vexpand">1</property>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="halign">center</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox">
-                                <property name="hexpand">1</property>
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">6</property>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_default_font">
-                                    <property name="label" translatable="1">_Use the system fixed width font</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                    <property name="active">1</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkBox">
-                                    <property name="vexpand">1</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkLabel" id="label_fontpicker">
-                                        <property name="label" translatable="1">_Editor font:</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="mnemonic_widget">fontpicker</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GtkFontButton" id="fontpicker">
-                                        <property name="hexpand">1</property>
-                                        <property name="focusable">1</property>
-                                        <property name="font">Monospace 12</property>
-                                        <property name="use_font">1</property>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox22">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="label34">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Display</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox17">
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label35">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="vbox23">
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
-                                <property name="spacing">6</property>
-                                <child>
-                                  <object class="GtkBox" id="hbox3">
-                                    <property name="valign">center</property>
-                                    <property name="can_focus">0</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkLabel" id="label_tabsize">
-                                        <property name="halign">center</property>
-                                        <property name="label" translatable="1">_Tab width:</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="mnemonic_widget">spinbutton_tabsize</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GtkSpinButton" id="spinbutton_tabsize">
-                                        <property name="halign">center</property>
-                                        <property name="focusable">1</property>
-                                        <property name="adjustment">adjustment1</property>
-                                        <property name="climb_rate">1</property>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_spaces_instead_of_tabs">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">_Insert spaces instead of tabs</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_wrap_text">
-                                    <property name="vexpand">1</property>
-                                    <property name="label" translatable="1">Enable text _wrapping</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                    <signal name="toggled" handler="on_checkbutton_wrap_text_toggled" swapped="no"/>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkAlignment" id="alignment1">
-                                    <property name="vexpand">1</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="left_padding">18</property>
-                                    <child>
-                                      <object class="GtkCheckButton" id="checkbutton_wrap_word">
-                                        <property name="label" translatable="1">Do not _split words over two lines</property>
-                                        <property name="sensitive">0</property>
-                                        <property name="focusable">1</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="xalign">0</property>
-                                        <property name="active">1</property>
-                                        <signal name="toggled" handler="on_checkbutton_wrap_text_toggled" swapped="no"/>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_highlight_current_line">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">Highlight _current line</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_show_line_numbers">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">Show _line numbers</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_show_whitespace">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">Show w_hitespace</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_prefer_dark_theme">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">Prefer dark theme</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_use_syntax_highlighting">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">Use s_yntax highlighting</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkBox" id="hbox11">
-                                    <property name="valign">center</property>
-                                    <property name="can_focus">0</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkLabel" id="label16">
-                                        <property name="hexpand">1</property>
-                                        <property name="label" translatable="1">Syntax highlighting color scheme:</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GSettingsStringComboBox" id="combobox_style_scheme">
-                                        <property name="hexpand">1</property>
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="model">syntaxschemestore</property>
-                                        <property name="gsettings-column">0</property>
-                                        <child>
-                                          <object class="GtkCellRendererText" id="syntax_scheme_renderer"/>
-                                          <attributes>
-                                            <attribute name="text">1</attribute>
-                                          </attributes>
-                                        </child>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
+                      <object class="GtkLabel">
+                        <property name="halign">center</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkBox">
+                        <property name="hexpand">1</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">6</property>
                         <child>
-                          <object class="GtkLabel">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Code Overview</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
+                          <object class="GtkCheckButton" id="checkbutton_default_font">
+                            <property name="label" translatable="1">_Use the system fixed width font</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                            <property name="active">1</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkBox">
                             <property name="vexpand">1</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkLabel" id="label_fontpicker">
+                                <property name="label" translatable="1">_Editor font:</property>
+                                <property name="use_underline">1</property>
+                                <property name="mnemonic_widget">fontpicker</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkFontButton" id="fontpicker">
+                                <property name="hexpand">1</property>
+                                <property name="focusable">1</property>
+                                <property name="font">Monospace 12</property>
+                                <property name="use_font">1</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="vbox22">
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label34">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Display</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox17">
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label35">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="vbox23">
+                        <property name="orientation">vertical</property>
+                        <property name="can_focus">0</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkBox" id="hbox3">
+                            <property name="valign">center</property>
+                            <property name="can_focus">0</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkLabel" id="label_tabsize">
+                                <property name="halign">center</property>
+                                <property name="label" translatable="1">_Tab width:</property>
+                                <property name="use_underline">1</property>
+                                <property name="mnemonic_widget">spinbutton_tabsize</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="spinbutton_tabsize">
+                                <property name="halign">center</property>
+                                <property name="focusable">1</property>
+                                <property name="adjustment">adjustment1</property>
+                                <property name="climb_rate">1</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_spaces_instead_of_tabs">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">_Insert spaces instead of tabs</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_wrap_text">
+                            <property name="vexpand">1</property>
+                            <property name="label" translatable="1">Enable text _wrapping</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                            <signal name="toggled" handler="on_checkbutton_wrap_text_toggled" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_wrap_word">
+                            <property name="label" translatable="1">Do not _split words over two lines</property>
+                            <property name="sensitive">0</property>
+                            <property name="margin-start">18</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                            <property name="active">1</property>
+                            <signal name="toggled" handler="on_checkbutton_wrap_text_toggled" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_highlight_current_line">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">Highlight _current line</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_show_line_numbers">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">Show _line numbers</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_show_whitespace">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">Show w_hitespace</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_prefer_dark_theme">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">Prefer dark theme</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_use_syntax_highlighting">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">Use s_yntax highlighting</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="hbox11">
+                            <property name="valign">center</property>
+                            <property name="can_focus">0</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkLabel" id="label16">
+                                <property name="hexpand">1</property>
+                                <property name="label" translatable="1">Syntax highlighting color scheme:</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GSettingsStringComboBox" id="combobox_style_scheme">
+                                <property name="hexpand">1</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="model">syntaxschemestore</property>
+                                <property name="gsettings-column">0</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="syntax_scheme_renderer"/>
+                                  <attributes>
+                                    <attribute name="text">1</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Code Overview</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="vexpand">1</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="halign">center</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="hexpand">1</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_show_overview_map">
+                            <property name="label" translatable="1">Show overview map</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                            <property name="active">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="valign">center</property>
+                            <property name="visible">0</property>
+                            <property name="can_focus">0</property>
+                            <property name="spacing">6</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="halign">center</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox">
-                                <property name="hexpand">1</property>
-                                <property name="orientation">vertical</property>
-                                <property name="spacing">6</property>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_show_overview_map">
-                                    <property name="label" translatable="1">Show overview map</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="active">1</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkBox">
-                                    <property name="valign">center</property>
-                                    <property name="visible">0</property>
-                                    <property name="can_focus">0</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkLabel">
-                                        <property name="halign">center</property>
-                                        <property name="label" translatable="1">Overview map style:</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GSettingsStringComboBox" id="combo_overview_map">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="model">overviewstylestore</property>
-                                        <property name="active">0</property>
-                                        <property name="gsettings-column">0</property>
-                                        <child>
-                                          <object class="GtkCellRendererText" id="overview_style_renderer"/>
-                                          <attributes>
-                                            <attribute name="text">1</attribute>
-                                          </attributes>
-                                        </child>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox42">
-                        <property name="vexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="label69">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">External Editor</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox34">
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label70">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="vbox43">
-                                <property name="hexpand">1</property>
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
-                                <property name="spacing">6</property>
-                                <child>
-                                  <object class="GtkCheckButton" id="system_editor_checkbutton">
-                                    <property name="vexpand">1</property>
-                                    <property name="label" translatable="1">Use _default system editor</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkBox" id="hbox35">
-                                    <property name="valign">center</property>
-                                    <property name="can_focus">0</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkLabel" id="label_editor_command">
-                                        <property name="label" translatable="1">Edito_r command:</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="mnemonic_widget">custom_edit_command_entry</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GtkEntry" id="custom_edit_command_entry">
-                                        <property name="hexpand">1</property>
-                                        <property name="focusable">1</property>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-                <property name="tab">
-                  <object class="GtkLabel" id="editor_label">
-                    <property name="label" translatable="1">Editor</property>
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkNotebookPage">
-                <property name="position">2</property>
-                <property name="tab_fill">False</property>
-                <property name="child">
-                  <object class="GtkBox" id="folder_comparison_tab">
-                    <property name="orientation">vertical</property>
-                    <property name="can_focus">0</property>
-                    <property name="border_width">12</property>
-                    <property name="spacing">12</property>
-                    <child>
-                      <object class="GtkBox" id="vbox3">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="label5">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Shallow Comparison</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox2">
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label6">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="vbox4">
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
-                                <property name="spacing">6</property>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_shallow_compare">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">C_ompare files based only on size and timestamp</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkBox" id="timestamp_hbox">
-                                    <property name="valign">center</property>
-                                    <property name="can_focus">0</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkLabel" id="label7">
-                                        <property name="halign">center</property>
-                                        <property name="label" translatable="1">_Timestamp resolution:</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="mnemonic_widget">combo_timestamp</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GSettingsIntComboBox" id="combo_timestamp">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="model">timestampstore</property>
-                                        <property name="active">0</property>
-                                        <property name="gsettings-column">0</property>
-                                        <child>
-                                          <object class="GtkCellRendererText" id="combo_timestamp_renderer"/>
-                                          <attributes>
-                                            <attribute name="text">1</attribute>
-                                          </attributes>
-                                        </child>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkBox">
-                                    <property name="vexpand">1</property>
-                                    <property name="orientation">vertical</property>
-                                    <child>
-                                      <object class="GtkCheckButton" id="checkbutton_folder_filter_text">
-                                        <property name="valign">center</property>
-                                        <property name="label" translatable="1">Apply text filters during folder comparisons</property>
-                                        <property name="focusable">1</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GtkLabel">
-                                        <property name="margin-start">24</property>
-                                        <property name="label" translatable="1">Note: enabling text filters may make comparing large files much slower</property>
-                                        <property name="xalign">0</property>
-                                        <style>
-                                          <class name="dim-label"/>
-                                        </style>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox1">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="symlink_label">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Symbolic Links</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="symlink_hbox">
-                            <property name="valign">center</property>
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label41">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="checkbutton_ignore_symlinks">
-                                <property name="halign">center</property>
-                                <property name="label" translatable="1">Ignore symbolic links</property>
-                                <property name="focusable">1</property>
+                                <property name="label" translatable="1">Overview map style:</property>
                                 <property name="use_underline">1</property>
-                                <property name="xalign">0</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox2">
-                        <property name="vexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="label3">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Visible Columns</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox1">
-                            <property name="vexpand">1</property>
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label4">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkBox" id="column_list_vbox">
-                                <property name="hexpand">1</property>
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
+                              <object class="GSettingsStringComboBox" id="combo_overview_map">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="model">overviewstylestore</property>
+                                <property name="active">0</property>
+                                <property name="gsettings-column">0</property>
                                 <child>
-                                  <placeholder/>
+                                  <object class="GtkCellRendererText" id="overview_style_renderer"/>
+                                  <attributes>
+                                    <attribute name="text">1</attribute>
+                                  </attributes>
                                 </child>
                               </object>
                             </child>
@@ -621,378 +316,65 @@
                       </object>
                     </child>
                   </object>
-                </property>
-                <property name="tab">
-                  <object class="GtkLabel" id="folder_comparison_label">
-                    <property name="label" translatable="1">Folder Comparisons</property>
-                  </object>
-                </property>
+                </child>
               </object>
             </child>
             <child>
-              <object class="GtkNotebookPage">
-                <property name="position">2</property>
-                <property name="tab_fill">False</property>
-                <property name="child">
-                  <object class="GtkBox" id="vc_comparison_tab">
-                    <property name="orientation">vertical</property>
+              <object class="GtkBox" id="vbox42">
+                <property name="vexpand">1</property>
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label69">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">External Editor</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox34">
                     <property name="can_focus">0</property>
-                    <property name="border_width">12</property>
-                    <property name="spacing">12</property>
                     <child>
-                      <object class="GtkBox" id="vbox5">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="label8">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Version Comparisons</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox4">
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label9">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="vbox6">
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
-                                <property name="spacing">6</property>
-                                <child>
-                                  <object class="GtkBox" id="file_order_hbox1">
-                                    <property name="valign">center</property>
-                                    <property name="can_focus">0</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkLabel" id="file_order_label">
-                                        <property name="halign">center</property>
-                                        <property name="label" translatable="1">_Order when comparing file revisions:</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="mnemonic_widget">combo_file_order</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GSettingsBoolComboBox" id="combo_file_order">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="model">fileorderstore</property>
-                                        <property name="active">0</property>
-                                        <property name="gsettings-column">0</property>
-                                        <child>
-                                          <object class="GtkCellRendererText" id="file_order_renderer"/>
-                                          <attributes>
-                                            <attribute name="text">1</attribute>
-                                          </attributes>
-                                        </child>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkBox" id="merge_order_hbox1">
-                                    <property name="valign">center</property>
-                                    <property name="can_focus">0</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkLabel" id="merge_order_label">
-                                        <property name="halign">center</property>
-                                        <property name="label" translatable="1">Order when _merging files:</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="mnemonic_widget">combo_merge_order</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GSettingsStringComboBox" id="combo_merge_order">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="model">mergeorderstore</property>
-                                        <property name="active">0</property>
-                                        <property name="gsettings-column">0</property>
-                                        <child>
-                                          <object class="GtkCellRendererText" id="merge_order_renderer"/>
-                                          <attributes>
-                                            <attribute name="text">1</attribute>
-                                          </attributes>
-                                        </child>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
+                      <object class="GtkLabel" id="label70">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkBox" id="vbox7">
+                      <object class="GtkBox" id="vbox43">
+                        <property name="hexpand">1</property>
                         <property name="orientation">vertical</property>
                         <property name="can_focus">0</property>
                         <property name="spacing">6</property>
                         <child>
-                          <object class="GtkLabel" id="label10">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Commit Messages</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox7">
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label11">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="vbox8">
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
-                                <property name="spacing">6</property>
-                                <child>
-                                  <object class="GtkBox" id="hbox8">
-                                    <property name="valign">center</property>
-                                    <property name="can_focus">0</property>
-                                    <property name="spacing">6</property>
-                                    <child>
-                                      <object class="GtkCheckButton" id="checkbutton_show_commit_margin">
-                                        <property name="halign">center</property>
-                                        <property name="label" translatable="1">Show _right margin at:</property>
-                                        <property name="focusable">1</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GtkSpinButton" id="spinbutton_commit_margin">
-                                        <property name="halign">center</property>
-                                        <property name="focusable">1</property>
-                                        <property name="adjustment">adjustment2</property>
-                                        <property name="climb_rate">1</property>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkAlignment" id="alignment3">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="left_padding">18</property>
-                                    <child>
-                                      <object class="GtkCheckButton" id="checkbutton_break_commit_lines">
-                                        <property name="label" translatable="1">Automatically _break lines at right margin on commit</property>
-                                        <property name="focusable">1</property>
-                                        <property name="use_underline">1</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                </property>
-                <property name="tab">
-                  <object class="GtkLabel" id="vc_comparison_label">
-                    <property name="label" translatable="1">Version Control</property>
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkNotebookPage">
-                <property name="position">3</property>
-                <property name="tab_fill">False</property>
-                <property name="child">
-                  <object class="GtkBox" id="file_filters_tab">
-                    <property name="orientation">vertical</property>
-                    <property name="can_focus">0</property>
-                    <property name="border_width">12</property>
-                    <property name="spacing">12</property>
-                    <child>
-                      <object class="GtkBox" id="vbox9">
-                        <property name="vexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="label1">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Filename filters</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox6">
+                          <object class="GtkCheckButton" id="system_editor_checkbutton">
                             <property name="vexpand">1</property>
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label2">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="file_filters_vbox">
-                                <property name="hexpand">1</property>
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
-                                <property name="spacing">12</property>
-                                <child>
-                                  <object class="GtkLabel" id="label86">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1" comments="Translators: &apos;filter out&apos; refers to removing matched files and folders from the display">When performing directory comparisons, you may filter out files and directories by name. Each pattern is a list of shell style wildcards separated by spaces.</property>
-                                    <property name="wrap">1</property>
-                                    <property name="max_width_chars">40</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                              </object>
-                            </child>
+                            <property name="label" translatable="1">Use _default system editor</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
                           </object>
                         </child>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-                <property name="tab">
-                  <object class="GtkLabel" id="filters_label">
-                    <property name="label" translatable="1">File Filters</property>
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkNotebookPage">
-                <property name="position">4</property>
-                <property name="child">
-                  <object class="GtkBox" id="text_filters_tab">
-                    <property name="orientation">vertical</property>
-                    <property name="can_focus">0</property>
-                    <property name="border_width">12</property>
-                    <property name="spacing">12</property>
-                    <child>
-                      <object class="GtkBox" id="vbox12">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
                         <child>
-                          <object class="GtkLabel" id="label14">
+                          <object class="GtkBox" id="hbox35">
                             <property name="valign">center</property>
-                            <property name="label" translatable="1">Change trimming</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox10">
                             <property name="can_focus">0</property>
+                            <property name="spacing">6</property>
                             <child>
-                              <object class="GtkLabel" id="label15">
-                                <property name="halign">center</property>
-                                <property name="xpad">12</property>
+                              <object class="GtkLabel" id="label_editor_command">
+                                <property name="label" translatable="1">Edito_r command:</property>
+                                <property name="use_underline">1</property>
+                                <property name="mnemonic_widget">custom_edit_command_entry</property>
                               </object>
                             </child>
                             <child>
-                              <object class="GtkBox" id="change_trimming_vbox">
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
-                                <property name="spacing">12</property>
-                                <child>
-                                  <object class="GtkCheckButton" id="checkbutton_ignore_blank_lines">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">Trim blank line differences from the start and end of changes</property>
-                                    <property name="focusable">1</property>
-                                    <property name="use_underline">1</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox11">
-                        <property name="vexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkLabel" id="label12">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Text filters</property>
-                            <property name="use_markup">1</property>
-                            <property name="xalign">0</property>
-                            <attributes>
-                              <attribute name="weight" value="bold"></attribute>
-                            </attributes>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox9">
-                            <property name="vexpand">1</property>
-                            <property name="can_focus">0</property>
-                            <child>
-                              <object class="GtkLabel" id="label13">
-                                <property name="xpad">12</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="text_filters_vbox">
+                              <object class="GtkEntry" id="custom_edit_command_entry">
                                 <property name="hexpand">1</property>
-                                <property name="orientation">vertical</property>
-                                <property name="can_focus">0</property>
-                                <property name="spacing">12</property>
-                                <child>
-                                  <object class="GtkLabel" id="label87">
-                                    <property name="valign">center</property>
-                                    <property name="label" translatable="1">When performing file comparisons, you may ignore certain types of changes. Each pattern here is a python regular expression which replaces matching text with the empty string before comparison is performed. If the expression contains groups, only the groups are replaced. See the user manual for more details.</property>
-                                    <property name="use_markup">1</property>
-                                    <property name="wrap">1</property>
-                                    <property name="max_width_chars">40</property>
-                                    <property name="xalign">0</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
+                                <property name="focusable">1</property>
                               </object>
                             </child>
                           </object>
@@ -1000,24 +382,564 @@
                       </object>
                     </child>
                   </object>
-                </property>
-                <property name="tab">
-                  <object class="GtkLabel" id="regex_label">
-                    <property name="label" translatable="1">Text Filters</property>
-                  </object>
-                </property>
+                </child>
               </object>
             </child>
           </object>
         </child>
       </object>
     </child>
-    <child internal-child="action_area">
-      <object class="GtkButtonBox">
-        <property name="valign">center</property>
-        <property name="can_focus">False</property>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title">Folder Comparisons</property>
+        <child>
+          <object class="GtkBox" id="folder_comparison_tab">
+            <property name="orientation">vertical</property>
+            <property name="can_focus">0</property>
+            <property name="margin-start">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkBox" id="vbox3">
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label5">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Shallow Comparison</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox2">
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label6">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="vbox4">
+                        <property name="orientation">vertical</property>
+                        <property name="can_focus">0</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_shallow_compare">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">C_ompare files based only on size and timestamp</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="timestamp_hbox">
+                            <property name="valign">center</property>
+                            <property name="can_focus">0</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkLabel" id="label7">
+                                <property name="halign">center</property>
+                                <property name="label" translatable="1">_Timestamp resolution:</property>
+                                <property name="use_underline">1</property>
+                                <property name="mnemonic_widget">combo_timestamp</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GSettingsIntComboBox" id="combo_timestamp">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="model">timestampstore</property>
+                                <property name="active">0</property>
+                                <property name="gsettings-column">0</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="combo_timestamp_renderer"/>
+                                  <attributes>
+                                    <attribute name="text">1</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="vexpand">1</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkCheckButton" id="checkbutton_folder_filter_text">
+                                <property name="valign">center</property>
+                                <property name="label" translatable="1">Apply text filters during folder comparisons</property>
+                                <property name="focusable">1</property>
+                                <property name="use_underline">1</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="margin-start">24</property>
+                                <property name="label" translatable="1">Note: enabling text filters may make comparing large files much slower</property>
+                                <style>
+                                  <class name="dim-label"/>
+                                </style>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="vbox1">
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="symlink_label">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Symbolic Links</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="symlink_hbox">
+                    <property name="valign">center</property>
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label41">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="checkbutton_ignore_symlinks">
+                        <property name="halign">center</property>
+                        <property name="label" translatable="1">Ignore symbolic links</property>
+                        <property name="focusable">1</property>
+                        <property name="use_underline">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="vbox2">
+                <property name="vexpand">1</property>
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label3">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Visible Columns</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox1">
+                    <property name="vexpand">1</property>
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label4">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="column_list_vbox">
+                        <property name="hexpand">1</property>
+                        <property name="orientation">vertical</property>
+                        <property name="can_focus">0</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title">Version Control</property>
+        <child>
+          <object class="GtkBox" id="vc_comparison_tab">
+            <property name="orientation">vertical</property>
+            <property name="can_focus">0</property>
+            <property name="margin-start">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkBox" id="vbox5">
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label8">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Version Comparisons</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox4">
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label9">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="vbox6">
+                        <property name="orientation">vertical</property>
+                        <property name="can_focus">0</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkBox" id="file_order_hbox1">
+                            <property name="valign">center</property>
+                            <property name="can_focus">0</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkLabel" id="file_order_label">
+                                <property name="halign">center</property>
+                                <property name="label" translatable="1">_Order when comparing file revisions:</property>
+                                <property name="use_underline">1</property>
+                                <property name="mnemonic_widget">combo_file_order</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GSettingsBoolComboBox" id="combo_file_order">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="model">fileorderstore</property>
+                                <property name="active">0</property>
+                                <property name="gsettings-column">0</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="file_order_renderer"/>
+                                  <attributes>
+                                    <attribute name="text">1</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="merge_order_hbox1">
+                            <property name="valign">center</property>
+                            <property name="can_focus">0</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkLabel" id="merge_order_label">
+                                <property name="halign">center</property>
+                                <property name="label" translatable="1">Order when _merging files:</property>
+                                <property name="use_underline">1</property>
+                                <property name="mnemonic_widget">combo_merge_order</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GSettingsStringComboBox" id="combo_merge_order">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="model">mergeorderstore</property>
+                                <property name="active">0</property>
+                                <property name="gsettings-column">0</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="merge_order_renderer"/>
+                                  <attributes>
+                                    <attribute name="text">1</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="vbox7">
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label10">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Commit Messages</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox7">
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label11">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="vbox8">
+                        <property name="orientation">vertical</property>
+                        <property name="can_focus">0</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkBox" id="hbox8">
+                            <property name="valign">center</property>
+                            <property name="can_focus">0</property>
+                            <property name="spacing">6</property>
+                            <child>
+                              <object class="GtkCheckButton" id="checkbutton_show_commit_margin">
+                                <property name="halign">center</property>
+                                <property name="label" translatable="1">Show _right margin at:</property>
+                                <property name="focusable">1</property>
+                                <property name="use_underline">1</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="spinbutton_commit_margin">
+                                <property name="halign">center</property>
+                                <property name="focusable">1</property>
+                                <property name="adjustment">adjustment2</property>
+                                <property name="climb_rate">1</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_break_commit_lines">
+                            <property name="label" translatable="1">Automatically _break lines at right margin on commit</property>
+                            <property name="margin-start">18</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title">File Filters</property>
+        <child>
+          <object class="GtkBox" id="file_filters_tab">
+            <property name="orientation">vertical</property>
+            <property name="can_focus">0</property>
+            <property name="margin-start">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkBox" id="vbox9">
+                <property name="vexpand">1</property>
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Filename filters</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox6">
+                    <property name="vexpand">1</property>
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label2">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="file_filters_vbox">
+                        <property name="hexpand">1</property>
+                        <property name="orientation">vertical</property>
+                        <property name="can_focus">0</property>
+                        <property name="spacing">12</property>
+                        <child>
+                          <object class="GtkLabel" id="label86">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1" comments="Translators: &apos;filter out&apos; refers to removing matched files and folders from the display">When performing directory comparisons, you may filter out files and directories by name. Each pattern is a list of shell style wildcards separated by spaces.</property>
+                            <property name="wrap">1</property>
+                            <property name="max_width_chars">40</property>
+                          </object>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title">Text Filters</property>
+        <child>
+          <object class="GtkBox" id="text_filters_tab">
+            <property name="orientation">vertical</property>
+            <property name="can_focus">0</property>
+            <property name="margin-start">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkBox" id="vbox12">
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label14">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Change trimming</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox10">
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label15">
+                        <property name="halign">center</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="change_trimming_vbox">
+                        <property name="orientation">vertical</property>
+                        <property name="can_focus">0</property>
+                        <property name="spacing">12</property>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_ignore_blank_lines">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">Trim blank line differences from the start and end of changes</property>
+                            <property name="focusable">1</property>
+                            <property name="use_underline">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="vbox11">
+                <property name="vexpand">1</property>
+                <property name="orientation">vertical</property>
+                <property name="can_focus">0</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label12">
+                    <property name="valign">center</property>
+                    <property name="label" translatable="1">Text filters</property>
+                    <property name="use_markup">1</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"></attribute>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="hbox9">
+                    <property name="vexpand">1</property>
+                    <property name="can_focus">0</property>
+                    <child>
+                      <object class="GtkLabel" id="label13">
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="text_filters_vbox">
+                        <property name="hexpand">1</property>
+                        <property name="orientation">vertical</property>
+                        <property name="can_focus">0</property>
+                        <property name="spacing">12</property>
+                        <child>
+                          <object class="GtkLabel" id="label87">
+                            <property name="valign">center</property>
+                            <property name="label" translatable="1">When performing file comparisons, you may ignore certain types of changes. Each pattern here is a python regular expression which replaces matching text with the empty string before comparison is performed. If the expression contains groups, only the groups are replaced. See the user manual for more details.</property>
+                            <property name="use_markup">1</property>
+                            <property name="wrap">1</property>
+                            <property name="max_width_chars">40</property>3
+                          </object>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+
   </template>
   <object class="GtkSizeGroup" id="sizegroup_editor">
     <widgets>

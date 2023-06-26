@@ -72,33 +72,34 @@ class ActionGutter(Gtk.DrawingArea):
         self.chunk_starts = [c.start_a for c in chunks]
 
     @GObject.Property(
-        type=Gtk.IconLookupFlags,
+        type=Gtk.TextDirection,
         nick='Which direction should directional changes appear to go',
         flags=(
             GObject.ParamFlags.READABLE |
             GObject.ParamFlags.WRITABLE |
             GObject.ParamFlags.CONSTRUCT_ONLY
         ),
-        default=Gtk.IconLookupFlags.FORCE_REGULAR,
+        default=Gtk.TextDirection.LTR,
     )
     def icon_direction(self):
         return self._icon_direction
 
     @icon_direction.setter
-    def icon_direction_set(self, direction: Gtk.IconLookupFlags):
-        if direction not in (
-                Gtk.IconLookupFlags.DIR_LTR, Gtk.IconLookupFlags.DIR_RTL):
-            raise ValueError('Invalid icon direction {}'.format(direction))
+    def icon_direction_set(self, direction: Gtk.TextDirection):
+        # TODO icon lookup flags
+        # if direction not in (
+        #         Gtk.IconLookupFlags.DIR_LTR, Gtk.IconLookupFlags.DIR_RTL):
+        #     raise ValueError('Invalid icon direction {}'.format(direction))
 
-        replace_icons = {
-            Gtk.IconLookupFlags.DIR_LTR: 'apply-right',
-            Gtk.IconLookupFlags.DIR_RTL: 'apply-left',
-        }
-        self.action_map = {
-            ActionMode.Replace: ActionIcons.load(replace_icons[direction]),
-            ActionMode.Delete: ActionIcons.load('delete'),
-            ActionMode.Insert: ActionIcons.load('copy'),
-        }
+        # replace_icons = {
+        #     Gtk.IconLookupFlags.DIR_LTR: 'apply-right',
+        #     Gtk.IconLookupFlags.DIR_RTL: 'apply-left',
+        # }
+        # self.action_map = {
+        #     ActionMode.Replace: ActionIcons.load(replace_icons[direction]),
+        #     ActionMode.Delete: ActionIcons.load('delete'),
+        #     ActionMode.Insert: ActionIcons.load('copy'),
+        # }
         self._icon_direction = direction
 
     _source_view: Gtk.TextView
@@ -170,18 +171,18 @@ class ActionGutter(Gtk.DrawingArea):
             self.fill_colors, self.line_colors = get_common_theme()
             alpha = self.fill_colors['current-chunk-highlight'].alpha
             self.chunk_highlights = {
-                state: Gdk.RGBA(*[alpha + c * (1.0 - alpha) for c in colour])
+                state: colour
                 for state, colour in self.fill_colors.items()
             }
 
     def do_realize(self):
-        self.set_events(
-            Gdk.EventMask.ENTER_NOTIFY_MASK |
-            Gdk.EventMask.LEAVE_NOTIFY_MASK |
-            Gdk.EventMask.POINTER_MOTION_MASK |
-            Gdk.EventMask.BUTTON_PRESS_MASK |
-            Gdk.EventMask.BUTTON_RELEASE_MASK
-        )
+        # self.set_events( TODO
+        #     Gdk.EventMask.ENTER_NOTIFY_MASK |
+        #     Gdk.EventMask.LEAVE_NOTIFY_MASK |
+        #     Gdk.EventMask.POINTER_MOTION_MASK |
+        #     Gdk.EventMask.BUTTON_PRESS_MASK |
+        #     Gdk.EventMask.BUTTON_RELEASE_MASK
+        # )
         self.connect('notify::action-mode', lambda *args: self.queue_draw())
 
         meld_settings = get_meld_settings()

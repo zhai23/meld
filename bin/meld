@@ -258,6 +258,7 @@ def check_requirements():
 def setup_resources():
     import gi
     gi.require_version("Gtk", "4.0")
+    gi.require_version("GtkSource", "5")
     from gi.repository import Gio
     from gi.repository import GtkSource
 

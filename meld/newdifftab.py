@@ -37,7 +37,7 @@ class DiffType(enum.IntEnum):
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/new-diff-tab.ui')
-class NewDiffTab(Gtk.Widget, LabeledObjectMixin):
+class NewDiffTab(Gtk.Box, LabeledObjectMixin):
 
     __gtype_name__ = "NewDiffTab"
 

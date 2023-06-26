@@ -130,30 +130,33 @@ class MeldStatusBar(Gtk.Statusbar):
 
     def __init__(self):
         super().__init__()
-        self.props.margin = 0
-        self.props.spacing = 6
+        self.props.margin_start = 0
+        self.props.margin_top = 0
+        self.props.margin_end = 0
+        self.props.margin_bottom = 0
+        # self.props.spacing = 6 TODO
 
-        hbox = self.get_message_area()
-        label = hbox.get_children()[0]
-        hbox.props.spacing = 6
-        label.props.ellipsize = Pango.EllipsizeMode.NONE
-        hbox.remove(label)
-        hbox.pack_end(label, False, True, 0)
+        # hbox = self.get_message_area() TODO statusbar is deprecated
+        # label = hbox.get_children()[0]
+        # hbox.props.spacing = 6
+        # label.props.ellipsize = Pango.EllipsizeMode.NONE
+        # hbox.remove(label)
+        # hbox.append(label, False, True, 0)
 
     def do_realize(self):
         Gtk.Statusbar.do_realize(self)
 
-        self.box_box = Gtk.Box(homogeneous=False, spacing=6)
-        self.pack_end(self.box_box, False, True, 0)
-        self.box_box.pack_end(
-            self.construct_line_display(), False, True, 0)
-        self.box_box.pack_end(
-            self.construct_highlighting_selector(), False, True, 0)
-        self.box_box.pack_end(
-            self.construct_encoding_selector(), False, True, 0)
-        self.box_box.pack_end(
-            self.construct_display_popover(), False, True, 0)
-        self.box_box.show_all()
+        # self.box_box = Gtk.Box(homogeneous=False, spacing=6)
+        # self.append(self.box_box, False, True, 0)
+        # self.box_box.append(
+        #     self.construct_line_display(), False, True, 0)
+        # self.box_box.append(
+        #     self.construct_highlighting_selector(), False, True, 0)
+        # self.box_box.append(
+        #     self.construct_encoding_selector(), False, True, 0)
+        # self.box_box.append(
+        #     self.construct_display_popover(), False, True, 0)
+        # self.box_box.show_all() TODO
 
     def construct_line_display(self):
 

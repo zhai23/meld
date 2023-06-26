@@ -50,17 +50,20 @@ class MeldGutterRenderer:
 
     def set_renderer_defaults(self):
         self.set_alignment_mode(GtkSource.GutterRendererAlignmentMode.FIRST)
-        self.set_padding(3, 0)
-        self.set_alignment(0.5, 0.5)
+        self.set_xpad(3)
+        self.set_ypad(0)
+        self.set_xalign(0.5)
+        self.set_yalign(0.5)
 
     def on_setting_changed(self, settings, key):
-        if key == 'style-scheme':
-            self.fill_colors, self.line_colors = get_common_theme()
-            alpha = self.fill_colors['current-chunk-highlight'].alpha
-            self.chunk_highlights = {
-                state: Gdk.RGBA(*[alpha + c * (1.0 - alpha) for c in colour])
-                for state, colour in self.fill_colors.items()
-            }
+        # if key == 'style-scheme':
+        #     self.fill_colors, self.line_colors = get_common_theme()
+        #     alpha = self.fill_colors['current-chunk-highlight'].alpha
+        #     self.chunk_highlights = {
+        #         state: Gdk.RGBA(*[alpha + c * (1.0 - alpha) for c in colour])
+        #         for state, colour in self.fill_colors.items()
+        #     }
+        pass # TODO
 
     def draw_chunks(
             self, context, background_area, cell_area, start, end, state):
@@ -91,8 +94,7 @@ class MeldGutterRenderer:
             context.rel_line_to(width, 0)
         context.stroke()
 
-    def query_chunks(self, start, end, state):
-        line = start.get_line()
+    def query_chunks(self, lines, line):
         chunk_index = self.linediffer.locate_chunk(self.from_pane, line)[0]
         in_chunk = chunk_index is not None
 
@@ -112,7 +114,7 @@ class MeldGutterRenderer:
             # TODO: Remove when fixed in upstream GTK+
             background_rgba = get_background_rgba(self)
         self._chunk = chunk
-        self.set_background(background_rgba)
+        # self.set_background(background_rgba) TODO
         return in_chunk
 
 
@@ -171,7 +173,7 @@ class GutterRendererChunkLines(
         self.num_line_digits = num_digits
         markup = "<b>%d</b>" % num_lines
         width, height = self._measure_markup(markup)
-        self.set_size(width)
+        self.set_size_request(width, height)
 
     def do_draw(self, context, background_area, cell_area, start, end, state):
         GtkSource.GutterRendererText.do_draw(
@@ -179,9 +181,7 @@ class GutterRendererChunkLines(
         self.draw_chunks(
             context, background_area, cell_area, start, end, state)
 
-    def do_query_data(self, start, end, state):
-        self.query_chunks(start, end, state)
-        line = start.get_line() + 1
-        current_line = state & GtkSource.GutterRendererState.CURSOR
-        markup = "<b>%d</b>" % line if current_line else str(line)
+    def do_query_data(self, lines, line):
+        self.query_chunks(lines, line)
+        markup = "<b>%d</b>" % (line + 1)
         self.set_markup(markup, -1)

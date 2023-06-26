@@ -258,7 +258,7 @@ class MeldWindow(Adw.ApplicationWindow):
             child = self.view_toolbar.get_first_child()
 
         if hasattr(newdoc, 'toolbar_actions'):
-            self.view_toolbar.add(newdoc.toolbar_actions)
+            self.view_toolbar.append(newdoc.toolbar_actions)
 
     @Gtk.Template.Callback()
     def after_switch_page(self, notebook, page, which):
@@ -275,7 +275,7 @@ class MeldWindow(Adw.ApplicationWindow):
             page.on_delete_event()
 
     def action_fullscreen_change(self, action, state):
-        window_state = self.get_window().get_state()
+        window_state = self.get_toplevel().get_state()
         is_full = window_state & Gdk.WindowState.FULLSCREEN
         action.set_state(state)
         if state and not is_full:
@@ -303,8 +303,7 @@ class MeldWindow(Adw.ApplicationWindow):
         if not self.has_pages():
             self.on_switch_page(self.notebook, page, -1)
             if self.should_close:
-                cancelled = self.emit(
-                    'delete-event', Gdk.Event.new(Gdk.EventType.DELETE))
+                cancelled = self.emit('close-request')
                 if not cancelled:
                     self.destroy()
 
@@ -329,10 +328,8 @@ class MeldWindow(Adw.ApplicationWindow):
     def _append_page(self, page):
         nbl = NotebookLabel(page=page)
         self.notebook.append_page(page, nbl)
-        id = page.choosers_notebook.get_current_page()
-        widg = page.choosers_notebook.get_nth_page(id)
-        page.choosers_notebook.get_page(widg).set_property("tab-expand", True)
-        # self.notebook.child_set_property(page, 'tab-expand', True) TODO
+        real_page = self.notebook.get_page(page)
+        real_page.set_property("tab-expand", True)
 
         # Change focus to the newly created page only if the user is on a
         # DirDiff or VcView page, or if it's a new tab page. This prevents

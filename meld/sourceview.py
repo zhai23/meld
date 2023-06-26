@@ -190,15 +190,15 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.drag_dest_add_uri_targets()
+        # self.drag_dest_add_uri_targets() TODO
 
         # Most bindings are on SourceView, except the Page Up/Down ones
         # which are on TextView.
-        binding_set_names = ('GtkSourceView', 'GtkTextView')
-        for set_name in binding_set_names:
-            binding_set = Gtk.binding_set_find(set_name)
-            for key, modifiers in self.replaced_entries:
-                Gtk.binding_entry_remove(binding_set, key, modifiers)
+        # binding_set_names = ('GtkSourceView', 'GtkTextView') TODO
+        # for set_name in binding_set_names:
+        #     binding_set = Gtk.binding_set_find(set_name)
+        #     for key, modifiers in self.replaced_entries:
+        #         Gtk.binding_entry_remove(binding_set, key, modifiers)
 
         self.anim_source_id = None
         self.animating_chunks = []
@@ -263,7 +263,7 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
 
     def on_setting_changed(self, settings, key):
         if key == 'font':
-            self.override_font(settings.font)
+            # self.override_font(settings.font) TODO use css
             self._approx_line_height = None
         elif key == 'style-scheme':
             self.highlight_color = colour_lookup_with_fallback(

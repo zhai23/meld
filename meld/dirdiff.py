@@ -608,8 +608,8 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column.set_resizable(True)
             rentext = Gtk.CellRendererText()
             renicon = EmblemCellRenderer()
-            column.pack_start(renicon, False)
-            column.pack_start(rentext, True)
+            column.prepend(renicon, False)
+            column.prepend(rentext, True)
             column.set_attributes(rentext, markup=col_index(tree.COL_TEXT, i),
                                   foreground_rgba=col_index(tree.COL_FG, i),
                                   style=col_index(tree.COL_STYLE, i),
@@ -628,7 +628,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column = Gtk.TreeViewColumn(_("Size"))
             column.set_resizable(True)
             rentext = CellRendererByteSize()
-            column.pack_start(rentext, True)
+            column.prepend(rentext, True)
             column.set_attributes(rentext, bytesize=col_index(COL_SIZE, i))
             self.treeview[i].append_column(column)
             self.columns_dict[i]["size"] = column
@@ -636,7 +636,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column = Gtk.TreeViewColumn(_("Modification time"))
             column.set_resizable(True)
             rentext = CellRendererDate()
-            column.pack_start(rentext, True)
+            column.prepend(rentext, True)
             column.set_attributes(rentext, timestamp=col_index(COL_TIME, i))
             self.treeview[i].append_column(column)
             self.columns_dict[i]["modification time"] = column
@@ -644,7 +644,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column = Gtk.TreeViewColumn(_("Modification time (ISO)"))
             column.set_resizable(True)
             rentext = CellRendererISODate()
-            column.pack_start(rentext, True)
+            column.prepend(rentext, True)
             column.set_attributes(rentext, timestamp=col_index(COL_TIME, i))
             self.treeview[i].append_column(column)
             self.columns_dict[i]["iso-time"] = column
@@ -652,7 +652,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column = Gtk.TreeViewColumn(_("Permissions"))
             column.set_resizable(True)
             rentext = CellRendererFileMode()
-            column.pack_start(rentext, False)
+            column.prepend(rentext, False)
             column.set_attributes(rentext, file_mode=col_index(COL_PERMS, i))
             self.treeview[i].append_column(column)
             self.columns_dict[i]["permissions"] = column

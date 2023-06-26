@@ -12,7 +12,6 @@
         <child>
           <object class="GtkButton">
             <property name="action-name">view.folder-copy-left</property>
-            <property name="use-action-appearance">False</property>
             <property name="tooltip-text" translatable="1">Copy to left</property>
             <property name="focus_on_click">0</property>
             <style>
@@ -29,7 +28,6 @@
         <child>
           <object class="GtkButton">
             <property name="action-name">view.folder-copy-right</property>
-            <property name="use-action-appearance">False</property>
             <property name="tooltip-text" translatable="1">Copy to right</property>
             <property name="focus_on_click">0</property>
             <style>
@@ -48,7 +46,6 @@
     <child>
       <object class="GtkButton">
         <property name="action-name">view.folder-delete</property>
-        <property name="use-action-appearance">False</property>
         <property name="tooltip-text" translatable="1">Delete selected</property>
         <property name="focus_on_click">0</property>
         <style>

@@ -267,41 +267,44 @@ class HandleWindow():
         self._pos = float(pos - xtrans) / width
 
     def realize(self, widget):
-        attr = Gdk.WindowAttr()
-        attr.window_type = Gdk.WindowType.CHILD
-        attr.x = self._area_x
-        attr.y = self._area_y
-        attr.width = self._area_width
-        attr.height = self._area_height
-        attr.wclass = Gdk.WindowWindowClass.INPUT_OUTPUT
-        attr.event_mask = (widget.get_events() |
-                           Gdk.EventMask.BUTTON_PRESS_MASK |
-                           Gdk.EventMask.BUTTON_RELEASE_MASK |
-                           Gdk.EventMask.ENTER_NOTIFY_MASK |
-                           Gdk.EventMask.LEAVE_NOTIFY_MASK |
-                           Gdk.EventMask.POINTER_MOTION_MASK)
-        attr.cursor = Gdk.Cursor.new_from_name(
-            widget.get_display(),
-            "col-resize",
-        )
-        attr_mask = (Gdk.WindowAttributesType.X |
-                     Gdk.WindowAttributesType.Y |
-                     Gdk.WindowAttributesType.CURSOR)
+        # attr = Gdk.WindowAttr() TODO
+        # attr.window_type = Gdk.WindowType.CHILD
+        # attr.x = self._area_x
+        # attr.y = self._area_y
+        # attr.width = self._area_width
+        # attr.height = self._area_height
+        # attr.wclass = Gdk.WindowWindowClass.INPUT_OUTPUT
+        # attr.event_mask = (widget.get_events() |
+        #                    Gdk.EventMask.BUTTON_PRESS_MASK |
+        #                    Gdk.EventMask.BUTTON_RELEASE_MASK |
+        #                    Gdk.EventMask.ENTER_NOTIFY_MASK |
+        #                    Gdk.EventMask.LEAVE_NOTIFY_MASK |
+        #                    Gdk.EventMask.POINTER_MOTION_MASK)
+        # attr.cursor = Gdk.Cursor.new_from_name(
+        #     widget.get_display(),
+        #     "col-resize",
+        # )
+        # attr_mask = (Gdk.WindowAttributesType.X |
+        #              Gdk.WindowAttributesType.Y |
+        #              Gdk.WindowAttributesType.CURSOR)
 
-        parent = widget.get_parent_window()
-        self._window = Gdk.Window(parent, attr, attr_mask)
-        self._window.handle = self
-        self._widget = widget
-        self._widget.register_window(self._window)
+        # parent = widget.get_parent_window()
+        # self._window = Gdk.Window(parent, attr, attr_mask)
+        # self._window.handle = self
+        # self._widget = widget
+        # self._widget.register_window(self._window)
+        pass
 
     def unrealize(self):
-        self._widget.unregister_window(self._window)
+        # self._widget.unregister_window(self._window)
+        pass # TODO
 
     def set_visible(self, visible):
-        if visible:
-            self._window.show()
-        else:
-            self._window.hide()
+        # if visible:
+        #     self._window.show()
+        # else:
+        #     self._window.hide()
+        pass # TODO
 
     def move_resize(self, x, y, width, height):
         self._window.move_resize(x, y, width, height)

@@ -38,7 +38,7 @@ def layout_text_and_icon(
     if icon_name:
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.DIALOG)
         image.set_alignment(0.5, 0.5)
-        hbox_content.pack_start(image, False, False, 0)
+        hbox_content.prepend(image, False, False, 0)
 
     vbox = Gtk.Box(homogeneous=False, spacing=6)
 
@@ -50,8 +50,9 @@ def layout_text_and_icon(
         xalign=0,
         can_focus=True,
         selectable=True,
+        hexpand=True,
     )
-    vbox.pack_start(primary_label, True, True, 0)
+    vbox.prepend(primary_label)
 
     if secondary_text:
         secondary_label = Gtk.Label(
@@ -63,10 +64,9 @@ def layout_text_and_icon(
             can_focus=True,
             selectable=True,
         )
-        vbox.pack_start(secondary_label, True, True, 0)
+        vbox.prepend(secondary_label, True, True, 0)
 
-    hbox_content.pack_start(vbox, True, True, 0)
-    hbox_content.show_all()
+    hbox_content.prepend(vbox)
     return hbox_content
 
 
@@ -103,17 +103,19 @@ class MsgAreaController(Gtk.Box):
     ):
         self.clear()
         msgarea = self.__msgarea = Gtk.InfoBar()
+        msgarea.set_hexpand(True)
 
         content = layout_text_and_icon(primary, secondary, icon_name)
+        msgarea.add_child(content)
 
-        content_area = msgarea.get_content_area()
-        content_area.foreach(content_area.remove, None)
-        content_area.add(content)
+        # content_area = msgarea.get_content_area()
+        # content_area.foreach(content_area.remove, None)
+        # content_area.add(content)
 
-        action_area = msgarea.get_action_area()
-        action_area.set_orientation(Gtk.Orientation.VERTICAL)
+        # action_area = msgarea.get_action_area()
+        # action_area.set_orientation(Gtk.Orientation.VERTICAL)
 
-        self.pack_start(msgarea, True, True, 0)
+        self.prepend(msgarea)
         return msgarea
 
     def add_dismissable_msg(self, icon, primary, secondary, close_panes=None):

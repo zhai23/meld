@@ -379,8 +379,8 @@ class FileDiff(Gtk.Box, MeldDoc):
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/filediff-menus.ui')
         self.popup_menu_model = builder.get_object('filediff-context-menu')
-        self.popup_menu = Gtk.Menu.new_from_model(self.popup_menu_model)
-        self.popup_menu.attach_to_widget(self)
+        self.popup_menu = Gtk.PopoverMenu.new_from_model(self.popup_menu_model)
+        self.popup_menu.set_parent(self)
 
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/filediff-actions.ui')
@@ -420,19 +420,20 @@ class FileDiff(Gtk.Box, MeldDoc):
 
         self.findbar = FindBar(self.grid)
         self.grid.attach(self.findbar, 0, 2, 10, 1)
+        self.findbar.set_visible(False)
 
         self.set_num_panes(num_panes)
         self.cursor = CursorDetails()
-        for t in self.textview:
-            t.connect("focus-in-event", self.on_current_diff_changed)
-            t.connect("focus-out-event", self.on_current_diff_changed)
-            t.connect(
-                "drag_data_received", self.on_textview_drag_data_received)
+        # for t in self.textview: TODO
+        #     t.connect("focus-in-event", self.on_current_diff_changed)
+        #     t.connect("focus-out-event", self.on_current_diff_changed)
+        #     t.connect(
+        #         "drag_data_received", self.on_textview_drag_data_received)
 
-        for label in self.filelabel:
-            label.connect(
-                "drag_data_received", self.on_textview_drag_data_received
-            )
+        # for label in self.filelabel: TODO
+        #     label.connect(
+        #         "drag_data_received", self.on_textview_drag_data_received
+        #     )
 
         # Bind all overwrite properties together, so that toggling
         # overwrite mode is per-FileDiff.
@@ -514,7 +515,7 @@ class FileDiff(Gtk.Box, MeldDoc):
         filter_menu = builder.get_object('file-copy-actions-menu')
 
         self.copy_action_button.set_popover(
-            Gtk.Popover.new_from_model(self.copy_action_button, filter_menu))
+            Gtk.PopoverMenu.new_from_model(filter_menu))
 
     def get_keymask(self):
         return self._keymask
@@ -531,8 +532,7 @@ class FileDiff(Gtk.Box, MeldDoc):
 
     keymask = property(get_keymask, set_keymask)
 
-    @Gtk.Template.Callback()
-    def on_key_event(self, object, event):
+    def on_key_event(self, object, event): # TODO controller
         keymap = Gdk.Keymap.get_default()
         ok, keyval, group, lvl, consumed = keymap.translate_keyboard_state(
             event.hardware_keycode, 0, event.group)
@@ -813,8 +813,7 @@ class FileDiff(Gtk.Box, MeldDoc):
             mark0, mark1, 'focus-highlight', 400000, starting_alpha=0.3,
             anim_type=TextviewLineAnimationType.stroke)
 
-    @Gtk.Template.Callback()
-    def on_linkmap_scroll_event(self, linkmap, event):
+    def on_linkmap_scroll_event(self, linkmap, event): # TODO controller
         self.next_diff(event.direction, use_viewport=True)
 
     def _is_chunk_in_area(
@@ -1144,8 +1143,7 @@ class FileDiff(Gtk.Box, MeldDoc):
                     self.set_file(pane, gfiles[0])
             return True
 
-    @Gtk.Template.Callback()
-    def on_textview_focus_in_event(self, view, event):
+    def on_textview_focus_in_event(self, view, event): # TODO controller
         self.focus_pane = view
         self.findbar.set_text_view(self.focus_pane)
         self.on_cursor_position_changed(view.get_buffer(), None, True)
@@ -1153,8 +1151,7 @@ class FileDiff(Gtk.Box, MeldDoc):
         self._set_merge_action_sensitivity()
         self._set_external_action_sensitivity()
 
-    @Gtk.Template.Callback()
-    def on_textview_focus_out_event(self, view, event):
+    def on_textview_focus_out_event(self, view, event): # TODO controller
         self.keymask = 0
         self._set_merge_action_sensitivity()
         self._set_external_action_sensitivity()
@@ -1228,7 +1225,7 @@ class FileDiff(Gtk.Box, MeldDoc):
                 needs_save = buf.get_modified()
                 button.set_sensitive(needs_save)
                 button.set_active(needs_save)
-                message_area.pack_start(
+                message_area.prepend(
                     button, expand=False, fill=True, padding=0)
                 buttons.append(button)
             message_area.show_all()
@@ -1418,7 +1415,6 @@ class FileDiff(Gtk.Box, MeldDoc):
     def action_go_to_line(self, pane, *args):
         self.statusbar[pane].emit('start-go-to-line')
 
-    @Gtk.Template.Callback()
     def on_scrolledwindow_size_allocate(self, scrolledwindow, allocation):
         index = self.scrolledwindow.index(scrolledwindow)
         if index == 0 or index == 1:
@@ -1426,8 +1422,7 @@ class FileDiff(Gtk.Box, MeldDoc):
         if index == 1 or index == 2:
             self.linkmap[1].queue_draw()
 
-    @Gtk.Template.Callback()
-    def on_textview_popup_menu(self, textview):
+    def on_textview_popup_menu(self, textview): # TODO
         buffer = textview.get_buffer()
         cursor_it = buffer.get_iter_at_mark(buffer.get_insert())
         location = textview.get_iter_location(cursor_it)
@@ -1448,8 +1443,7 @@ class FileDiff(Gtk.Box, MeldDoc):
         )
         return True
 
-    @Gtk.Template.Callback()
-    def on_textview_button_press_event(self, textview, event):
+    def on_textview_button_press_event(self, textview, event): # TODO controller
         if event.button == 3:
             textview.grab_focus()
             pane = self.textview.index(textview)
@@ -2031,7 +2025,6 @@ class FileDiff(Gtk.Box, MeldDoc):
                                        Gtk.ResponseType.OK)
 
                 msgarea.connect("response", self.on_msgarea_identical_response)
-                msgarea.show_all()
         else:
             for m in self.msgarea_mgr:
                 if m.get_msg_id() == FileDiff.MSG_SAME:
@@ -2249,7 +2242,7 @@ class FileDiff(Gtk.Box, MeldDoc):
         filelist.props.xalign = 0.0
         filelist.show()
         message_area = dialog.get_message_area()
-        message_area.pack_start(filelist, expand=False, fill=True, padding=0)
+        message_area.prepend(filelist)
 
         response = dialog.run()
         dialog.destroy()

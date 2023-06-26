@@ -239,7 +239,6 @@
               <object class="GtkScrolledWindow" id="console_scrolledwindow">
                 <property name="vexpand">1</property>
                 <property name="focusable">1</property>
-                <property name="shadow_type">in</property>
                 <property name="child">
                   <object class="GtkTextView" id="consoleview">
                     <property name="focusable">1</property>

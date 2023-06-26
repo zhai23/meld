@@ -16,7 +16,8 @@
 
 import gi
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gio, GLib, GObject, Gtk, GtkSource
+gi.require_version("Adw", "1")
+from gi.repository import Gio, GLib, GObject, Gtk, GtkSource, Adw
 
 from meld.conf import _
 from meld.filters import FilterEntry
@@ -254,7 +255,7 @@ class GSettingsStringComboBox(GSettingsComboBox):
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/preferences.ui')
-class PreferencesDialog(Gtk.Dialog):
+class PreferencesDialog(Adw.PreferencesWindow):
 
     __gtype_name__ = "PreferencesDialog"
 
@@ -342,16 +343,16 @@ class PreferencesDialog(Gtk.Dialog):
             filter_type=FilterEntry.SHELL,
             settings_key="filename-filters",
         )
-        self.file_filters_vbox.pack_start(filefilter, True, True, 0)
+        self.file_filters_vbox.prepend(filefilter)
 
         textfilter = FilterList(
             filter_type=FilterEntry.REGEX,
             settings_key="text-filters",
         )
-        self.text_filters_vbox.pack_start(textfilter, True, True, 0)
+        self.text_filters_vbox.prepend(textfilter)
 
         columnlist = ColumnList(settings_key="folder-columns")
-        self.column_list_vbox.pack_start(columnlist, True, True, 0)
+        self.column_list_vbox.prepend(columnlist)
 
         self.combo_timestamp.bind_to('folder-time-resolution')
         self.combo_file_order.bind_to('vc-left-is-local')
@@ -376,7 +377,3 @@ class PreferencesDialog(Gtk.Dialog):
         else:
             wrap_mode = Gtk.WrapMode.CHAR
         settings.set_enum('wrap-mode', wrap_mode)
-
-    @Gtk.Template.Callback()
-    def on_response(self, dialog, response_id):
-        self.destroy()

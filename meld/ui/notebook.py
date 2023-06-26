@@ -37,21 +37,21 @@ class MeldNotebook(Gtk.Notebook):
 
     # Python 3.4; no bytes formatting
     css = (
-        b"""
-        @binding-set TabSwitchBindings {
-          bind "<Alt>1" { "tab-switch" (0) };
-          bind "<Alt>2" { "tab-switch" (1) };
-          bind "<Alt>3" { "tab-switch" (2) };
-          bind "<Alt>4" { "tab-switch" (3) };
-          bind "<Alt>5" { "tab-switch" (4) };
-          bind "<Alt>6" { "tab-switch" (5) };
-          bind "<Alt>7" { "tab-switch" (6) };
-          bind "<Alt>8" { "tab-switch" (7) };
-          bind "<Alt>9" { "tab-switch" (8) };
-          bind "<Alt>0" { "tab-switch" (9) };
-        }
-        notebook.meld-notebook { -gtk-key-bindings: TabSwitchBindings; }
-        """
+        b""""""
+        # @binding-set TabSwitchBindings {
+        #   bind "<Alt>1" { "tab-switch" (0) };
+        #   bind "<Alt>2" { "tab-switch" (1) };
+        #   bind "<Alt>3" { "tab-switch" (2) };
+        #   bind "<Alt>4" { "tab-switch" (3) };
+        #   bind "<Alt>5" { "tab-switch" (4) };
+        #   bind "<Alt>6" { "tab-switch" (5) };
+        #   bind "<Alt>7" { "tab-switch" (6) };
+        #   bind "<Alt>8" { "tab-switch" (7) };
+        #   bind "<Alt>9" { "tab-switch" (8) };
+        #   bind "<Alt>0" { "tab-switch" (9) };
+        # }
+        # notebook.meld-notebook { -gtk-key-bindings: TabSwitchBindings; }
+        # """
     )
 
     ui = """
