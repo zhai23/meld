@@ -4,7 +4,6 @@
   <template class="PatchDialog" parent="GtkDialog">
     <property name="border_width">12</property>
     <property name="title" translatable="1">Format as Patch</property>
-    <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <child internal-child="content_area">

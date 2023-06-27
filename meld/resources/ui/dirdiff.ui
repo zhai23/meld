@@ -5,7 +5,7 @@
   <object class="GtkAdjustment" id="pane_adjustment0"/>
   <object class="GtkAdjustment" id="pane_adjustment1"/>
   <object class="GtkAdjustment" id="pane_adjustment2"/>
-  <template class="GtkBox" parent="GtkVBox">
+  <template class="DirDiff" parent="GtkBox">
     <property name="orientation">vertical</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -136,9 +136,7 @@
             <property name="width_request">50</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="events">GDK_SCROLL_MASK</property>
             <property name="vexpand">True</property>
-            <signal name="scroll-event" handler="on_linkmap_scroll_event" swapped="no"/>
             <layout>
               <property name="column">3</property>
               <property name="row">1</property>
@@ -161,9 +159,7 @@
             <property name="width_request">50</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="events">GDK_SCROLL_MASK</property>
             <property name="vexpand">True</property>
-            <signal name="scroll-event" handler="on_linkmap_scroll_event" swapped="no"/>
             <layout>
               <property name="column">1</property>
               <property name="row">1</property>

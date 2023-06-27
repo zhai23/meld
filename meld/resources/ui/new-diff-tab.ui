@@ -175,6 +175,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="1">Select First File</property>
+                        <signal name="clicked" handler="on_file_chooser_clicked" swapped="no"/>
                         <layout>
                           <property name="column">0</property>
                           <property name="row">0</property>
@@ -186,6 +187,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="1">Select Second File</property>
+                        <signal name="clicked" handler="on_file_chooser_clicked" swapped="no"/>
                         <layout>
                           <property name="column">1</property>
                           <property name="row">0</property>
@@ -198,6 +200,7 @@
                         <property name="sensitive">False</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="1">Select Third File</property>
+                        <signal name="clicked" handler="on_file_chooser_clicked" swapped="no"/>
                         <layout>
                           <property name="column">2</property>
                           <property name="row">0</property>
@@ -227,6 +230,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="1">Select First Folder</property>
+                        <signal name="clicked" handler="on_dir_chooser_clicked" swapped="no"/>
                         <layout>
                           <property name="column">0</property>
                           <property name="row">0</property>
@@ -238,6 +242,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="1">Select Second Folder</property>
+                        <signal name="clicked" handler="on_dir_chooser_clicked" swapped="no"/>
                         <layout>
                           <property name="column">1</property>
                           <property name="row">0</property>
@@ -250,6 +255,7 @@
                         <property name="sensitive">False</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="1">Select Third Folder</property>
+                        <signal name="clicked" handler="on_dir_chooser_clicked" swapped="no"/>
                         <layout>
                           <property name="column">2</property>
                           <property name="row">0</property>

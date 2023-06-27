@@ -537,8 +537,8 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/dirdiff-menus.ui')
         context_menu = builder.get_object('dirdiff-context-menu')
-        self.popup_menu = Gtk.Menu.new_from_model(context_menu)
-        self.popup_menu.attach_to_widget(self)
+        self.popup_menu = Gtk.PopoverMenu.new_from_model(context_menu)
+        self.popup_menu.set_parent(self)
 
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/dirdiff-actions.ui')
@@ -1892,7 +1892,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             self._update_item_state(model.get_iter(path))
         self.force_cursor_recalculate = True
 
-    @Gtk.Template.Callback()
     def on_linkmap_scroll_event(self, linkmap, event):
         self.next_diff(event.direction)
 
