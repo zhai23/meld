@@ -56,14 +56,17 @@ class MeldGutterRenderer:
         self.set_yalign(0.5)
 
     def on_setting_changed(self, settings, key):
-        # if key == 'style-scheme':
-        #     self.fill_colors, self.line_colors = get_common_theme()
-        #     alpha = self.fill_colors['current-chunk-highlight'].alpha
-        #     self.chunk_highlights = {
-        #         state: Gdk.RGBA(*[alpha + c * (1.0 - alpha) for c in colour])
-        #         for state, colour in self.fill_colors.items()
-        #     }
-        pass # TODO
+        if key == 'style-scheme':
+            self.fill_colors, self.line_colors = get_common_theme()
+            alpha = self.fill_colors['current-chunk-highlight'].alpha
+            self.chunk_highlights = {}
+            for state, colour in self.fill_colors.items():
+                c = Gdk.RGBA()
+                c.red=alpha + colour.red * (1.0 - alpha)
+                c.green=alpha + colour.green * (1.0 - alpha)
+                c.blue=alpha + colour.blue * (1.0 - alpha)
+                c.alpha=alpha + colour.alpha * (1.0 - alpha)
+                self.chunk_highlights[state] = c
 
     def draw_chunks(
             self, context, background_area, cell_area, start, end, state):

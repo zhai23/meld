@@ -170,10 +170,14 @@ class ActionGutter(Gtk.DrawingArea):
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
             alpha = self.fill_colors['current-chunk-highlight'].alpha
-            self.chunk_highlights = {
-                state: colour
-                for state, colour in self.fill_colors.items()
-            }
+            self.chunk_highlights = {}
+            for state, colour in self.fill_colors.items():
+                c = Gdk.RGBA()
+                c.red=alpha + colour.red * (1.0 - alpha)
+                c.green=alpha + colour.green * (1.0 - alpha)
+                c.blue=alpha + colour.blue * (1.0 - alpha)
+                c.alpha=alpha + colour.alpha * (1.0 - alpha)
+                self.chunk_highlights[state] = c
 
     def do_realize(self):
         # self.set_events( TODO
