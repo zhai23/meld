@@ -352,7 +352,8 @@ class PreferencesDialog(Adw.PreferencesWindow):
         self.text_filters_vbox.prepend(textfilter)
 
         columnlist = ColumnList(settings_key="folder-columns")
-        self.column_list_vbox.prepend(columnlist)
+        columnlist.set_size_request(-1, 200)
+        self.column_list_vbox.add(columnlist)
 
         self.combo_timestamp.bind_to('folder-time-resolution')
         self.combo_file_order.bind_to('vc-left-is-local')

@@ -237,198 +237,83 @@
       </object>
     </child>
 
+    <!-- Folder Comparison Page -->
     <child>
       <object class="AdwPreferencesPage">
         <property name="title">Folder Comparisons</property>
+
         <child>
-          <object class="GtkBox" id="folder_comparison_tab">
-            <property name="orientation">vertical</property>
-            <property name="can_focus">0</property>
-            <property name="margin-start">12</property>
-            <property name="margin-top">12</property>
-            <property name="margin-end">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="spacing">12</property>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Shallow Comparison</property>
             <child>
-              <object class="GtkBox" id="vbox3">
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Compare files based only on size and timestamp</property>
                 <child>
-                  <object class="GtkLabel" id="label5">
+                  <object class="GtkSwitch" id="checkbutton_shallow_compare">
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">Shallow Comparison</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
                   </object>
                 </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Timestamp resolution</property>
                 <child>
-                  <object class="GtkBox" id="hbox2">
-                    <property name="can_focus">0</property>
+                  <object class="GSettingsIntComboBox" id="combo_timestamp">
+                    <property name="valign">center</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">timestampstore</property>
+                    <property name="active">0</property>
+                    <property name="gsettings-column">0</property>
                     <child>
-                      <object class="GtkLabel" id="label6">
-                        <property name="halign">center</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox4">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_shallow_compare">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">C_ompare files based only on size and timestamp</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="timestamp_hbox">
-                            <property name="valign">center</property>
-                            <property name="can_focus">0</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkLabel" id="label7">
-                                <property name="halign">center</property>
-                                <property name="label" translatable="1">_Timestamp resolution:</property>
-                                <property name="use_underline">1</property>
-                                <property name="mnemonic_widget">combo_timestamp</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GSettingsIntComboBox" id="combo_timestamp">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="model">timestampstore</property>
-                                <property name="active">0</property>
-                                <property name="gsettings-column">0</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="combo_timestamp_renderer"/>
-                                  <attributes>
-                                    <attribute name="text">1</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="vexpand">1</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <object class="GtkCheckButton" id="checkbutton_folder_filter_text">
-                                <property name="valign">center</property>
-                                <property name="label" translatable="1">Apply text filters during folder comparisons</property>
-                                <property name="focusable">1</property>
-                                <property name="use_underline">1</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="margin-start">24</property>
-                                <property name="label" translatable="1">Note: enabling text filters may make comparing large files much slower</property>
-                                <style>
-                                  <class name="dim-label"/>
-                                </style>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
+                      <object class="GtkCellRendererText" id="combo_timestamp_renderer"/>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
                     </child>
                   </object>
                 </child>
               </object>
             </child>
             <child>
-              <object class="GtkBox" id="vbox1">
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Apply text filters during folder comparisons</property>
+                <property name="subtitle" translatable="1">Note: enabling text filters may make comparing large files much slower</property>
                 <child>
-                  <object class="GtkLabel" id="symlink_label">
+                  <object class="GtkSwitch" id="checkbutton_folder_filter_text">
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">Symbolic Links</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox" id="symlink_hbox">
-                    <property name="valign">center</property>
-                    <property name="can_focus">0</property>
-                    <child>
-                      <object class="GtkLabel" id="label41">
-                        <property name="halign">center</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="checkbutton_ignore_symlinks">
-                        <property name="halign">center</property>
-                        <property name="label" translatable="1">Ignore symbolic links</property>
-                        <property name="focusable">1</property>
-                        <property name="use_underline">1</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkBox" id="vbox2">
-                <property name="vexpand">1</property>
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
-                <child>
-                  <object class="GtkLabel" id="label3">
-                    <property name="valign">center</property>
-                    <property name="label" translatable="1">Visible Columns</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox" id="hbox1">
-                    <property name="vexpand">1</property>
-                    <property name="can_focus">0</property>
-                    <child>
-                      <object class="GtkLabel" id="label4">
-                        <property name="halign">center</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="column_list_vbox">
-                        <property name="hexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>
             </child>
           </object>
         </child>
+
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Symbolic Links</property>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Ignore symbolic links</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_ignore_symlinks">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <child>
+          <object class="AdwPreferencesGroup" id="column_list_vbox">
+            <property name="title">Visible Columns</property>
+          </object>
+        </child>
+
       </object>
     </child>
+
 
     <child>
       <object class="AdwPreferencesPage">
