@@ -314,187 +314,98 @@
       </object>
     </child>
 
-
+    <!-- Version Control Page -->
     <child>
       <object class="AdwPreferencesPage">
         <property name="title">Version Control</property>
+
         <child>
-          <object class="GtkBox" id="vc_comparison_tab">
-            <property name="orientation">vertical</property>
-            <property name="can_focus">0</property>
-            <property name="margin-start">12</property>
-            <property name="margin-top">12</property>
-            <property name="margin-end">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="spacing">12</property>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Version Comparison</property>
             <child>
-              <object class="GtkBox" id="vbox5">
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Order when comparing file revisions</property>
                 <child>
-                  <object class="GtkLabel" id="label8">
+                  <object class="GSettingsBoolComboBox" id="combo_file_order">
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">Version Comparisons</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox" id="hbox4">
-                    <property name="can_focus">0</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">fileorderstore</property>
+                    <property name="active">0</property>
+                    <property name="gsettings-column">0</property>
                     <child>
-                      <object class="GtkLabel" id="label9">
-                        <property name="halign">center</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox6">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkBox" id="file_order_hbox1">
-                            <property name="valign">center</property>
-                            <property name="can_focus">0</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkLabel" id="file_order_label">
-                                <property name="halign">center</property>
-                                <property name="label" translatable="1">_Order when comparing file revisions:</property>
-                                <property name="use_underline">1</property>
-                                <property name="mnemonic_widget">combo_file_order</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GSettingsBoolComboBox" id="combo_file_order">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="model">fileorderstore</property>
-                                <property name="active">0</property>
-                                <property name="gsettings-column">0</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="file_order_renderer"/>
-                                  <attributes>
-                                    <attribute name="text">1</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="merge_order_hbox1">
-                            <property name="valign">center</property>
-                            <property name="can_focus">0</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkLabel" id="merge_order_label">
-                                <property name="halign">center</property>
-                                <property name="label" translatable="1">Order when _merging files:</property>
-                                <property name="use_underline">1</property>
-                                <property name="mnemonic_widget">combo_merge_order</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GSettingsStringComboBox" id="combo_merge_order">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="model">mergeorderstore</property>
-                                <property name="active">0</property>
-                                <property name="gsettings-column">0</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="merge_order_renderer"/>
-                                  <attributes>
-                                    <attribute name="text">1</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
+                      <object class="GtkCellRendererText" id="file_order_renderer"/>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
                     </child>
                   </object>
                 </child>
               </object>
             </child>
             <child>
-              <object class="GtkBox" id="vbox7">
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Order when merging files</property>
                 <child>
-                  <object class="GtkLabel" id="label10">
+                  <object class="GSettingsStringComboBox" id="combo_merge_order">
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">Commit Messages</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox" id="hbox7">
-                    <property name="can_focus">0</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">mergeorderstore</property>
+                    <property name="active">0</property>
+                    <property name="gsettings-column">0</property>
                     <child>
-                      <object class="GtkLabel" id="label11">
-                        <property name="halign">center</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox8">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkBox" id="hbox8">
-                            <property name="valign">center</property>
-                            <property name="can_focus">0</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkCheckButton" id="checkbutton_show_commit_margin">
-                                <property name="halign">center</property>
-                                <property name="label" translatable="1">Show _right margin at:</property>
-                                <property name="focusable">1</property>
-                                <property name="use_underline">1</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="spinbutton_commit_margin">
-                                <property name="halign">center</property>
-                                <property name="focusable">1</property>
-                                <property name="adjustment">adjustment2</property>
-                                <property name="climb_rate">1</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_break_commit_lines">
-                            <property name="label" translatable="1">Automatically _break lines at right margin on commit</property>
-                            <property name="margin-start">18</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                      </object>
+                      <object class="GtkCellRendererText" id="merge_order_renderer"/>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
                     </child>
                   </object>
                 </child>
               </object>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
         </child>
+
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Commit Messages</property>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Show right margin</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_show_commit_margin">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Show right margin at</property>
+                <child>
+                  <object class="GtkSpinButton" id="spinbutton_commit_margin">
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <property name="focusable">1</property>
+                    <property name="adjustment">adjustment2</property>
+                    <property name="climb_rate">1</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Automatically break lines at right margin on commit</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_break_commit_lines">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+
+
       </object>
     </child>
     <child>
@@ -682,14 +593,8 @@
       <widget name="combo_merge_order"/>
     </widgets>
   </object>
-  <object class="GtkSizeGroup" id="sizegroup_file_order_labels">
-    <widgets>
-      <widget name="file_order_label"/>
-      <widget name="merge_order_label"/>
-    </widgets>
-  </object>
   <object class="GtkListStore" id="fileorderstore">
-    <columns>
+  <columns>
       <column type="gboolean"/>
       <column type="gchararray"/>
     </columns>
