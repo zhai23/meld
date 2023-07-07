@@ -343,7 +343,7 @@ class PreferencesDialog(Adw.PreferencesWindow):
             filter_type=FilterEntry.SHELL,
             settings_key="filename-filters",
         )
-        self.file_filters_vbox.prepend(filefilter)
+        self.file_filters_vbox.add(filefilter)
 
         textfilter = FilterList(
             filter_type=FilterEntry.REGEX,
