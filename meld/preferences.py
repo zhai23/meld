@@ -349,7 +349,7 @@ class PreferencesDialog(Adw.PreferencesWindow):
             filter_type=FilterEntry.REGEX,
             settings_key="text-filters",
         )
-        self.text_filters_vbox.prepend(textfilter)
+        self.text_filters_vbox.add(textfilter)
 
         columnlist = ColumnList(settings_key="folder-columns")
         columnlist.set_size_request(-1, 200)

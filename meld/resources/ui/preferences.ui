@@ -419,118 +419,38 @@
             <property name="description" comments="Translators: &apos;filter out&apos; refers to removing matched files and folders from the display">When performing directory comparisons, you may filter out files and directories by name. Each pattern is a list of shell style wildcards separated by spaces.</property>
           </object>
         </child>
+
       </object>
     </child>
 
-
+    <!-- Text Filters Page -->
     <child>
       <object class="AdwPreferencesPage">
         <property name="title">Text Filters</property>
+
         <child>
-          <object class="GtkBox" id="text_filters_tab">
-            <property name="orientation">vertical</property>
-            <property name="can_focus">0</property>
-            <property name="margin-start">12</property>
-            <property name="margin-top">12</property>
-            <property name="margin-end">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="spacing">12</property>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Change trimming</property>
             <child>
-              <object class="GtkBox" id="vbox12">
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Trim blank line differences from the start and end of changes</property>
                 <child>
-                  <object class="GtkLabel" id="label14">
+                  <object class="GtkSwitch" id="checkbutton_ignore_blank_lines">
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">Change trimming</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox" id="hbox10">
-                    <property name="can_focus">0</property>
-                    <child>
-                      <object class="GtkLabel" id="label15">
-                        <property name="halign">center</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="change_trimming_vbox">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">12</property>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_ignore_blank_lines">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Trim blank line differences from the start and end of changes</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkBox" id="vbox11">
-                <property name="vexpand">1</property>
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
-                <child>
-                  <object class="GtkLabel" id="label12">
-                    <property name="valign">center</property>
-                    <property name="label" translatable="1">Text filters</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox" id="hbox9">
-                    <property name="vexpand">1</property>
-                    <property name="can_focus">0</property>
-                    <child>
-                      <object class="GtkLabel" id="label13">
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="text_filters_vbox">
-                        <property name="hexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">12</property>
-                        <child>
-                          <object class="GtkLabel" id="label87">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">When performing file comparisons, you may ignore certain types of changes. Each pattern here is a python regular expression which replaces matching text with the empty string before comparison is performed. If the expression contains groups, only the groups are replaced. See the user manual for more details.</property>
-                            <property name="use_markup">1</property>
-                            <property name="wrap">1</property>
-                            <property name="max_width_chars">40</property>3
-                          </object>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>
             </child>
           </object>
         </child>
+
+        <child>
+          <object class="AdwPreferencesGroup" id="text_filters_vbox">
+            <property name="title">Text filters</property>
+            <property name="description">When performing file comparisons, you may ignore certain types of changes. Each pattern here is a python regular expression which replaces matching text with the empty string before comparison is performed. If the expression contains groups, only the groups are replaced. See the user manual for more details.</property>
+          </object>
+        </child>
+
       </object>
     </child>
 
