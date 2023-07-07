@@ -20,366 +20,154 @@
     <property name="modal">1</property>
     <property name="destroy_with_parent">1</property>
 
+    <!-- Editor Page -->
     <child>
       <object class="AdwPreferencesPage">
         <property name="title">Editor</property>
+
         <child>
-          <object class="GtkBox" id="editor_tab">
-            <property name="margin-start">12</property>
-            <property name="margin-top">12</property>
-            <property name="margin-end">12</property>
-            <property name="margin-bottom">12</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">12</property>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Font</property>
             <child>
-              <object class="GtkBox" id="vbox20">
-                <property name="orientation">vertical</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Use the system fixed width font</property>
                 <child>
-                  <object class="GtkLabel" id="label32">
+                  <object class="GtkSwitch" id="checkbutton_default_font">
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">Font</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="vexpand">1</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">center</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="hexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_default_font">
-                            <property name="label" translatable="1">_Use the system fixed width font</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                            <property name="active">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="vexpand">1</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkLabel" id="label_fontpicker">
-                                <property name="label" translatable="1">_Editor font:</property>
-                                <property name="use_underline">1</property>
-                                <property name="mnemonic_widget">fontpicker</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkFontButton" id="fontpicker">
-                                <property name="hexpand">1</property>
-                                <property name="focusable">1</property>
-                                <property name="font">Monospace 12</property>
-                                <property name="use_font">1</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>
             </child>
             <child>
-              <object class="GtkBox" id="vbox22">
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Editor Font</property>
                 <child>
-                  <object class="GtkLabel" id="label34">
+                  <object class="GtkFontButton" id="fontpicker">
+                    <property name="hexpand">1</property>
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">Display</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
+                    <property name="font">Monospace 12</property>
+                    <property name="use_font">1</property>
                   </object>
                 </child>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Display</property>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Tab Width</property>
                 <child>
-                  <object class="GtkBox" id="hbox17">
-                    <property name="can_focus">0</property>
-                    <child>
-                      <object class="GtkLabel" id="label35">
-                        <property name="halign">center</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox23">
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkBox" id="hbox3">
-                            <property name="valign">center</property>
-                            <property name="can_focus">0</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkLabel" id="label_tabsize">
-                                <property name="halign">center</property>
-                                <property name="label" translatable="1">_Tab width:</property>
-                                <property name="use_underline">1</property>
-                                <property name="mnemonic_widget">spinbutton_tabsize</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="spinbutton_tabsize">
-                                <property name="halign">center</property>
-                                <property name="focusable">1</property>
-                                <property name="adjustment">adjustment1</property>
-                                <property name="climb_rate">1</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_spaces_instead_of_tabs">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">_Insert spaces instead of tabs</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_wrap_text">
-                            <property name="vexpand">1</property>
-                            <property name="label" translatable="1">Enable text _wrapping</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                            <signal name="toggled" handler="on_checkbutton_wrap_text_toggled" swapped="no"/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_wrap_word">
-                            <property name="label" translatable="1">Do not _split words over two lines</property>
-                            <property name="sensitive">0</property>
-                            <property name="margin-start">18</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                            <property name="active">1</property>
-                            <signal name="toggled" handler="on_checkbutton_wrap_text_toggled" swapped="no"/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_highlight_current_line">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Highlight _current line</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_show_line_numbers">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Show _line numbers</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_show_whitespace">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Show w_hitespace</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_prefer_dark_theme">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Prefer dark theme</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_use_syntax_highlighting">
-                            <property name="valign">center</property>
-                            <property name="label" translatable="1">Use s_yntax highlighting</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox11">
-                            <property name="valign">center</property>
-                            <property name="can_focus">0</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkLabel" id="label16">
-                                <property name="hexpand">1</property>
-                                <property name="label" translatable="1">Syntax highlighting color scheme:</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GSettingsStringComboBox" id="combobox_style_scheme">
-                                <property name="hexpand">1</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="model">syntaxschemestore</property>
-                                <property name="gsettings-column">0</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="syntax_scheme_renderer"/>
-                                  <attributes>
-                                    <attribute name="text">1</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
+                  <object class="GtkSpinButton" id="spinbutton_tabsize">
+                    <property name="valign">center</property>
+                    <property name="focusable">1</property>
+                    <property name="adjustment">adjustment1</property>
+                    <property name="climb_rate">1</property>
                   </object>
                 </child>
               </object>
             </child>
             <child>
-              <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Insert spaces instead of tabs</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkSwitch" id="checkbutton_spaces_instead_of_tabs">
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">Code Overview</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="vexpand">1</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">center</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="hexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_show_overview_map">
-                            <property name="label" translatable="1">Show overview map</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                            <property name="active">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="valign">center</property>
-                            <property name="visible">0</property>
-                            <property name="can_focus">0</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="halign">center</property>
-                                <property name="label" translatable="1">Overview map style:</property>
-                                <property name="use_underline">1</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GSettingsStringComboBox" id="combo_overview_map">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="model">overviewstylestore</property>
-                                <property name="active">0</property>
-                                <property name="gsettings-column">0</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="overview_style_renderer"/>
-                                  <attributes>
-                                    <attribute name="text">1</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
                   </object>
                 </child>
               </object>
             </child>
             <child>
-              <object class="GtkBox" id="vbox42">
-                <property name="vexpand">1</property>
-                <property name="orientation">vertical</property>
-                <property name="can_focus">0</property>
-                <property name="spacing">6</property>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Enable text wrapping</property>
                 <child>
-                  <object class="GtkLabel" id="label69">
+                  <object class="GtkSwitch" id="checkbutton_wrap_text">
                     <property name="valign">center</property>
-                    <property name="label" translatable="1">External Editor</property>
-                    <property name="use_markup">1</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"></attribute>
-                    </attributes>
+                    <signal name="activate" handler="on_checkbutton_wrap_text_toggled" swapped="no"/>
                   </object>
                 </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Do not split words over two lines</property>
                 <child>
-                  <object class="GtkBox" id="hbox34">
-                    <property name="can_focus">0</property>
+                  <object class="GtkSwitch" id="checkbutton_wrap_word">
+                    <property name="valign">center</property>
+                    <signal name="activate" handler="on_checkbutton_wrap_text_toggled" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Highlight current line</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_highlight_current_line">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Show line numbers</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_show_line_numbers">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Show whitespace</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_show_whitespace">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Prefer dark theme</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_prefer_dark_theme">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Use syntax highlighting</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_use_syntax_highlighting">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Syntax highlighting color scheme</property>
+                <child>
+                  <object class="GSettingsStringComboBox" id="combobox_style_scheme">
+                    <property name="hexpand">1</property>
+                    <property name="valign">center</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">syntaxschemestore</property>
+                    <property name="gsettings-column">0</property>
                     <child>
-                      <object class="GtkLabel" id="label70">
-                        <property name="halign">center</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="vbox43">
-                        <property name="hexpand">1</property>
-                        <property name="orientation">vertical</property>
-                        <property name="can_focus">0</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkCheckButton" id="system_editor_checkbutton">
-                            <property name="vexpand">1</property>
-                            <property name="label" translatable="1">Use _default system editor</property>
-                            <property name="focusable">1</property>
-                            <property name="use_underline">1</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="hbox35">
-                            <property name="valign">center</property>
-                            <property name="can_focus">0</property>
-                            <property name="spacing">6</property>
-                            <child>
-                              <object class="GtkLabel" id="label_editor_command">
-                                <property name="label" translatable="1">Edito_r command:</property>
-                                <property name="use_underline">1</property>
-                                <property name="mnemonic_widget">custom_edit_command_entry</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="custom_edit_command_entry">
-                                <property name="hexpand">1</property>
-                                <property name="focusable">1</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
+                      <object class="GtkCellRendererText" id="syntax_scheme_renderer"/>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
                     </child>
                   </object>
                 </child>
@@ -387,8 +175,68 @@
             </child>
           </object>
         </child>
+
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">Code Overview</property>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Show overview map</property>
+                <child>
+                  <object class="GtkSwitch" id="checkbutton_show_overview_map">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Overview map style</property>
+                <child>
+                  <object class="GSettingsStringComboBox" id="combo_overview_map">
+                    <property name="valign">center</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">overviewstylestore</property>
+                    <property name="active">0</property>
+                    <property name="gsettings-column">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="overview_style_renderer"/>
+                      <attributes>
+                        <attribute name="text">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title">External Editor</property>
+            <child>
+              <object class="AdwActionRow">
+                <property name="title" translatable="1">Use default system editor</property>
+                <child>
+                  <object class="GtkSwitch" id="system_editor_checkbutton">
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwEntryRow" id="custom_edit_command_entry">
+                <property name="title" translatable="1">Editor command</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
       </object>
     </child>
+
     <child>
       <object class="AdwPreferencesPage">
         <property name="title">Folder Comparisons</property>
@@ -581,6 +429,7 @@
         </child>
       </object>
     </child>
+
     <child>
       <object class="AdwPreferencesPage">
         <property name="title">Version Control</property>
@@ -941,13 +790,7 @@
     </child>
 
   </template>
-  <object class="GtkSizeGroup" id="sizegroup_editor">
-    <widgets>
-      <widget name="label_fontpicker"/>
-      <widget name="label_tabsize"/>
-      <widget name="label_editor_command"/>
-    </widgets>
-  </object>
+
   <object class="GtkSizeGroup" id="sizegroup_file_order_combos">
     <widgets>
       <widget name="combo_file_order"/>
