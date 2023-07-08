@@ -17,12 +17,12 @@ import enum
 
 import gi
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gio, GLib, GObject, Gtk
+from gi.repository import Gio, GLib, GObject, Gtk, Gdk
 
 from meld.conf import _
 from meld.melddoc import LabeledObjectMixin, MeldDoc
 from meld.recent import recent_comparisons
-from meld.ui.util import map_widgets_into_lists, map_widgets_to_dict
+from meld.ui.util import map_widgets_into_lists
 
 
 class DiffType(enum.IntEnum):
@@ -67,15 +67,11 @@ class NewDiffTab(Gtk.Box, LabeledObjectMixin):
     vc_chooser0 = Gtk.Template.Child()
 
     file_chooser_dialogs = {}
-    dir_chooser_dialogs = {}
+    file_chooser_values = {}
 
     def __init__(self, parentapp):
         super().__init__()
         map_widgets_into_lists(
-            self,
-            ["file_chooser", "dir_chooser", "vc_chooser"]
-        )
-        map_widgets_to_dict(
             self,
             ["file_chooser", "dir_chooser", "vc_chooser"]
         )
@@ -91,7 +87,31 @@ class NewDiffTab(Gtk.Box, LabeledObjectMixin):
         }
         self.diff_type = DiffType.Unselected
 
+        self.prepare_file_chooser()
+
         self.show()
+
+    def prepare_file_chooser(self):
+        for button in [*self.file_chooser, *self.dir_chooser]:
+            self.add_drop_controllers(button)
+
+    def add_drop_controllers(self, button):
+        drop_target = Gtk.DropTarget(formats=Gdk.ContentFormats.new_for_gtype(Gio.File), actions=Gdk.DragAction.COPY)
+        drop_target.connect("accept", self.button_accept)
+        drop_target.connect("drop", self.button_drop)
+        button.add_controller(drop_target)
+
+    def button_accept(self, drop_target, drop):
+        # for debugging only, remove once folders work properly
+        formats = drop.get_formats()
+        formats_as_string = formats.to_string()
+        print(f"formats: {formats_as_string}")
+        return True
+
+    def button_drop(self, drop_target, value, x, y):
+        button = drop_target.get_widget()
+        if isinstance(value, Gio.File):
+            self.set_path_for_button(button, value)
 
     @Gtk.Template.Callback()
     def on_button_type_toggled(self, button, *args):
@@ -118,8 +138,9 @@ class NewDiffTab(Gtk.Box, LabeledObjectMixin):
         else:  # button is self.dir_three_way_checkbutton
             self.dir_chooser2.set_sensitive(button.get_active())
 
-    def show_file_dialog(self, title, action, button, dialogs):
-        if button not in dialogs:
+    def show_file_dialog(self, title, action, button):
+        path = None
+        if button not in self.file_chooser_dialogs:
             parent = self.get_root()
             dialog = Gtk.FileChooserNative.new(
                 title=title,
@@ -128,17 +149,29 @@ class NewDiffTab(Gtk.Box, LabeledObjectMixin):
             dialog.connect("response", self.on_file_set)
 
             # set default path
-            if len(dialogs) > 0:
-                another_dialog = list(dialogs.values())[0]
-                default_path = another_dialog.get_current_folder()
+            if len(self.file_chooser_dialogs) > 0:
+                another_dialog = list(self.file_chooser_dialogs.values())[0]
+                path = another_dialog.get_current_folder()
             else:
-                default_path = Gio.File.new_for_path(GLib.get_home_dir())
-            dialog.set_current_folder(default_path)
+                path = Gio.File.new_for_path(GLib.get_home_dir())
             
-            dialogs[button] = dialog
+            self.file_chooser_dialogs[button] = dialog
         else:
-            dialog = dialogs[button]
+            dialog = self.file_chooser_dialogs[button]
 
+        if button in self.file_chooser_values:
+            path = self.file_chooser_values[button]
+
+            if path is not None and path.query_file_type(
+                    Gio.FileQueryInfoFlags.NONE, None) != Gio.FileType.DIRECTORY:
+                parent = path.get_parent()
+                path = None
+                if parent and parent.query_file_type(
+                        Gio.FileQueryInfoFlags.NONE, None) == Gio.FileType.DIRECTORY:
+                    path = parent
+
+        if path is not None:
+            dialog.set_current_folder(path)
         dialog.show()
 
     @Gtk.Template.Callback()
@@ -150,7 +183,7 @@ class NewDiffTab(Gtk.Box, LabeledObjectMixin):
         else:
             title = "Select Third File"
 
-        self.show_file_dialog(title, Gtk.FileChooserAction.OPEN, button, self.file_chooser_dialogs)
+        self.show_file_dialog(title, Gtk.FileChooserAction.OPEN, button)
 
     @Gtk.Template.Callback()
     def on_dir_chooser_clicked(self, button):
@@ -161,41 +194,31 @@ class NewDiffTab(Gtk.Box, LabeledObjectMixin):
         else:
             title = "Select Third Folder"
 
-        self.show_file_dialog(title, Gtk.FileChooserAction.SELECT_FOLDER, button, self.dir_chooser_dialogs)
+        self.show_file_dialog(title, Gtk.FileChooserAction.SELECT_FOLDER, button)
 
     def on_file_set(self, dialog, response):
         if response == Gtk.ResponseType.ACCEPT:
-            gfile = dialog.get_file()
-            if not gfile:
+            file = dialog.get_file()
+            if not file:
                 return
 
-            if dialog in self.file_chooser_dialogs.values():
-                button = list(self.file_chooser_dialogs.keys())[list(self.file_chooser_dialogs.values()).index(dialog)]
-                values = self.file_chooser_values
-            elif dialog in self.dir_chooser_dialogs.values():
-                button = list(self.dir_chooser_dialogs.keys())[list(self.dir_chooser_dialogs.values()).index(dialog)]
-                values = self.dir_chooser_values
-            
-            if button is not None:
-                button.set_label(gfile.get_basename())
-                values[button] = gfile
+            button = list(self.file_chooser_dialogs.keys())[list(self.file_chooser_dialogs.values()).index(dialog)]
 
-            parent = gfile.get_parent()
-            if not parent:
-                return
-
-            if parent.query_file_type(
-                    Gio.FileQueryInfoFlags.NONE, None) == Gio.FileType.DIRECTORY:
-                dialog.set_current_folder(parent)
-
-            # TODO: We could do checks here to prevent errors: check to see if
-            # we've got binary files; check for null file selections; sniff text
-            # encodings; check file permissions.
-
+            self.set_path_for_button(button, file)
         else:
             # current folder gets reset to "recent" on cancel
             current_folder = dialog.get_current_folder()
-            dialog.set_current_folder(current_folder)
+            if current_folder is not None:
+                dialog.set_current_folder(current_folder)
+
+    def set_path_for_button(self, button, file):
+        if button is not None:
+            button.set_label(file.get_basename())
+            self.file_chooser_values[button] = file
+
+        # TODO: We could do checks here to prevent errors: check to see if
+        # we've got binary files; check for null file selections; sniff text
+        # encodings; check file permissions.
 
     def _get_num_paths(self):
         if self.diff_type in (DiffType.File, DiffType.Folder):
@@ -213,11 +236,10 @@ class NewDiffTab(Gtk.Box, LabeledObjectMixin):
     def on_button_compare_clicked(self, *args):
         type_choosers = (self.file_chooser, self.dir_chooser, self.vc_chooser)
         choosers = type_choosers[self.diff_type][:self._get_num_paths()]
-        values = (self.file_chooser_values, self.dir_chooser_values)[self.diff_type]
         compare_gfiles = []
 
         for button in choosers:
-            compare_gfiles.append(values[button])
+            compare_gfiles.append(self.file_chooser_values[button])
 
         compare_kwargs = {}
 
