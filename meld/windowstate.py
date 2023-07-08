@@ -36,9 +36,10 @@ class SavedWindowState(GObject.GObject):
         type=bool, nick='Is window fullscreen', default=False)
 
     def bind(self, window):
-        # TODO use property state notifications
-        # window.connect('size-allocate', self.on_size_allocate)
-        # window.connect('window-state-event', self.on_window_state_event)
+        window.connect("notify::default-width", self.on_size_allocate)
+        window.connect("notify::default-height", self.on_size_allocate)
+        window.connect("notify::maximized", self.on_window_state_event)
+        window.connect("notify::fullscreen", self.on_window_state_event)
 
         # Don't re-read from gsettings after initialisation; we've seen
         # what looked like issues with buggy debounce here.
@@ -55,21 +56,21 @@ class SavedWindowState(GObject.GObject):
         if self.props.is_maximized:
             window.maximize()
 
-    def on_size_allocate(self, window, allocation):
+    def on_size_allocate(self, window, property):
         if not (self.props.is_maximized or self.props.is_fullscreen):
-            width, height = window.get_size()
+            width, height = window.get_width(), window.get_height()
             if width != self.props.width:
                 self.props.width = width
             if height != self.props.height:
                 self.props.height = height
 
     def on_window_state_event(self, window, event):
-        state = event.window.get_state()
+        if event.name == "maximized":
+            is_maximized = window.is_maximized()
+            if is_maximized != self.props.is_maximized:
+                self.props.is_maximized = is_maximized
 
-        is_maximized = state & Gdk.WindowState.MAXIMIZED
-        if is_maximized != self.props.is_maximized:
-            self.props.is_maximized = is_maximized
-
-        is_fullscreen = state & Gdk.WindowState.FULLSCREEN
-        if is_fullscreen != self.props.is_fullscreen:
-            self.props.is_fullscreen = is_fullscreen
+        if event.name == "fullscreen":
+            is_fullscreen = window.is_fullscreen
+            if is_fullscreen != self.props.is_fullscreen:
+                self.props.is_fullscreen = is_fullscreen
