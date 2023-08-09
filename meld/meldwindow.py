@@ -21,7 +21,7 @@ from typing import Any, Dict, Optional, Sequence
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gdk, Gio, GLib, Gtk, Adw
+from gi.repository import Gdk, Gio, GLib, Gtk, Adw, GObject
 
 # Import support module to get all builder-constructed widgets in the namespace
 import meld.ui.gladesupport  # noqa: F401
@@ -102,6 +102,10 @@ class MeldWindow(Adw.ApplicationWindow):
                 setattr(self.spinner, attr, lambda *args: True)
 
         # TODO use Gtk.DropTarget
+        drop_target = Gtk.DropTarget(formats=Gdk.ContentFormats.new(['text']))
+        drop_target.connect("accept", self.on_widget_drag_data_accept)
+        drop_target.connect("drop", self.on_widget_drag_data_received)
+        self.add_controller(drop_target)
         # self.drag_dest_set(
         #     Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT |
         #     Gtk.DestDefaults.DROP,
@@ -178,8 +182,10 @@ class MeldWindow(Adw.ApplicationWindow):
         filter_model = app.get_menu_by_id("text-filter-menu")
         replace_menu_section(filter_model, section)
 
-    def on_widget_drag_data_received(
-            self, wid, context, x, y, selection_data, info, time):
+    def on_widget_drag_data_accept(self, drop_target, drop):
+        return True
+
+    def on_widget_drag_data_received(self, drop_target, value, x, y, data):
         uris = selection_data.get_uris()
         if uris:
             self.open_paths([Gio.File.new_for_uri(uri) for uri in uris])
