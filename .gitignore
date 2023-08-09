@@ -36,3 +36,6 @@ data/mime/meld.xml
 data/org.gnome.Meld.gresource
 data/styles/meld-base.style-scheme.xml
 data/styles/meld-dark.style-scheme.xml
+
+# Test files
+test/dirdiff/diffs
