@@ -1231,7 +1231,7 @@ class FileDiff(Gtk.Box, MeldDoc):
             builder = Gtk.Builder.new_from_resource(
                 '/org/gnome/meld/ui/save-confirm-dialog.ui')
             dialog = builder.get_object('save-confirm-dialog')
-            dialog.set_transient_for(self.get_toplevel())
+            dialog.set_transient_for(self.get_root())
             message_area = dialog.get_message_area()
 
             buttons = []
@@ -1240,14 +1240,11 @@ class FileDiff(Gtk.Box, MeldDoc):
                 needs_save = buf.get_modified()
                 button.set_sensitive(needs_save)
                 button.set_active(needs_save)
-                message_area.prepend(
-                    button, expand=False, fill=True, padding=0)
+                message_area.prepend(button)
                 buttons.append(button)
-            message_area.show_all()
 
-            response = dialog.run()
+            response = dialog.present()
             try_save = [b.get_active() for b in buttons]
-            dialog.destroy()
 
             if response == Gtk.ResponseType.OK:
                 for i, buf in enumerate(buffers):
@@ -1297,27 +1294,31 @@ class FileDiff(Gtk.Box, MeldDoc):
                 parent.command(
                     'resolve', [conflict_gfile.get_path()], sync=True)
 
-    def on_delete_event(self):
+    def on_delete_event(self, external_callback):
         self.state = ComparisonState.Closing
-        response = self.check_save_modified()
-        if response == Gtk.ResponseType.OK:
-            meld_settings = get_meld_settings()
-            for h in self.settings_handlers:
-                meld_settings.disconnect(h)
 
-            # This is a workaround for cleaning up file monitors.
-            for buf in self.textbuffer:
-                buf.data.disconnect_monitor()
+        def callback(widget, response):
+            if response == Gtk.ResponseType.OK:
+                meld_settings = get_meld_settings()
+                for h in self.settings_handlers:
+                    meld_settings.disconnect(h)
 
-            try:
-                self._cached_match.stop()
-            except Exception:
-                # Ignore any cross-process exceptions that happen when
-                # shutting down our matcher process.
-                log.exception('Failed to shut down matcher process')
-            # TODO: Base the return code on something meaningful for VC tools
-            self.close_signal.emit(0)
-        return response
+                # This is a workaround for cleaning up file monitors.
+                for buf in self.textbuffer:
+                    buf.data.disconnect_monitor()
+
+                try:
+                    self._cached_match.stop()
+                except Exception:
+                    # Ignore any cross-process exceptions that happen when
+                    # shutting down our matcher process.
+                    log.exception('Failed to shut down matcher process')
+                # TODO: Base the return code on something meaningful for VC tools
+                self.close_signal.emit(0)
+            
+            external_callback(response)
+    
+        self.check_save_modified(callback)
 
     def _scroll_to_actions(self, actions):
         """Scroll all views affected by *actions* to the current cursor"""
@@ -2069,7 +2070,6 @@ class FileDiff(Gtk.Box, MeldDoc):
                 button.props.label = _("_Keep highlighting")
             msgarea.connect("response",
                             on_msgarea_highlighting_response)
-            msgarea.show_all()
 
     def on_msgarea_identical_response(self, msgarea, respid):
         for mgr in self.msgarea_mgr:
