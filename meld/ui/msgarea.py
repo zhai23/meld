@@ -56,15 +56,16 @@ def layout_text_and_icon(
 
     if secondary_text:
         secondary_label = Gtk.Label(
-            "<small>{}</small>".format(secondary_text),
-            wrap=True,
-            wrap_mode=Pango.WrapMode.WORD,
-            use_markup=True,
-            xalign=0,
-            can_focus=True,
-            selectable=True,
+            # TODO
+            # "<small>{}</small>".format(secondary_text),
+            # wrap=True,
+            # wrap_mode=Pango.WrapMode.WORD,
+            # use_markup=True,
+            # xalign=0,
+            # can_focus=True,
+            # selectable=True,
         )
-        vbox.prepend(secondary_label, True, True, 0)
+        vbox.prepend(secondary_label)
 
     hbox_content.prepend(vbox)
     return hbox_content
@@ -91,7 +92,6 @@ class MsgAreaController(Gtk.Box):
     def clear(self):
         if self.__msgarea is not None:
             self.remove(self.__msgarea)
-            self.__msgarea.destroy()
             self.__msgarea = None
         self.__msgid = None
 
