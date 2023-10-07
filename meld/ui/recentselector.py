@@ -42,7 +42,7 @@ class RecentSelector(Gtk.Grid):
 
     def do_realize(self):
         self.filter_text = ''
-        self.recent_chooser.set_filter(self.make_recent_filter())
+        # self.recent_chooser.set_filter(self.make_recent_filter()) TODO
 
         return Gtk.Grid.do_realize(self)
 
@@ -80,17 +80,18 @@ class RecentSelector(Gtk.Grid):
 
         # This feels unnecessary, but there's no other good way to get
         # the RecentChooser to re-evaluate the filter.
-        self.recent_chooser.set_filter(self.make_recent_filter())
+        # self.recent_chooser.set_filter(self.make_recent_filter()) TODO
 
     # @Gtk.Template.Callback() TODO
     def on_selection_changed(self, *args):
-        have_selection = bool(self.recent_chooser.get_current_uri())
-        self.open_button.set_sensitive(have_selection)
+        # have_selection = bool(self.recent_chooser.get_current_uri())
+        # self.open_button.set_sensitive(have_selection)
+        pass # TODO
 
     # @Gtk.Template.Callback() TODO
     def on_activate(self, *args):
-        uri = self.recent_chooser.get_current_uri()
-        if uri:
-            self.open_recent.emit(uri)
+        # uri = self.recent_chooser.get_current_uri()
+        # if uri:
+        #     self.open_recent.emit(uri)
 
         self.get_parent().popdown()
