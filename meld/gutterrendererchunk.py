@@ -154,7 +154,7 @@ class GutterRendererChunkLines(
         if not self.get_view():
             return
 
-        self.get_view().connect("style-updated", self.on_view_style_updated)
+        # self.get_view().connect("style-updated", self.on_view_style_updated) TODO deprecated
 
     def on_view_style_updated(self, view: GtkSource.View) -> None:
         stylecontext = view.get_style_context()

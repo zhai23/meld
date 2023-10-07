@@ -588,7 +588,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.custom_labels = []
         self.set_num_panes(num_panes)
 
-        self.connect("style-updated", self.model.on_style_updated)
+        # self.connect("style-updated", self.model.on_style_updated) TODO deprecated
         self.model.on_style_updated(self)
 
         self.do_to_others_lock = False

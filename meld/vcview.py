@@ -244,7 +244,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.popup_menu.attach_to_widget(self)
 
         self.model = VcTreeStore()
-        self.connect("style-updated", self.model.on_style_updated)
+        # self.connect("style-updated", self.model.on_style_updated) TODO deprecated
         self.model.on_style_updated(self)
         self.treeview.set_model(self.model)
         self.treeview.get_selection().connect(
