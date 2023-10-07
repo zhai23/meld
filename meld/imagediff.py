@@ -60,11 +60,18 @@ def file_is_image(gfile):
         return False
 
     # Check MIME type of the file.
-    info = gfile.query_info(Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-                            Gio.FileQueryInfoFlags.NONE,
-                            None)
-    file_content_type = info.get_content_type()
-    return file_content_type in get_supported_image_mime_types()
+    try:
+        info = gfile.query_info(
+            Gio.FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+            Gio.FileQueryInfoFlags.NONE,
+            None,
+        )
+        file_content_type = info.get_content_type()
+        return file_content_type in get_supported_image_mime_types()
+    except GLib.Error as err:
+        if err.code == Gio.IOErrorEnum.NOT_FOUND:
+            return False
+        raise
 
 
 def files_are_images(gfiles):

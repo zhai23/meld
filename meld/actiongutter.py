@@ -180,12 +180,13 @@ class ActionGutter(Gtk.DrawingArea):
                 self.chunk_highlights[state] = c
 
     def do_realize(self):
-        # self.set_events( TODO
+        # self.set_events(
         #     Gdk.EventMask.ENTER_NOTIFY_MASK |
         #     Gdk.EventMask.LEAVE_NOTIFY_MASK |
         #     Gdk.EventMask.POINTER_MOTION_MASK |
         #     Gdk.EventMask.BUTTON_PRESS_MASK |
-        #     Gdk.EventMask.BUTTON_RELEASE_MASK
+        #     Gdk.EventMask.BUTTON_RELEASE_MASK |
+        #     Gdk.EventMask.SCROLL_MASK
         # )
         self.connect('notify::action-mode', lambda *args: self.queue_draw())
 

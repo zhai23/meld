@@ -1452,7 +1452,8 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
     @Gtk.Template.Callback()
     def on_treeview_row_activated(self, view, path, column):
         pane = self.treeview.index(view)
-        rows = self.model.value_paths(self.model.get_iter(path))
+        it = self.model.get_iter(path)
+        rows = self.model.value_paths(it)
         # Click a file: compare; click a directory: expand; click a missing
         # entry: check the next neighbouring entry
         pane_ordering = ((0, 1, 2), (1, 2, 0), (2, 1, 0))
@@ -1463,11 +1464,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         if not rows[pane]:
             return
         if os.path.isfile(rows[pane]):
-            diff_gfiles = [
-                Gio.File.new_for_path(r) if os.path.isfile(r) else None
-                for r in rows
-            ]
-            self.create_diff_signal.emit(diff_gfiles, {})
+            self.run_diff_from_iter(it)
         elif os.path.isdir(rows[pane]):
             if view.row_expanded(path):
                 view.collapse_row(path)
@@ -1495,9 +1492,11 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         tree.emit("cursor-changed")
 
     def run_diff_from_iter(self, it):
-        row_paths = self.model.value_paths(it)
-        gfiles = [Gio.File.new_for_path(p)
-                  for p in row_paths if os.path.exists(p)]
+        rows = self.model.value_paths(it)
+        gfiles = [
+            Gio.File.new_for_path(r) if os.path.isfile(r) else None
+            for r in rows
+        ]
         self.create_diff_signal.emit(gfiles, {})
 
     def action_diff(self, *args):

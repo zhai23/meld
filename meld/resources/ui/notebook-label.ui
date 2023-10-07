@@ -5,6 +5,8 @@
     <child type="center">
       <object class="GtkLabel" id="label">
         <property name="single_line_mode">1</property>
+        <property name="ellipsize">PANGO_ELLIPSIZE_MIDDLE</property>
+        <property name="width-request">150</property>
       </object>
     </child>
     <child>
