@@ -142,17 +142,12 @@ class MeldStatusBar(Gtk.Box):
 
     def do_realize(self):
         Gtk.Box.do_realize(self)
+        self.set_halign(Gtk.Align.END)
 
-        # self.box_box = Gtk.Box(homogeneous=False, spacing=6)
-        # self.append(self.box_box, False, True, 0)
-        self.append(
-            self.construct_line_display())
-        self.append(
-            self.construct_highlighting_selector())
-        self.append(
-            self.construct_encoding_selector())
-        self.append(
-            self.construct_display_popover())
+        self.append(self.construct_display_popover())
+        self.append(self.construct_encoding_selector())
+        self.append(self.construct_highlighting_selector())
+        self.append(self.construct_line_display())
 
     def construct_line_display(self):
 
@@ -220,7 +215,6 @@ class MeldStatusBar(Gtk.Box):
         # Set a label width to avoid other widgets moving on cursor change
         reasonable_width = len(format_cursor_position(None, (1000, 100))) - 2
         button.set_label_width(reasonable_width)
-        button.show()
 
         return button
 
@@ -246,7 +240,6 @@ class MeldStatusBar(Gtk.Box):
             GObject.BindingFlags.DEFAULT | GObject.BindingFlags.SYNC_CREATE,
             lambda binding, enc: selector.get_value_label(enc))
         button.set_popover(pop)
-        button.show()
 
         return button
 
@@ -277,7 +270,6 @@ class MeldStatusBar(Gtk.Box):
             GObject.BindingFlags.DEFAULT | GObject.BindingFlags.SYNC_CREATE,
             lambda binding, enc: selector.get_value_label(enc))
         button.set_popover(pop)
-        button.show()
 
         return button
 
@@ -295,6 +287,5 @@ class MeldStatusBar(Gtk.Box):
         # such as text wrapping, show line numbers, whitespace, etc.
         button.set_label(_('Display'))
         button.set_popover(pop)
-        button.show()
 
         return button
