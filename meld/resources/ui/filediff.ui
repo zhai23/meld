@@ -354,7 +354,7 @@
             </style>
             <layout>
               <property name="column">1</property>
-              <property name="colspan">3</property>
+              <property name="column-span">3</property>
               <property name="row">3</property>
             </layout>
           </object>
@@ -380,7 +380,7 @@
             </style>
             <layout>
               <property name="column">5</property>
-              <property name="colspan">3</property>
+              <property name="column-span">3</property>
               <property name="row">3</property>
             </layout>
           </object>

@@ -2,7 +2,10 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="CommitDialog" parent="GtkDialog">
-    <property name="border_width">12</property>
+    <property name="margin-start">12</property>
+    <property name="margin-top">12</property>
+    <property name="margin-end">12</property>
+    <property name="margin-bottom">12</property>
     <property name="title" translatable="1">Commit</property>
     <property name="modal">1</property>
     <property name="window_position">center</property>

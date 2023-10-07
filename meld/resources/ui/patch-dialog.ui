@@ -2,7 +2,10 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="PatchDialog" parent="GtkDialog">
-    <property name="border_width">12</property>
+    <property name="margin-start">12</property>
+    <property name="margin-top">12</property>
+    <property name="margin-end">12</property>
+    <property name="margin-bottom">12</property>
     <property name="title" translatable="1">Format as Patch</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
