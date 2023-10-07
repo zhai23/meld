@@ -20,7 +20,7 @@ from gi.repository import Gdk, GObject, Gtk
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/notebook-label.ui')
-class NotebookLabel(Gtk.Widget):
+class NotebookLabel(Gtk.Box):
 
     __gtype_name__ = 'NotebookLabel'
 

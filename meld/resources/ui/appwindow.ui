@@ -19,7 +19,7 @@
                 </style>
                 <child>
                   <object class="GtkButton">
-                    <!-- <property name="action-name">win.new-tab</property> -->
+                    <property name="action-name">win.new-tab</property>
                     <property name="tooltip-text" translatable="1">Start a new comparison</property>
                     <property name="focus_on_click">0</property>
                     <child>
