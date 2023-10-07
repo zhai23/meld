@@ -1294,7 +1294,7 @@ class FileDiff(Gtk.Box, MeldDoc):
                 parent.command(
                     'resolve', [conflict_gfile.get_path()], sync=True)
 
-    def on_delete_event(self, external_callback):
+    def on_delete_event(self, external_callback=None):
         self.state = ComparisonState.Closing
 
         def callback(widget, response):
@@ -1318,7 +1318,7 @@ class FileDiff(Gtk.Box, MeldDoc):
             
             external_callback(response)
     
-        self.check_save_modified(callback)
+        # self.check_save_modified(callback) TODO
 
     def _scroll_to_actions(self, actions):
         """Scroll all views affected by *actions* to the current cursor"""

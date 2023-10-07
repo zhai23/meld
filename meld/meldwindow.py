@@ -231,6 +231,8 @@ class MeldWindow(Adw.ApplicationWindow):
             if response == Gtk.ResponseType.CANCEL:
                 should_cancel = True
 
+        # TODO ignore open pages for now
+        return False
         should_cancel = should_cancel or self.has_pages()
         if should_cancel:
             self.should_close = True
