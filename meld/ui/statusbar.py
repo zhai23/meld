@@ -81,12 +81,10 @@ class MeldStatusMenuButton(Gtk.MenuButton):
 
         box = Gtk.Box()
         box.set_spacing(3)
-        box.add(label)
-        box.add(arrow)
-        box.show_all()
+        box.append(label)
+        box.append(arrow)
 
-        self.remove(self.get_child())
-        self.add(box)
+        self.set_child(box)
 
         self._label = label
 
@@ -94,7 +92,7 @@ class MeldStatusMenuButton(Gtk.MenuButton):
         self._label.set_width_chars(width)
 
 
-class MeldStatusBar(Gtk.Statusbar):
+class MeldStatusBar(Gtk.Box):
     __gtype_name__ = "MeldStatusBar"
 
     __gsignals__ = {
@@ -133,7 +131,7 @@ class MeldStatusBar(Gtk.Statusbar):
         self.props.margin_top = 0
         self.props.margin_end = 0
         self.props.margin_bottom = 0
-        # self.props.spacing = 6 TODO
+        self.props.spacing = 6
 
         # hbox = self.get_message_area() TODO statusbar is deprecated
         # label = hbox.get_children()[0]
@@ -143,19 +141,18 @@ class MeldStatusBar(Gtk.Statusbar):
         # hbox.append(label, False, True, 0)
 
     def do_realize(self):
-        Gtk.Statusbar.do_realize(self)
+        Gtk.Box.do_realize(self)
 
         # self.box_box = Gtk.Box(homogeneous=False, spacing=6)
         # self.append(self.box_box, False, True, 0)
-        # self.box_box.append(
-        #     self.construct_line_display(), False, True, 0)
-        # self.box_box.append(
-        #     self.construct_highlighting_selector(), False, True, 0)
-        # self.box_box.append(
-        #     self.construct_encoding_selector(), False, True, 0)
-        # self.box_box.append(
-        #     self.construct_display_popover(), False, True, 0)
-        # self.box_box.show_all() TODO
+        self.append(
+            self.construct_line_display())
+        self.append(
+            self.construct_highlighting_selector())
+        self.append(
+            self.construct_encoding_selector())
+        self.append(
+            self.construct_display_popover())
 
     def construct_line_display(self):
 
@@ -199,13 +196,15 @@ class MeldStatusBar(Gtk.Statusbar):
         entry.connect('activate', line_entry_activated)
 
         selector = Gtk.Grid()
-        selector.set_border_width(6)
-        selector.add(entry)
-        selector.show_all()
+        selector.set_margin_start(6)
+        selector.set_margin_top(6)
+        selector.set_margin_end(6)
+        selector.set_margin_bottom(6)
+        selector.attach(entry, 0, 0, 1, 1)
 
         pop = Gtk.Popover()
         pop.set_position(Gtk.PositionType.TOP)
-        pop.add(selector)
+        pop.set_child(selector)
 
         def format_cursor_position(binding, cursor):
             line, offset = cursor
@@ -239,7 +238,7 @@ class MeldStatusBar(Gtk.Statusbar):
 
         pop = Gtk.Popover()
         pop.set_position(Gtk.PositionType.TOP)
-        pop.add(selector)
+        pop.set_child(selector)
 
         button = MeldStatusMenuButton()
         self.bind_property(
@@ -270,7 +269,7 @@ class MeldStatusBar(Gtk.Statusbar):
 
         pop = Gtk.Popover()
         pop.set_position(Gtk.PositionType.TOP)
-        pop.add(selector)
+        pop.set_child(selector)
 
         button = MeldStatusMenuButton()
         self.bind_property(
@@ -287,8 +286,8 @@ class MeldStatusBar(Gtk.Statusbar):
             '/org/gnome/meld/ui/statusbar-menu.ui')
         menu = builder.get_object('statusbar-menu')
 
-        pop = Gtk.Popover()
-        pop.bind_model(menu, 'view-local')
+        pop = Gtk.PopoverMenu.new_from_model(menu)
+        # pop.bind_model(menu, 'view-local') TODO set action namespace
         pop.set_position(Gtk.PositionType.TOP)
 
         button = MeldStatusMenuButton()
