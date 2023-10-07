@@ -33,14 +33,17 @@ def layout_text_and_icon(
     secondary_text: Optional[str] = None,
     icon_name: Optional[str] = None,
 ):
-    hbox_content = Gtk.Box(homogeneous=False, spacing=8)
+    hbox_content = Gtk.Box(spacing=8)
 
     if icon_name:
         image = Gtk.Image.new_from_icon_name(icon_name)
-        image.set_alignment(0.5, 0.5)
-        hbox_content.prepend(image, False, False, 0)
+        image.set_icon_size(Gtk.IconSize.LARGE)
+        hbox_content.append(image)
 
-    vbox = Gtk.Box(homogeneous=False, spacing=6)
+    vbox = Gtk.Box(
+        orientation=Gtk.Orientation.VERTICAL,
+        spacing=6,
+        valign=Gtk.Align.CENTER)
 
     primary_label = Gtk.Label(
         label="<b>{}</b>".format(primary_text),
@@ -52,22 +55,21 @@ def layout_text_and_icon(
         selectable=True,
         hexpand=True,
     )
-    vbox.prepend(primary_label)
+    vbox.append(primary_label)
 
     if secondary_text:
         secondary_label = Gtk.Label(
-            # TODO
-            # "<small>{}</small>".format(secondary_text),
-            # wrap=True,
-            # wrap_mode=Pango.WrapMode.WORD,
-            # use_markup=True,
-            # xalign=0,
-            # can_focus=True,
-            # selectable=True,
+            label="<small>{}</small>".format(secondary_text),
+            wrap=True,
+            wrap_mode=Pango.WrapMode.WORD,
+            use_markup=True,
+            xalign=0,
+            can_focus=True,
+            selectable=True,
         )
-        vbox.prepend(secondary_label)
+        vbox.append(secondary_label)
 
-    hbox_content.prepend(vbox)
+    hbox_content.append(vbox)
     return hbox_content
 
 
@@ -108,12 +110,10 @@ class MsgAreaController(Gtk.Box):
         content = layout_text_and_icon(primary, secondary, icon_name)
         msgarea.add_child(content)
 
-        # content_area = msgarea.get_content_area()
-        # content_area.foreach(content_area.remove, None)
-        # content_area.add(content)
-
-        # action_area = msgarea.get_action_area()
-        # action_area.set_orientation(Gtk.Orientation.VERTICAL)
+        dummy_button = msgarea.add_button("asd", Gtk.ResponseType.ACCEPT)
+        parent_box = dummy_button.get_parent()
+        parent_box.set_orientation(Gtk.Orientation.VERTICAL)
+        msgarea.remove_action_widget(dummy_button)
 
         self.prepend(msgarea)
         return msgarea
@@ -128,7 +128,6 @@ class MsgAreaController(Gtk.Box):
         msgarea = self.new_from_text_and_icon(primary, secondary, icon)
         msgarea.add_button(_("Hi_de"), Gtk.ResponseType.CLOSE)
         msgarea.connect("response", clear_all)
-        msgarea.show_all()
         return msgarea
 
     def add_action_msg(self, icon, primary, secondary, action_label, callback):
@@ -141,5 +140,4 @@ class MsgAreaController(Gtk.Box):
         msgarea.add_button(action_label, Gtk.ResponseType.ACCEPT)
         msgarea.add_button(_("Hi_de"), Gtk.ResponseType.CLOSE)
         msgarea.connect("response", on_response)
-        msgarea.show_all()
         return msgarea
