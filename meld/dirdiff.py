@@ -583,8 +583,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             ],
         )
 
-        self.ensure_style()
-
         self.custom_labels = []
         self.set_num_panes(num_panes)
 
@@ -608,8 +606,8 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column.set_resizable(True)
             rentext = Gtk.CellRendererText()
             renicon = EmblemCellRenderer()
-            column.prepend(renicon, False)
-            column.prepend(rentext, True)
+            column.pack_start(renicon, False)
+            column.pack_start(rentext, True)
             column.set_attributes(rentext, markup=col_index(tree.COL_TEXT, i),
                                   foreground_rgba=col_index(tree.COL_FG, i),
                                   style=col_index(tree.COL_STYLE, i),
@@ -628,7 +626,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column = Gtk.TreeViewColumn(_("Size"))
             column.set_resizable(True)
             rentext = CellRendererByteSize()
-            column.prepend(rentext, True)
+            column.pack_start(rentext, True)
             column.set_attributes(rentext, bytesize=col_index(COL_SIZE, i))
             self.treeview[i].append_column(column)
             self.columns_dict[i]["size"] = column
@@ -636,7 +634,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column = Gtk.TreeViewColumn(_("Modification time"))
             column.set_resizable(True)
             rentext = CellRendererDate()
-            column.prepend(rentext, True)
+            column.pack_start(rentext, True)
             column.set_attributes(rentext, timestamp=col_index(COL_TIME, i))
             self.treeview[i].append_column(column)
             self.columns_dict[i]["modification time"] = column
@@ -644,7 +642,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column = Gtk.TreeViewColumn(_("Modification time (ISO)"))
             column.set_resizable(True)
             rentext = CellRendererISODate()
-            column.prepend(rentext, True)
+            column.pack_start(rentext, True)
             column.set_attributes(rentext, timestamp=col_index(COL_TIME, i))
             self.treeview[i].append_column(column)
             self.columns_dict[i]["iso-time"] = column
@@ -652,7 +650,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             column = Gtk.TreeViewColumn(_("Permissions"))
             column.set_resizable(True)
             rentext = CellRendererFileMode()
-            column.prepend(rentext, False)
+            column.pack_start(rentext, False)
             column.set_attributes(rentext, file_mode=col_index(COL_PERMS, i))
             self.treeview[i].append_column(column)
             self.columns_dict[i]["permissions"] = column
@@ -1403,11 +1401,9 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
         self.current_path = cursor_path
 
-    @Gtk.Template.Callback()
     def on_treeview_popup_menu(self, treeview):
         return tree.TreeviewCommon.on_treeview_popup_menu(self, treeview)
 
-    @Gtk.Template.Callback()
     def on_treeview_button_press_event(self, treeview, event):
         return tree.TreeviewCommon.on_treeview_button_press_event(
             self, treeview, event)
@@ -1422,7 +1418,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         new_pane = (pane + 1) % self.num_panes
         self.change_focused_tree(self.treeview[pane], self.treeview[new_pane])
 
-    @Gtk.Template.Callback()
     def on_treeview_key_press_event(self, view, event):
         if event.keyval not in (Gdk.KEY_Left, Gdk.KEY_Right):
             return False
@@ -1485,7 +1480,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.row_expansions.discard(str(path))
         self._do_to_others(view, self.treeview, "collapse_row", (path,))
 
-    @Gtk.Template.Callback()
     def on_treeview_focus_in_event(self, tree, event):
         self.focus_pane = tree
         self.update_action_sensitivity()
