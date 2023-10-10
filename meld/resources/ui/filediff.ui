@@ -458,7 +458,6 @@
               <property name="column">1</property>
               <property name="row">1</property>
             </layout>
-            <!-- <signal name="scroll-event" handler="on_linkmap_scroll_event" swapped="no"/> TODO -->
           </object>
         </child>
         <child>
@@ -473,7 +472,6 @@
               <property name="column">3</property>
               <property name="row">1</property>
             </layout>
-            <!-- <signal name="scroll-event" handler="on_linkmap_scroll_event" swapped="no"/> TODO -->
           </object>
         </child>
         <child>
@@ -488,7 +486,6 @@
               <property name="column">5</property>
               <property name="row">1</property>
             </layout>
-            <!-- <signal name="scroll-event" handler="on_linkmap_scroll_event" swapped="no"/> TODO -->
           </object>
         </child>
         <child>
@@ -503,7 +500,6 @@
               <property name="column">7</property>
               <property name="row">1</property>
             </layout>
-            <!-- <signal name="scroll-event" handler="on_linkmap_scroll_event" swapped="no"/> TODO -->
           </object>
         </child>
         <child>
