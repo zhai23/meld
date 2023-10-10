@@ -41,9 +41,15 @@ class ActionIcons:
         icon = cls.icon_cache.get(icon_name)
 
         if not icon:
-            icon_theme = Gtk.IconTheme.get_default()
-            icon = icon_theme.load_icon(
-                f'{cls.icon_name_prefix}-{icon_name}', cls.pixbuf_height, 0)
+            display = Gdk.Display.get_default()
+            icon_theme = Gtk.IconTheme.get_for_display(display)
+            icon = icon_theme.lookup_icon(
+                f'{cls.icon_name_prefix}-{icon_name}',
+                None,
+                cls.pixbuf_height,
+                1,
+                Gtk.TextDirection.LTR,
+                0)
             cls.icon_cache[icon_name] = icon
 
         return icon
@@ -86,20 +92,19 @@ class ActionGutter(Gtk.DrawingArea):
 
     @icon_direction.setter
     def icon_direction_set(self, direction: Gtk.TextDirection):
-        # TODO icon lookup flags
-        # if direction not in (
-        #         Gtk.IconLookupFlags.DIR_LTR, Gtk.IconLookupFlags.DIR_RTL):
-        #     raise ValueError('Invalid icon direction {}'.format(direction))
+        if direction not in (
+                Gtk.TextDirection.LTR, Gtk.TextDirection.RTL):
+            raise ValueError('Invalid icon direction {}'.format(direction))
 
-        # replace_icons = {
-        #     Gtk.IconLookupFlags.DIR_LTR: 'apply-right',
-        #     Gtk.IconLookupFlags.DIR_RTL: 'apply-left',
-        # }
-        # self.action_map = {
-        #     ActionMode.Replace: ActionIcons.load(replace_icons[direction]),
-        #     ActionMode.Delete: ActionIcons.load('delete'),
-        #     ActionMode.Insert: ActionIcons.load('copy'),
-        # }
+        replace_icons = {
+            Gtk.TextDirection.LTR: 'apply-right',
+            Gtk.TextDirection.RTL: 'apply-left',
+        }
+        self.action_map = {
+            ActionMode.Replace: ActionIcons.load(replace_icons[direction]),
+            ActionMode.Delete: ActionIcons.load('delete'),
+            ActionMode.Insert: ActionIcons.load('copy'),
+        }
         self._icon_direction = direction
 
     _source_view: Gtk.TextView
