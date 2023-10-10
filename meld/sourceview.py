@@ -478,7 +478,7 @@ class MeldSourceMap(GtkSource.Map, SourceViewHelperMixin):
         super().__init__(*args, **kwargs)
         self.connect('notify::compact-view', lambda *args: self.queue_resize())
 
-    def do_draw_layer(self, layer, context):
+    def do_snapshot_layer(self, layer, context):
         if layer != Gtk.TextViewLayer.BELOW_TEXT:
             return GtkSource.Map.do_draw_layer(self, layer, context)
 
