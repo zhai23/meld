@@ -288,12 +288,11 @@ class HandleWindow():
         #              Gdk.WindowAttributesType.Y |
         #              Gdk.WindowAttributesType.CURSOR)
 
-        # parent = widget.get_parent_window()
-        # self._window = Gdk.Window(parent, attr, attr_mask)
+        parent = widget.get_root()
+        # self._window = Gdk.Surface.new_toplevel(parent)
         # self._window.handle = self
-        # self._widget = widget
+        self._widget = widget
         # self._widget.register_window(self._window)
-        pass
 
     def unrealize(self):
         # self._widget.unregister_window(self._window)
@@ -307,11 +306,12 @@ class HandleWindow():
         pass # TODO
 
     def move_resize(self, x, y, width, height):
-        self._window.move_resize(x, y, width, height)
-        self._area_x = x
-        self._area_y = y
-        self._area_width = width
-        self._area_height = height
+        # self._window.move_resize(x, y, width, height)
+        # self._area_x = x
+        # self._area_y = y
+        # self._area_width = width
+        # self._area_height = height
+        pass TODO
 
     def set_prelight(self, flag):
         self._prelit = flag
