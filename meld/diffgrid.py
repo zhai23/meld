@@ -251,7 +251,7 @@ class HandleWindow():
 
     def __init__(self):
         self._widget = None
-        self._window = None
+        self._surface = None
         self._area_x = -1
         self._area_y = -1
         self._area_width = 1
@@ -291,36 +291,37 @@ class HandleWindow():
         #              Gdk.WindowAttributesType.CURSOR)
 
         parent = widget.get_root()
-        # self._window = Gdk.Surface.new_toplevel(parent)
-        # self._window.handle = self
+        display = Gdk.Display.get_default()
+        self._surface = Gdk.Surface.new_toplevel(display)
+        # self._surface = Gdk.Surface.new_toplevel(parent)
+        # self._surface.handle = self
         self._widget = widget
-        # self._widget.register_window(self._window)
+        # self._widget.register_window(self._surface)
 
     def unrealize(self):
-        # self._widget.unregister_window(self._window)
+        # self._widget.unregister_window(self._surface)
         pass # TODO
 
     def set_visible(self, visible):
         # if visible:
-        #     self._window.show()
+        #     self._surface.show()
         # else:
-        #     self._window.hide()
+        #     self._surface.hide()
         pass # TODO
 
     def move_resize(self, x, y, width, height):
-        # self._window.move_resize(x, y, width, height)
-        # self._area_x = x
-        # self._area_y = y
-        # self._area_width = width
-        # self._area_height = height
-        pass TODO
+        # self._surface.move_resize(x, y, width, height) TODO
+        self._area_x = x
+        self._area_y = y
+        self._area_width = width
+        self._area_height = height
 
     def set_prelight(self, flag):
         self._prelit = flag
         self._widget.queue_draw_area(self._area_x, self._area_y,
                                      self._area_width, self._area_height)
 
-    def draw(self, cairocontext):
+    def draw(self, snapshot):
         alloc = self._widget.get_allocation()
         padding = 5
         x = self._area_x - alloc.x + padding
@@ -338,7 +339,7 @@ class HandleWindow():
         if self._prelit:
             state |= Gtk.StateFlags.PRELIGHT
 
-        if Gtk.cairo_should_draw_window(cairocontext, self._window):
+        if Gtk.cairo_should_draw_window(snapshot, self._surface):
             stylecontext.save()
             stylecontext.set_state(state)
             stylecontext.add_class(Gtk.STYLE_CLASS_PANE_SEPARATOR)
@@ -347,10 +348,10 @@ class HandleWindow():
             if color.alpha > 0.0:
                 xcenter = x + width / 2.0 - self.handle_width / 2.0
                 Gtk.render_handle(
-                    stylecontext, cairocontext,
+                    stylecontext, snapshot,
                     xcenter, y, self.handle_width, height)
             else:
                 xcenter = x + width / 2.0
-                Gtk.render_line(stylecontext, cairocontext,
+                Gtk.render_line(stylecontext, snapshot,
                                 xcenter, y, xcenter, y + height)
             stylecontext.restore()
