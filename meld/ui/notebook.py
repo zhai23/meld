@@ -35,25 +35,6 @@ class MeldNotebook(Gtk.Notebook):
         'page-label-changed': (0, None, (GObject.TYPE_STRING,)),
     }
 
-    # Python 3.4; no bytes formatting
-    css = (
-        b""""""
-        # @binding-set TabSwitchBindings {
-        #   bind "<Alt>1" { "tab-switch" (0) };
-        #   bind "<Alt>2" { "tab-switch" (1) };
-        #   bind "<Alt>3" { "tab-switch" (2) };
-        #   bind "<Alt>4" { "tab-switch" (3) };
-        #   bind "<Alt>5" { "tab-switch" (4) };
-        #   bind "<Alt>6" { "tab-switch" (5) };
-        #   bind "<Alt>7" { "tab-switch" (6) };
-        #   bind "<Alt>8" { "tab-switch" (7) };
-        #   bind "<Alt>9" { "tab-switch" (8) };
-        #   bind "<Alt>0" { "tab-switch" (9) };
-        # }
-        # notebook.meld-notebook { -gtk-key-bindings: TabSwitchBindings; }
-        # """
-    )
-
     ui = """
       <?xml version="1.0" encoding="UTF-8"?>
       <interface>
@@ -93,16 +74,6 @@ class MeldNotebook(Gtk.Notebook):
         builder = Gtk.Builder.new_from_string(self.ui, -1)
         self.popup_menu = builder.get_object("tab-menu")
 
-        provider = Gtk.CssProvider()
-        try:
-            provider.load_from_data(self.css)
-        except TypeError:
-            # Older GTK4 bindings had the wrong introspection data.
-            provider.load_from_data(self.css.decode(), -1)
-        Gtk.StyleContext.add_provider_for_display(
-            Gdk.Display.get_default(), provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-
         stylecontext = self.get_style_context()
         stylecontext.add_class('meld-notebook')
 
@@ -110,6 +81,11 @@ class MeldNotebook(Gtk.Notebook):
         # self.connect('popup-menu', self.on_popup_menu)
         self.connect('page-added', self.on_page_added)
         self.connect('page-removed', self.on_page_removed)
+
+    def on_key_pressed_event(self, controller, keyval, keycode, state):
+        if state == Gdk.ModifierType.ALT_MASK:
+            if keyval >= Gdk.KEY_0 and keyval <= Gdk.KEY_9:
+                self.emit("tab-switch", keyval - Gdk.KEY_0)
 
     def do_tab_switch(self, page_num):
         self.set_current_page(page_num)

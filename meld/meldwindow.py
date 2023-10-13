@@ -126,6 +126,13 @@ class MeldWindow(Adw.ApplicationWindow):
             style_context = self.get_style_context()
             style_context.add_class("devel")
 
+        keycontroller = Gtk.EventControllerKey()
+        keycontroller.connect("key-pressed", self.on_key_pressed_event)
+        self.add_controller(keycontroller)
+
+    def on_key_pressed_event(self, controller, keyval, keycode, state):
+        self.notebook.on_key_pressed_event(controller, keyval, keycode, state)
+
     def do_realize(self):
         Adw.ApplicationWindow.do_realize(self)
 
