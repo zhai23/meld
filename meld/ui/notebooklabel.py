@@ -50,10 +50,14 @@ class NotebookLabel(Gtk.Box):
             GObject.BindingFlags.DEFAULT | GObject.BindingFlags.SYNC_CREATE,
         )
 
-    def on_label_button_press_event(self, widget, event):
+        gesture = Gtk.GestureClick()
+        gesture.set_button(2)
+        gesture.connect("pressed", self.on_label_button_press_event)
+        self.add_controller(gesture)
+
+    def on_label_button_press_event(self, gesture, n_press, x, y):
         # Middle-click on the tab closes the tab.
-        if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:
-            self.page.on_delete_event()
+        self.page.on_delete_event()
 
     @Gtk.Template.Callback()
     def on_close_button_clicked(self, widget):
