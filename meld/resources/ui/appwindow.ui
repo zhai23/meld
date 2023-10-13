@@ -65,7 +65,7 @@
                 </child>
                 <child>
                   <object class="GtkButton">
-                    <!-- <property name="action-name">view.next-change</property> -->
+                    <property name="action-name">view.next-change</property>
                     <property name="tooltip-text" translatable="1">Go to the next change</property>
                     <property name="focus_on_click">0</property>
                     <style>
