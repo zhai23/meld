@@ -19,8 +19,6 @@ import logging
 from collections.abc import Sequence
 from typing import Optional
 
-import gi
-gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, GdkPixbuf, Gio, GObject, Gtk, GtkSource
 
 # TODO: Don't from-import whole modules

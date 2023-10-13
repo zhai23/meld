@@ -23,8 +23,6 @@
 import logging
 import re
 
-import gi
-gi.require_version("Gtk", "4.0")
 from gi.repository import GObject, Gtk
 
 log = logging.getLogger(__name__)

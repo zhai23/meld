@@ -16,8 +16,6 @@
 import math
 from typing import Any
 
-import gi
-gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, GtkSource, Pango
 
 from meld.settings import get_meld_settings

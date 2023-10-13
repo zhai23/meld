@@ -32,8 +32,6 @@ import sys
 import tempfile
 from typing import List, Tuple
 
-import gi
-gi.require_version("Gtk", "4.0")
 from gi.repository import Gio, GLib, Gtk
 
 import meld.misc

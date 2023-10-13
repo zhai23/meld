@@ -30,8 +30,6 @@ from decimal import Decimal
 from mmap import ACCESS_COPY, mmap
 from typing import DefaultDict, List, NamedTuple, Optional, Tuple
 
-import gi
-gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk
 
 # TODO: Don't from-import whole modules

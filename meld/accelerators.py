@@ -1,9 +1,6 @@
 
 from typing import Dict, Sequence, Union
 
-import gi
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw
 
 VIEW_ACCELERATORS: Dict[str, Union[str, Sequence[str]]] = {

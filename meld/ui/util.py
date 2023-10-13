@@ -16,9 +16,6 @@
 import logging
 from typing import List
 
-import gi
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
 from gi.repository import Gio, GObject, Gtk, Adw
 
 log = logging.getLogger(__name__)

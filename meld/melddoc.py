@@ -23,8 +23,6 @@ import subprocess
 import sys
 from typing import List, Optional, Sequence
 
-import gi
-gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk
 
 from meld.conf import _

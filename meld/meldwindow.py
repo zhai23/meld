@@ -16,11 +16,8 @@
 
 import logging
 import os
-import gi
 from typing import Any, Dict, Optional, Sequence
 
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
 from gi.repository import Gdk, Gio, GLib, Gtk, Adw, GObject
 
 # Import support module to get all builder-constructed widgets in the namespace

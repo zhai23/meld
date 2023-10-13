@@ -18,10 +18,7 @@ import io
 import logging
 import optparse
 import os
-import gi
 
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
 from gi.repository import Gdk, Gio, GLib, Gtk, Adw
 
 import meld.accelerators

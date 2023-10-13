@@ -38,9 +38,6 @@ from typing import (
     Union,
 )
 
-import gi
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
 from gi.repository import GLib, Gtk, Adw
 
 from meld.conf import _

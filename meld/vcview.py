@@ -24,8 +24,6 @@ import sys
 import tempfile
 from typing import Tuple
 
-import gi
-gi.require_version("Gtk", "4.0")
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk, Pango
 
 from meld import tree
