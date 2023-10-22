@@ -251,14 +251,14 @@ EMBLEM_NEW = "emblem-new"
 EMBLEM_SELECTED = "emblem-default-symbolic"
 EMBLEM_SYMLINK = "emblem-symbolic-link"
 
-COL_EMBLEM, COL_EMBLEM_SECONDARY, COL_SIZE, COL_TIME, COL_PERMS, COL_END = (
-    range(tree.COL_END, tree.COL_END + 6))
+COL_EMBLEM, COL_SIZE, COL_TIME, COL_PERMS, COL_END = (
+    range(tree.COL_END, tree.COL_END + 5))
 
 
 class DirDiffTreeStore(tree.DiffTreeStore):
     def __init__(self, ntree):
         # FIXME: size should be a GObject.TYPE_UINT64, but we use -1 as a flag
-        super().__init__(ntree, [str, str, GObject.TYPE_INT64, float, int])
+        super().__init__(ntree, [str, GObject.TYPE_INT64, float, int])
 
     def add_error(self, parent, msg, pane):
         defaults = {
@@ -615,7 +615,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                 renicon,
                 icon_name=col_index(tree.COL_ICON, i),
                 emblem_name=col_index(COL_EMBLEM, i),
-                secondary_emblem_name=col_index(COL_EMBLEM_SECONDARY, i),
                 icon_tint=col_index(tree.COL_TINT, i)
             )
             self.treeview[i].append_column(column)
@@ -903,7 +902,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             self.model.set_state(it, pane, tree.STATE_SPINNER, label, True)
             self.model.unsafe_set(it, pane, {
                 COL_EMBLEM: None,
-                COL_EMBLEM_SECONDARY: None,
                 COL_TIME: MISSING_TIMESTAMP,
                 COL_SIZE: -1,
                 COL_PERMS: -1
@@ -1764,13 +1762,15 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                 else:
                     emblem = EMBLEM_NEW if j in newest else None
 
-                link_emblem = EMBLEM_SYMLINK if j in symlinks else None
                 self.model.unsafe_set(it, j, {
                     COL_EMBLEM: emblem,
-                    COL_EMBLEM_SECONDARY: link_emblem,
                     COL_TIME: times[j],
                     COL_PERMS: perms[j]
                 })
+                if j in symlinks:
+                    self.model.unsafe_set(it, j, {
+                        tree.COL_ICON: "symbolic-link-symbolic",
+                    })
                 # Size is handled independently, because unsafe_set
                 # can't correctly box GObject.TYPE_INT64.
                 self.model.set(

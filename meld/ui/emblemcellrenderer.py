@@ -14,10 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 from typing import Dict, Tuple
 
 import cairo
-from gi.repository import Gdk, GdkPixbuf, GObject, Gtk
+from gi.repository import Gdk, GdkPixbuf, GLib, GObject, Gtk
+
+log = logging.getLogger(__name__)
 
 
 class EmblemCellRenderer(Gtk.CellRenderer):
@@ -39,12 +42,6 @@ class EmblemCellRenderer(Gtk.CellRenderer):
         blurb='Name for emblem icon to overlay',
     )
 
-    secondary_emblem_name = GObject.Property(
-        type=str,
-        nick='Named secondary emblem icon',
-        blurb='Name for secondary emblem icon to overlay',
-    )
-
     icon_tint = GObject.Property(
         type=Gdk.RGBA,
         nick='Icon tint',
@@ -59,10 +56,21 @@ class EmblemCellRenderer(Gtk.CellRenderer):
         self._emblem_size = 8
 
     def _get_pixbuf(self, name, size):
+        if not name:
+            return None
+
         if (name, size) not in self.icon_cache:
             icon_theme = Gtk.IconTheme.get_default()
-            pixbuf = icon_theme.load_icon(name, size, 0).copy()
+            try:
+                pixbuf = icon_theme.load_icon(name, size, 0).copy()
+            except GLib.GError as err:
+                if err.domain != GLib.quark_to_string(Gtk.IconThemeError.quark()):
+                    raise
+                log.error(f"Icon {name!r} not found; an icon theme is missing")
+                pixbuf = None
+
             self.icon_cache[(name, size)] = pixbuf
+
         return self.icon_cache[(name, size)]
 
     def do_render(self, context, widget, background_area, cell_area, flags):
@@ -72,8 +80,8 @@ class EmblemCellRenderer(Gtk.CellRenderer):
 
         # TODO: Incorporate padding
         context.push_group()
-        if self.icon_name:
-            pixbuf = self._get_pixbuf(self.icon_name, self._icon_size)
+        pixbuf = self._get_pixbuf(self.icon_name, self._icon_size)
+        if pixbuf:
             context.set_operator(cairo.OPERATOR_SOURCE)
             # Assumes square icons; may break if we don't get the requested
             # size
@@ -103,18 +111,6 @@ class EmblemCellRenderer(Gtk.CellRenderer):
                 Gdk.cairo_set_source_pixbuf(context, pixbuf, x_offset, 0)
                 context.rectangle(x_offset, 0,
                                   cell_area.width, self._emblem_size)
-                context.fill()
-
-            if self.secondary_emblem_name:
-                pixbuf = self._get_pixbuf(
-                    self.secondary_emblem_name, self._emblem_size)
-                x_offset = self._icon_size - self._emblem_size
-                y_offset = self._icon_size - self._emblem_size + height_offset
-                context.set_operator(cairo.OPERATOR_OVER)
-                Gdk.cairo_set_source_pixbuf(
-                    context, pixbuf, x_offset, y_offset)
-                context.rectangle(
-                    x_offset, y_offset, cell_area.width, self._emblem_size)
                 context.fill()
 
         context.pop_group_to_source()

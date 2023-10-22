@@ -200,6 +200,13 @@ class MeldApp(Adw.Application):
         pad_args_fmt = "%-" + str(max([len(s[0]) for s in usages])) + "s %s"
         usage_lines = ["  %prog " + pad_args_fmt % u for u in usages]
         usage = "\n" + "\n".join(usage_lines)
+        usage += _(
+            "\n"
+            "\n"
+            "For file comparisons, the special argument @blank may be used "
+            "instead of\n"
+            "a <file> argument to create a blank pane."
+        )
 
         class GLibFriendlyOptionParser(optparse.OptionParser):
 
@@ -327,7 +334,18 @@ class MeldApp(Adw.Application):
                 relative = Gio.File.resolve_relative_path(cwd, arg)
                 if relative.query_exists(cancellable=None):
                     return relative
-                # Return the original arg for a better error message
+
+                # We have special handling for not-a-file arguments:
+                #  * @blank is just a new blank tab
+                #
+                # The intention was to support @clipboard here as well, which
+                # would have started with a pasted clipboard, but Wayland's
+                # clipboard security makes this borderline impossible for us.
+                if arg == "@blank":
+                    return None
+
+                # Otherwise we fall through and return the original arg for
+                # a better error message
 
             if f.get_uri() is None:
                 raise ValueError(_("invalid path or URI “%s”") % arg)
