@@ -110,16 +110,6 @@ $ cd _build
 $ ninja
 ```
 
-To see meson configuration settings, run:
-```sh
-$ meson configure build
-```
-
-To change the meson configuration settings, run:
-```sh
-$ meson configure build -D<name>=<value>
-```
-
 ## Running locally build version ##
 After building, assuming you are in the build directory,
 you can run your modified version via:
