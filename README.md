@@ -124,11 +124,6 @@ You can then install Meld system-wide by running:
 $ ninja install
 ```
 
-You can create a distribution package by running:
-```sh
-$ ninja distro
-```
-
 A Windows installer can be built with command
 
 ```powershell
