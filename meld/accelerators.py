@@ -26,7 +26,6 @@ VIEW_ACCELERATORS: Dict[str, Union[str, Sequence[str]]] = {
     'view.save-as': '<Primary><Shift>S',
     'view.undo': '<Primary>Z',
     'win.close': '<Primary>W',
-    'win.gear-menu': 'F10',
     'win.fullscreen': 'F11',
     'win.new-tab': '<Primary>N',
     'win.stop': 'Escape',

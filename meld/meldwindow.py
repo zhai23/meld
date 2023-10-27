@@ -517,3 +517,4 @@ class MeldWindow(Adw.ApplicationWindow):
             def __getattr__(self, a):
                 return lambda *x: None
         return DummyDoc()
+

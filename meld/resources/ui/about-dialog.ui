@@ -2,6 +2,10 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <object class="AdwAboutWindow" id="about-dialog">
+    <property name="application-name">Meld</property>
+    <property name="developer-name">Kai Willadsen</property>
+    <property name="issue-url">https://gitlab.gnome.org/GNOME/meld/-/issues</property>
+    <property name="support-url">https://discourse.gnome.org/tag/meld</property>
     <property name="copyright" translatable="1">Copyright © 2002-2009 Stephen Kennedy
 Copyright © 2009-2022 Kai Willadsen</property>
     <property name="website">https://meld.app/</property>
