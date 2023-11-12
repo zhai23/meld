@@ -73,6 +73,8 @@ class ChunkMap(Gtk.DrawingArea):
         self._have_grab = False
         self._cached_map = None
 
+        self.set_draw_func(self.draw)
+
     def do_realize(self):
         if not self.adjustment:
             log.critical(
@@ -137,15 +139,15 @@ class ChunkMap(Gtk.DrawingArea):
         """Map chunks to buffer offsets for drawing, ordered by tag"""
         raise NotImplementedError()
 
-    def do_draw(self, context: cairo.Context) -> bool:
+    def draw(self, _chunkmap, context, width, height):
         if not self.adjustment or self.adjustment.get_upper() <= 0:
-            return False
+            return
 
         height = self.get_allocated_height()
         width = self.get_allocated_width()
 
         if width <= 0 or height <= 0:
-            return False
+            return
 
         base_bg, base_outline, handle_overdraw, handle_outline = (
             self.get_map_base_colors())
@@ -161,7 +163,7 @@ class ChunkMap(Gtk.DrawingArea):
             cache_ctx.set_line_width(1)
 
             cache_ctx.rectangle(x0, -0.5, x1, height_scale + 0.5)
-            cache_ctx.set_source_rgba(*base_bg)
+            cache_ctx.set_source_rgba(base_bg.red, base_bg.green, base_bg.blue, base_bg.alpha)
             cache_ctx.fill()
 
             # We get drawing coordinates by tag to minimise our source
@@ -169,17 +171,20 @@ class ChunkMap(Gtk.DrawingArea):
             tagged_diffs = self.chunk_coords_by_tag()
 
             for tag, diffs in tagged_diffs.items():
-                cache_ctx.set_source_rgba(*self.fill_colors[tag])
+                color = self.fill_colors[tag]
+                cache_ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
                 for y0, y1 in diffs:
                     y0 = round(y0 * height_scale) + 0.5
                     y1 = round(y1 * height_scale) - 0.5
                     cache_ctx.rectangle(x0, y0, x1, y1 - y0)
                 cache_ctx.fill_preserve()
-                cache_ctx.set_source_rgba(*self.line_colors[tag])
+                color = self.line_colors[tag]
+                cache_ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
                 cache_ctx.stroke()
 
             cache_ctx.rectangle(x0, -0.5, x1, height_scale + 0.5)
-            cache_ctx.set_source_rgba(*base_outline)
+            color = base_outline
+            cache_ctx.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             cache_ctx.stroke()
 
             self._cached_map = surface
@@ -189,7 +194,8 @@ class ChunkMap(Gtk.DrawingArea):
 
         # Draw our scroll position indicator
         context.set_line_width(1)
-        context.set_source_rgba(*handle_overdraw)
+        color = handle_overdraw
+        context.set_source_rgba(color.red, color.green, color.blue, color.alpha)
 
         adj_y = self.adjustment.get_value() / self.adjustment.get_upper()
         adj_h = self.adjustment.get_page_size() / self.adjustment.get_upper()
@@ -199,10 +205,9 @@ class ChunkMap(Gtk.DrawingArea):
             x1 + 2 * self.overdraw_padding, round(height_scale * adj_h) - 1,
         )
         context.fill_preserve()
-        context.set_source_rgba(*handle_outline)
+        color = handle_outline
+        context.set_source_rgba(color.red, color.green, color.blue, color.alpha)
         context.stroke()
-
-        return True
 
     def _scroll_to_location(self, location: float):
         raise NotImplementedError()
@@ -329,11 +334,11 @@ class TextViewChunkMap(ChunkMap):
 
         return tagged_diffs
 
-    def do_draw(self, context: cairo.Context) -> bool:
+    def draw(self, chunkmap, context, width, height):
         if not self.textview:
-            return False
+            return
 
-        return ChunkMap.do_draw(self, context)
+        return ChunkMap.draw(self, chunkmap, context, width, height)
 
     def _scroll_to_location(self, location: float):
         if not self.textview:
@@ -430,11 +435,11 @@ class TreeViewChunkMap(ChunkMap):
 
         return tagged_diffs
 
-    def do_draw(self, context: cairo.Context) -> bool:
+    def draw(self, chunkmap, context, width, height):
         if not self.treeview:
-            return False
+            return
 
-        return ChunkMap.do_draw(self, context)
+        return ChunkMap.draw(self, chunkmap, context, width, height)
 
     def _scroll_to_location(self, location: float):
         if not self.treeview or self.adjustment.get_upper() <= 0:
