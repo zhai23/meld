@@ -17,7 +17,7 @@
 import logging
 from enum import Enum
 
-from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource, Pango
+from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource, Pango, Graphene
 
 from meld.meldbuffer import MeldBuffer
 from meld.settings import bind_settings, get_meld_settings, settings
@@ -325,116 +325,127 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
             GLib.source_remove(self.anim_source_id)
         return GtkSource.View.do_unrealize(self)
 
-    def do_draw_layer(self, layer, context):
+    def do_snapshot_layer(self, layer, snapshot):
         if layer != Gtk.TextViewLayer.BELOW_TEXT:
-            return GtkSource.View.do_draw_layer(self, layer, context)
+            return GtkSource.View.do_snapshot_layer(self, layer, snapshot)
 
-        context.save()
-        context.set_line_width(1.0)
+        snapshot.save()
+        try:
+            width = self.get_width() + 1
+            bounds = (
+                self.get_line_num_for_y(0),
+                self.get_line_num_for_y(self.get_height()),
+            )
 
-        _, clip = Gdk.cairo_get_clip_rectangle(context)
-        clip_end = clip.y + clip.height
-        bounds = (
-            self.get_line_num_for_y(clip.y),
-            self.get_line_num_for_y(clip_end),
-        )
+            x = 0
+            width = self.get_width() + 1
 
-        x = clip.x - 0.5
-        width = clip.width + 1
+            # Paint chunk backgrounds and outlines
+            for change in self.chunk_iter(bounds):
+                ypos0 = self.get_y_for_line_num(change[1])
+                ypos1 = self.get_y_for_line_num(change[2])
+                height = max(0, ypos1 - ypos0 - 1)
 
-        # Paint chunk backgrounds and outlines
-        for change in self.chunk_iter(bounds):
-            ypos0 = self.get_y_for_line_num(change[1])
-            ypos1 = self.get_y_for_line_num(change[2])
-            height = max(0, ypos1 - ypos0 - 1)
+                cairo = snapshot.append_cairo(Graphene.Rect(x, ypos0 + 0.5, width, height))
+                cairo.set_line_width(1.0)
+                if change[1] != change[2]:
+                    color = self.fill_colors[change[0]]
+                    cairo.set_source_rgba(color.red, color.green, color.blue, color.alpha)
+                    cairo.fill_preserve()
+                    if self.current_chunk_check(change):
+                        highlight = self.fill_colors['current-chunk-highlight']
+                        cairo.set_source_rgba(highlight.red, highlight.green, highlight.blue, highlight.alpha)
+                        cairo.fill_preserve()
 
-            context.rectangle(x, ypos0 + 0.5, width, height)
-            if change[1] != change[2]:
-                context.set_source_rgba(*self.fill_colors[change[0]])
-                context.fill_preserve()
-                if self.current_chunk_check(change):
-                    highlight = self.fill_colors['current-chunk-highlight']
-                    context.set_source_rgba(*highlight)
-                    context.fill_preserve()
+                color = self.line_colors[change[0]]
+                cairo.set_source_rgba(color.red, color.green, color.blue, color.alpha)
+                cairo.stroke()
 
-            context.set_source_rgba(*self.line_colors[change[0]])
-            context.stroke()
+            textbuffer = self.get_buffer()
 
-        textbuffer = self.get_buffer()
+            # Check whether we're drawing past the last line in the buffer
+            # (i.e., the overscroll) and draw a custom background if so.
+            end_y, end_height = self.get_line_yrange(textbuffer.get_end_iter())
+            end_y += end_height
+            visible_bottom_margin = self.get_width() - end_y
+            if visible_bottom_margin > 0:
+                cairo = snapshot.append_cairo(Graphene.Rect(x + 1, end_y, width - 1, visible_bottom_margin))
+                cairo.set_line_width(1.0)
+                color = self.fill_colors['overscroll']
+                cairo.set_source_rgba(color.red, color.green, color.blue, color.alpha)
+                cairo.fill()
 
-        # Check whether we're drawing past the last line in the buffer
-        # (i.e., the overscroll) and draw a custom background if so.
-        end_y, end_height = self.get_line_yrange(textbuffer.get_end_iter())
-        end_y += end_height
-        visible_bottom_margin = clip_end - end_y
-        if visible_bottom_margin > 0:
-            context.rectangle(x + 1, end_y, width - 1, visible_bottom_margin)
-            context.set_source_rgba(*self.fill_colors['overscroll'])
-            context.fill()
+            # Paint current line highlight
+            if self.props.highlight_current_line_local:
+                it = textbuffer.get_iter_at_mark(textbuffer.get_insert())
+                ypos, line_height = self.get_line_yrange(it)
+                cairo = snapshot.append_cairo(Graphene.Rect(x, ypos, width, line_height))
+                cairo.set_line_width(1.0)
+                highlight = self.highlight_color
+                cairo.set_source_rgba(highlight.red, highlight.green, highlight.blue, highlight.alpha)
+                cairo.fill()
 
-        # Paint current line highlight
-        if self.props.highlight_current_line_local and self.is_focus():
-            it = textbuffer.get_iter_at_mark(textbuffer.get_insert())
-            ypos, line_height = self.get_line_yrange(it)
-            context.rectangle(x, ypos, width, line_height)
-            context.set_source_rgba(*self.highlight_color)
-            context.fill()
+            # Draw syncpoint indicator lines
+            for syncpoint in self.syncpoints:
+                if syncpoint is None:
+                    continue
+                syncline = textbuffer.get_iter_at_mark(syncpoint).get_line()
+                if bounds[0] <= syncline <= bounds[1]:
+                    ypos = self.get_y_for_line_num(syncline)
+                    ypos, line_height = self.get_line_yrange(it)
+                    cairo = snapshot.append_cairo(Graphene.Rect(x, ypos - 0.5, width, 1))
+                    cairo.set_line_width(1.0)
+                    syncpoint = self.syncpoint_color
+                    cairo.set_source_rgba(syncpoint.red, syncpoint.green, syncpoint.blue, syncpoint.alpha)
+                    cairo.stroke()
 
-        # Draw syncpoint indicator lines
-        for syncpoint in self.syncpoints:
-            if syncpoint is None:
-                continue
-            syncline = textbuffer.get_iter_at_mark(syncpoint).get_line()
-            if bounds[0] <= syncline <= bounds[1]:
-                ypos = self.get_y_for_line_num(syncline)
-                context.rectangle(x, ypos - 0.5, width, 1)
-                context.set_source_rgba(*self.syncpoint_color)
-                context.stroke()
+            # Overdraw all animated chunks, and update animation states
+            new_anim_chunks = []
+            for c in self.animating_chunks:
+                current_time = GLib.get_monotonic_time()
+                percent = min(
+                    1.0, (current_time - c.start_time) / float(c.duration))
+                # rgba_pairs = zip(c.start_rgba, c.end_rgba) TODO
+                # rgba = [s + (e - s) * percent for s, e in rgba_pairs]
 
-        # Overdraw all animated chunks, and update animation states
-        new_anim_chunks = []
-        for c in self.animating_chunks:
-            current_time = GLib.get_monotonic_time()
-            percent = min(
-                1.0, (current_time - c.start_time) / float(c.duration))
-            rgba_pairs = zip(c.start_rgba, c.end_rgba)
-            rgba = [s + (e - s) * percent for s, e in rgba_pairs]
+                it = textbuffer.get_iter_at_mark(c.start_mark)
+                ystart, _ = self.get_line_yrange(it)
+                it = textbuffer.get_iter_at_mark(c.end_mark)
+                yend, _ = self.get_line_yrange(it)
+                if ystart == yend:
+                    ystart -= 1
 
-            it = textbuffer.get_iter_at_mark(c.start_mark)
-            ystart, _ = self.get_line_yrange(it)
-            it = textbuffer.get_iter_at_mark(c.end_mark)
-            yend, _ = self.get_line_yrange(it)
-            if ystart == yend:
-                ystart -= 1
+                cairo = snapshot.append_cairo(Graphene.Rect(x, ystart, width, yend - ystart))
+                cairo.set_line_width(1.0)
+                cairo.set_source_rgba(1,0,1,1) # TODO use rgba from above
+                if c.anim_type == TextviewLineAnimationType.stroke:
+                    cairo.stroke()
+                else:
+                    cairo.fill()
 
-            context.set_source_rgba(*rgba)
-            context.rectangle(x, ystart, width, yend - ystart)
-            if c.anim_type == TextviewLineAnimationType.stroke:
-                context.stroke()
-            else:
-                context.fill()
+                if current_time <= c.start_time + c.duration:
+                    new_anim_chunks.append(c)
+                else:
+                    textbuffer.delete_mark(c.start_mark)
+                    textbuffer.delete_mark(c.end_mark)
+            self.animating_chunks = new_anim_chunks
 
-            if current_time <= c.start_time + c.duration:
-                new_anim_chunks.append(c)
-            else:
-                textbuffer.delete_mark(c.start_mark)
-                textbuffer.delete_mark(c.end_mark)
-        self.animating_chunks = new_anim_chunks
+            if self.animating_chunks and self.anim_source_id is None:
+                def anim_cb():
+                    self.queue_draw()
+                    return True
+                # Using timeout_add interferes with recalculation of inline
+                # highlighting; this mechanism could be improved.
+                self.anim_source_id = GLib.idle_add(anim_cb)
+            elif not self.animating_chunks and self.anim_source_id:
+                GLib.source_remove(self.anim_source_id)
+                self.anim_source_id = None
+        except Exception as _ex:
+            pass
 
-        if self.animating_chunks and self.anim_source_id is None:
-            def anim_cb():
-                self.queue_draw()
-                return True
-            # Using timeout_add interferes with recalculation of inline
-            # highlighting; this mechanism could be improved.
-            self.anim_source_id = GLib.idle_add(anim_cb)
-        elif not self.animating_chunks and self.anim_source_id:
-            GLib.source_remove(self.anim_source_id)
-            self.anim_source_id = None
+        snapshot.restore()
 
-        context.restore()
-
-        return GtkSource.View.do_draw_layer(self, layer, context)
+        return GtkSource.View.do_snapshot_layer(self, layer, snapshot)
 
 
 class CommitMessageSourceView(GtkSource.View):
@@ -476,43 +487,45 @@ class MeldSourceMap(GtkSource.Map, SourceViewHelperMixin):
         super().__init__(*args, **kwargs)
         self.connect('notify::compact-view', lambda *args: self.queue_resize())
 
-    def do_snapshot_layer(self, layer, context):
+    def do_snapshot_layer(self, layer, snapshot):
         if layer != Gtk.TextViewLayer.BELOW_TEXT:
-            return GtkSource.Map.do_draw_layer(self, layer, context)
+            return GtkSource.Map.do_snapshot_layer(self, layer, snapshot)
 
         # Handle bad view assignments and partial initialisation
         parent_view = self.props.view
         if not hasattr(parent_view, 'chunk_iter'):
-            return GtkSource.Map.do_draw_layer(self, layer, context)
+            return GtkSource.Map.do_snapshot_layer(self, layer, snapshot)
 
-        context.save()
-        context.set_line_width(1.0)
+        snapshot.save()
+        try:
+            x = 0
+            width = self.get_width() + 1
+            bounds = (
+                self.get_line_num_for_y(0),
+                self.get_line_num_for_y(self.get_height()),
+            )
 
-        _, clip = Gdk.cairo_get_clip_rectangle(context)
-        x = clip.x - 0.5
-        width = clip.width + 1
-        bounds = (
-            self.get_line_num_for_y(clip.y),
-            self.get_line_num_for_y(clip.y + clip.height),
-        )
+            # Paint chunk backgrounds
+            for change in parent_view.chunk_iter(bounds):
+                if change[1] == change[2]:
+                    # We don't have room to paint inserts in this widget
+                    continue
 
-        # Paint chunk backgrounds
-        for change in parent_view.chunk_iter(bounds):
-            if change[1] == change[2]:
-                # We don't have room to paint inserts in this widget
-                continue
+                ypos0 = self.get_y_for_line_num(change[1])
+                ypos1 = self.get_y_for_line_num(change[2])
+                height = max(0, ypos1 - ypos0 - 1)
 
-            ypos0 = self.get_y_for_line_num(change[1])
-            ypos1 = self.get_y_for_line_num(change[2])
-            height = max(0, ypos1 - ypos0 - 1)
+                cairo = snapshot.append_cairo(Graphene.Rect(x, ypos0 + 0.5, width, height))
+                cairo.set_line_width(1.0)
+                colors = parent_view.fill_colors[change[0]]
+                cairo.set_source_rgba(colors.red, colors.green, colors.blue, colors.alpha)
+                cairo.fill()
+        except Exception as _ex:
+            pass
 
-            context.rectangle(x, ypos0 + 0.5, width, height)
-            context.set_source_rgba(*parent_view.fill_colors[change[0]])
-            context.fill()
+        snapshot.restore()
 
-        context.restore()
-
-        return GtkSource.Map.do_draw_layer(self, layer, context)
+        return GtkSource.Map.do_snapshot_layer(self, layer, snapshot)
 
     def do_get_preferred_width(self):
         if self.props.compact_view:
