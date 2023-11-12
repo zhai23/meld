@@ -22,7 +22,6 @@ from meld.conf import _
 from meld.const import ActionMode, ChunkAction
 from meld.settings import get_meld_settings
 from meld.style import get_common_theme
-from meld.ui.gtkcompat import get_style
 
 
 class ActionIcons:
@@ -169,6 +168,8 @@ class ActionGutter(Gtk.DrawingArea):
         self.pointer_chunk = None
         self.pressed_chunk = None
 
+        self.set_draw_func(self.draw)
+
     def on_setting_changed(self, settings, key):
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
@@ -287,7 +288,7 @@ class ActionGutter(Gtk.DrawingArea):
 
         return self.chunks[start_idx:end_idx]
 
-    def do_draw(self, context):
+    def draw(self, _gutter, context, width, height):
         view = self.source_view
         if not view or not view.get_realized():
             return
@@ -329,13 +330,15 @@ class ActionGutter(Gtk.DrawingArea):
             # if in the focused chunk, and then stroke the border.
             context.rectangle(-0.5, rect_y + 0.5, width + 1, rect_height)
             if start_line != end_line:
-                context.set_source_rgba(*self.fill_colors[change_type])
+                color = self.fill_colors[change_type]
+                context.set_source_rgba(color.red, color.green, color.blue, color.alpha)
                 context.fill_preserve()
                 if view.current_chunk_check(chunk):
                     highlight = self.fill_colors['current-chunk-highlight']
-                    context.set_source_rgba(*highlight)
+                    context.set_source_rgba(highlight.red, highlight.green, highlight.blue, highlight)
                     context.fill_preserve()
-            context.set_source_rgba(*self.line_colors[change_type])
+            color = self.line_colors[change_type]
+            context.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             context.stroke()
 
             # Button rendering and tracking
@@ -348,7 +351,7 @@ class ActionGutter(Gtk.DrawingArea):
             button_y += 1
             button_height -= 2
 
-            button_style_context = get_style(None, 'button.flat.image-button')
+            button_style_context = self.get_style_context() # get_style(None, 'button.flat.image-button')
             if chunk == self.pointer_chunk:
                 button_style_context.set_state(Gtk.StateFlags.PRELIGHT)
 
@@ -372,11 +375,11 @@ class ActionGutter(Gtk.DrawingArea):
                 )
             )
 
-            pixbuf = self.action_map.get(action)
-            icon_x = button_x + (button_width - pixbuf.props.width) // 2
-            icon_y = button_y + (button_height - pixbuf.props.height) // 2
-            Gtk.render_icon(
-                button_style_context, context, pixbuf, icon_x, icon_y)
+            # pixbuf = self.action_map.get(action) TODO
+            # icon_x = button_x + (button_width - pixbuf.props.width) // 2
+            # icon_y = button_y + (button_height - pixbuf.props.height) // 2
+            # Gtk.render_icon(
+            #     button_style_context, context, pixbuf, icon_x, icon_y)
 
         context.restore()
 
