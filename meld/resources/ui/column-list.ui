@@ -9,10 +9,9 @@
     </columns>
   </object>
   <template class="ColumnList" parent="GtkBox">
-    <property name="orientation">vertical</property>
     <property name="visible">True</property>
+    <property name="orientation">vertical</property>
     <property name="can_focus">False</property>
-    <property name="homogeneous">False</property>
     <child>
       <object class="GtkScrolledWindow" id="scrolledwindow2">
         <property name="vexpand">1</property>

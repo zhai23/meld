@@ -22,6 +22,8 @@ from meld.conf import _
 from meld.const import ActionMode, ChunkAction
 from meld.settings import get_meld_settings
 from meld.style import get_common_theme
+from meld.ui.gtkcompat import get_style
+from meld.ui.gtkutil import make_gdk_rgba
 
 
 class ActionIcons:
@@ -89,8 +91,7 @@ class ActionGutter(Gtk.DrawingArea):
 
     @icon_direction.setter
     def icon_direction_set(self, direction: Gtk.TextDirection):
-        if direction not in (
-                Gtk.TextDirection.LTR, Gtk.TextDirection.RTL):
+        if direction not in (Gtk.TextDirection.LTR, Gtk.TextDirection.RTL):
             raise ValueError('Invalid icon direction {}'.format(direction))
 
         replace_icons = {
@@ -170,18 +171,20 @@ class ActionGutter(Gtk.DrawingArea):
 
         self.set_draw_func(self.draw)
 
+        self.motion_controller = Gtk.EventControllerMotion()
+        self.motion_controller.set_propagation_phase(Gtk.PropagationPhase.TARGET)
+        self.motion_controller.connect("enter", self.motion_event)
+        self.motion_controller.connect("leave", self.motion_event)
+        self.motion_controller.connect("motion", self.motion_event)
+
     def on_setting_changed(self, settings, key):
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
             alpha = self.fill_colors['current-chunk-highlight'].alpha
-            self.chunk_highlights = {}
-            for state, colour in self.fill_colors.items():
-                c = Gdk.RGBA()
-                c.red=alpha + colour.red * (1.0 - alpha)
-                c.green=alpha + colour.green * (1.0 - alpha)
-                c.blue=alpha + colour.blue * (1.0 - alpha)
-                c.alpha=alpha + colour.alpha * (1.0 - alpha)
-                self.chunk_highlights[state] = c
+            self.chunk_highlights = {
+                state: make_gdk_rgba(*[alpha + c * (1.0 - alpha) for c in [colour.red, colour.green, colour.blue, colour.alpha]])
+                for state, colour in self.fill_colors.items()
+            }
 
     def do_realize(self):
         # self.set_events(
@@ -217,16 +220,20 @@ class ActionGutter(Gtk.DrawingArea):
             self.pointer_chunk = new_pointer_chunk
             self.queue_draw()
 
-    def do_motion_notify_event(self, event):
-        self.update_pointer_chunk(event.x, event.y)
-
-    def do_enter_notify_event(self, event):
-        self.update_pointer_chunk(event.x, event.y)
-
-    def do_leave_notify_event(self, event):
-        if self.pointer_chunk:
-            self.pointer_chunk = None
-            self.queue_draw()
+    def motion_event(
+        self,
+        controller: Gtk.EventControllerMotion,
+        x: float | None = None,
+        y: float | None = None,
+    ):
+        if x is None or y is None:
+            # Missing coordinates are leave events
+            if self.pointer_chunk:
+                self.pointer_chunk = None
+                self.queue_draw()
+        else:
+            # This is either an enter or motion event; we treat them the same
+            self.update_pointer_chunk(x, y)
 
     def do_button_press_event(self, event):
         if self.pointer_chunk:

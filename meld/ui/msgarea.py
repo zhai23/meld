@@ -80,6 +80,8 @@ class MsgAreaController(Gtk.Box):
         self.__msgarea = None
         self.__msgid = None
 
+        self.props.orientation = Gtk.Orientation.HORIZONTAL
+
     def has_message(self):
         return self.__msgarea is not None
 

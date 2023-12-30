@@ -6,8 +6,8 @@
   <object class="GtkAdjustment" id="pane_adjustment1"/>
   <object class="GtkAdjustment" id="pane_adjustment2"/>
   <template class="DirDiff" parent="GtkBox">
-    <property name="orientation">vertical</property>
     <property name="visible">True</property>
+    <property name="orientation">vertical</property>
     <property name="can_focus">False</property>
     <child>
       <object class="GtkGrid" id="grid">

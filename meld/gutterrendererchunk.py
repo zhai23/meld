@@ -20,6 +20,7 @@ from gi.repository import Gdk, GtkSource, Pango
 
 from meld.settings import get_meld_settings
 from meld.style import get_common_theme
+from meld.ui.gtkutil import make_gdk_rgba
 
 
 def get_background_rgba(renderer):
@@ -49,23 +50,19 @@ class MeldGutterRenderer:
 
     def set_renderer_defaults(self):
         self.set_alignment_mode(GtkSource.GutterRendererAlignmentMode.FIRST)
-        self.set_xpad(3)
-        self.set_ypad(0)
-        self.set_xalign(0.5)
-        self.set_yalign(0.5)
+        self.props.xpad = 3
+        self.props.ypad = 0
+        self.props.xalign = 0.5
+        self.props.yalign = 0.5
 
     def on_setting_changed(self, settings, key):
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
             alpha = self.fill_colors['current-chunk-highlight'].alpha
-            self.chunk_highlights = {}
-            for state, colour in self.fill_colors.items():
-                c = Gdk.RGBA()
-                c.red=alpha + colour.red * (1.0 - alpha)
-                c.green=alpha + colour.green * (1.0 - alpha)
-                c.blue=alpha + colour.blue * (1.0 - alpha)
-                c.alpha=alpha + colour.alpha * (1.0 - alpha)
-                self.chunk_highlights[state] = c
+            self.chunk_highlights = {
+                state: make_gdk_rgba(*[alpha + c * (1.0 - alpha) for c in [colour.red, colour.green, colour.blue, colour.alpha]])
+                for state, colour in self.fill_colors.items()
+            }
 
     def draw_chunks(
             self, context, background_area, cell_area, start, end, state):
