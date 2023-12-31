@@ -21,7 +21,7 @@ import math
 from enum import Enum
 from typing import Optional, Tuple, Type
 
-from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource
+from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource, Adw
 
 # TODO: Don't from-import whole modules
 from meld import misc
@@ -119,6 +119,8 @@ class FileDiff(Gtk.Box, MeldDoc):
     label_changed = MeldDoc.label_changed
     move_diff = MeldDoc.move_diff
     tab_state_changed = MeldDoc.tab_state_changed
+
+    buttons = []
 
     __gsettings_bindings_view__ = (
         ('ignore-blank-lines', 'ignore-blank-lines'),
@@ -1241,49 +1243,34 @@ class FileDiff(Gtk.Box, MeldDoc):
         self._after_text_modified(buf, starting_at, -self.lines_removed)
         self.lines_removed = 0
 
-    def check_save_modified(self, buffers=None):
-        response = Gtk.ResponseType.OK
-        buffers = buffers or self.textbuffer[:self.num_panes]
+    def check_save_modified(self, callback):
+        buffers = self.textbuffer[:self.num_panes]
         if any(b.get_modified() for b in buffers):
-            builder = Gtk.Builder.new_from_resource(
-                '/org/gnome/meld/ui/save-confirm-dialog.ui')
-            dialog = builder.get_object('save-confirm-dialog')
-            dialog.set_transient_for(self.get_root())
-            message_area = dialog.get_message_area()
+            dialog = Adw.MessageDialog(transient_for=self.get_root())
+            dialog.set_heading(_("Save changes to documents before closing?"))
+            dialog.set_body(_("If you don't save, changes will be permanently lost."))
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-            buttons = []
+            self.buttons = []
             for buf in buffers:
                 button = Gtk.CheckButton.new_with_label(buf.data.label)
                 needs_save = buf.get_modified()
                 button.set_sensitive(needs_save)
                 button.set_active(needs_save)
-                message_area.prepend(button)
-                buttons.append(button)
+                box.prepend(button)
+                self.buttons.append(button)
 
-            response = dialog.present()
-            try_save = [b.get_active() for b in buttons]
+            dialog.set_extra_child(box)
 
-            if response == Gtk.ResponseType.OK:
-                for i, buf in enumerate(buffers):
-                    if try_save[i]:
-                        self.save_file(self.textbuffer.index(buf))
+            dialog.add_response("close", _("Close _without Saving"))
+            dialog.add_response("cancel", _("_Cancel"))
+            dialog.add_response("save", _("_Save"))
 
-                # Regardless of whether these saves are successful or not,
-                # we return a cancel here, so that other closing logic
-                # doesn't run. Instead, the file-saved callback from
-                # save_file() handles closing files and setting state.
-                return Gtk.ResponseType.CANCEL
-            elif response == Gtk.ResponseType.DELETE_EVENT:
-                response = Gtk.ResponseType.CANCEL
-            elif response == Gtk.ResponseType.CLOSE:
-                response = Gtk.ResponseType.OK
+            dialog.connect("response", callback)
 
-        if response == Gtk.ResponseType.OK and self.meta:
-            self.prompt_resolve_conflict()
-        elif response == Gtk.ResponseType.CANCEL:
-            self.state = ComparisonState.Normal
-
-        return response
+            dialog.present()
+        else:
+            callback(None, "close")
 
     def prompt_resolve_conflict(self):
         parent = self.meta.get('parent', None)
@@ -1311,11 +1298,33 @@ class FileDiff(Gtk.Box, MeldDoc):
                 parent.command(
                     'resolve', [conflict_gfile.get_path()], sync=True)
 
-    def on_delete_event(self, external_callback=None):
+    def request_close(self, external_callback=None):
         self.state = ComparisonState.Closing
 
-        def callback(widget, response):
-            if response == Gtk.ResponseType.OK:
+        def callback(dialog, response):
+            closed = False
+            try_save = [b.get_active() for b in self.buttons]
+
+            if response == "save":
+                buffers = self.textbuffer[:self.num_panes]
+                for i, buf in enumerate(buffers):
+                    if try_save[i]:
+                        self.save_file(self.textbuffer.index(buf))
+
+                # Regardless of whether these saves are successful or not,
+                # we return a cancel here, so that other closing logic
+                # doesn't run. Instead, the file-saved callback from
+                # save_file() handles closing files and setting state.
+                return # TODO maybe close directly
+            elif response == "close":
+                response = "save"
+
+            if response == "save" and self.meta:
+                self.prompt_resolve_conflict()
+            elif response == "cancel":
+                self.state = ComparisonState.Normal
+
+            if response == "save":
                 meld_settings = get_meld_settings()
                 for h in self.settings_handlers:
                     meld_settings.disconnect(h)
@@ -1332,10 +1341,12 @@ class FileDiff(Gtk.Box, MeldDoc):
                     log.exception('Failed to shut down matcher process')
                 # TODO: Base the return code on something meaningful for VC tools
                 self.close_signal.emit(0)
+                closed = True
 
-            external_callback(response)
+            if external_callback is not None and callable(external_callback):
+                external_callback(closed)
 
-        # self.check_save_modified(callback) TODO
+        self.check_save_modified(callback)
 
     def _scroll_to_actions(self, actions):
         """Scroll all views affected by *actions* to the current cursor"""
@@ -2190,7 +2201,7 @@ class FileDiff(Gtk.Box, MeldDoc):
 
         if self.state == ComparisonState.Closing:
             if not any(b.get_modified() for b in self.textbuffer):
-                self.on_delete_event()
+                self.request_close()
         else:
             self.state = ComparisonState.Normal
 

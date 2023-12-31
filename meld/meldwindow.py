@@ -225,24 +225,28 @@ class MeldWindow(Adw.ApplicationWindow):
 
     @Gtk.Template.Callback()
     def on_close_request(self, window):
-        should_cancel = False
-        # Delete pages from right-to-left.  This ensures that if a version
-        # control page is open in the far left page, it will be closed last.
-        pages = self.notebook.get_pages()
-        for page in reversed(pages):
-            child = page.get_child()
-            page_num = self.notebook.page_num(child)
-            self.notebook.set_current_page(page_num)
-            response = child.on_delete_event()
-            if response == Gtk.ResponseType.CANCEL:
-                should_cancel = True
+        if self.notebook.get_n_pages() > 0:
+            GLib.idle_add(self.close_window_async, True)
 
-        # TODO ignore open pages for now
+            # prevent close, will be done by thread if all pages are closed
+            return True
+
         return False
-        should_cancel = should_cancel or self.has_pages()
-        if should_cancel:
-            self.should_close = True
-        return should_cancel
+
+    def close_window_async(self, last_closed):
+        if last_closed:
+            # Delete pages from right-to-left.  This ensures that if a version
+            # control page is open in the far left page, it will be closed last.
+            n_pages = self.notebook.get_n_pages()
+
+            if n_pages > 0:
+                page = self.notebook.get_nth_page(n_pages - 1)
+                page_num = self.notebook.page_num(page)
+                self.notebook.set_current_page(page_num)
+                page.request_close(self.close_window_async)
+            else:
+                # all pages have been closed, close window
+                self.close()
 
     def has_pages(self):
         return self.notebook.get_n_pages() > 0
@@ -284,7 +288,7 @@ class MeldWindow(Adw.ApplicationWindow):
         i = self.notebook.get_current_page()
         if i >= 0:
             page = self.notebook.get_nth_page(i)
-            page.on_delete_event()
+            page.request_close()
 
     def action_fullscreen_change(self, action, state):
         root = self.get_root()
@@ -368,7 +372,7 @@ class MeldWindow(Adw.ApplicationWindow):
         self.notebook.on_label_changed(doc, _("New comparison"), None)
 
         def diff_created_cb(doc, newdoc):
-            doc.on_delete_event()
+            doc.request_close()
             idx = self.notebook.page_num(newdoc)
             self.notebook.set_current_page(idx)
 
