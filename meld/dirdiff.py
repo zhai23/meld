@@ -65,9 +65,13 @@ class StatItem(namedtuple('StatItem', 'mode size time')):
         return StatItem(stat.S_IFMT(stat_result.st_mode),
                         stat_result.st_size, stat_result.st_mtime)
 
-    def shallow_equal(self, other, time_resolution_ns):
+    def shallow_equal(self, other: "StatItem", time_resolution_ns: int) -> bool:
         if self.size != other.size:
             return False
+
+        # Check for the ignore-timestamp configuration first
+        if time_resolution_ns == -1:
+            return True
 
         # Shortcut to avoid expensive Decimal calculations. 2 seconds is our
         # current accuracy threshold (for VFAT), so should be safe for now.
