@@ -358,16 +358,16 @@ class ActionGutter(Gtk.DrawingArea):
             button_y += 1
             button_height -= 2
 
-            button_style_context = self.get_style_context() # get_style(None, 'button.flat.image-button')
-            if chunk == self.pointer_chunk:
-                button_style_context.set_state(Gtk.StateFlags.PRELIGHT)
+            # button_style_context = get_style(None, 'button.flat.image-button') TODO render button
+            # if chunk == self.pointer_chunk:
+            #     button_style_context.set_state(Gtk.StateFlags.PRELIGHT)
 
-            Gtk.render_background(
-                button_style_context, context, button_x, button_y,
-                button_width, button_height)
-            Gtk.render_frame(
-                button_style_context, context, button_x, button_y,
-                button_width, button_height)
+            # Gtk.render_background(
+            #     button_style_context, context, button_x, button_y,
+            #     button_width, button_height)
+            # Gtk.render_frame(
+            #     button_style_context, context, button_x, button_y,
+            #     button_width, button_height)
 
             # TODO: Ideally we'd do this in a pre-render step of some
             # kind, but I'm having trouble figuring out what that would
@@ -382,7 +382,7 @@ class ActionGutter(Gtk.DrawingArea):
                 )
             )
 
-            # pixbuf = self.action_map.get(action) TODO
+            # pixbuf = self.action_map.get(action) TODO draw icon
             # icon_x = button_x + (button_width - pixbuf.props.width) // 2
             # icon_y = button_y + (button_height - pixbuf.props.height) // 2
             # Gtk.render_icon(
