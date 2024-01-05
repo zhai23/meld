@@ -19,7 +19,7 @@ import logging
 from collections.abc import Sequence
 from typing import Optional
 
-from gi.repository import Gdk, GdkPixbuf, Gio, GObject, Gtk, GtkSource
+from gi.repository import Gdk, GdkPixbuf, Gio, GObject, Gtk, GtkSource, GLib
 
 # TODO: Don't from-import whole modules
 from meld import misc
@@ -169,8 +169,6 @@ class ImageDiff(Gtk.Box, MeldDoc):
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/imagediff-menus.ui')
         self.popup_menu_model = builder.get_object('imagediff-context-menu')
-        self.popup_menu = Gtk.Menu.new_from_model(self.popup_menu_model)
-        self.popup_menu.attach_to_widget(self)
 
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/imagediff-actions.ui')
@@ -178,6 +176,16 @@ class ImageDiff(Gtk.Box, MeldDoc):
         self.copy_action_button = builder.get_object('copy_action_button')
 
         self.set_num_panes(num_panes)
+
+        self._add_controller()
+
+
+    def _add_controller(self):
+        for w in self.viewport:
+            controller = Gtk.GestureClick()
+            controller.connect("released", self.on_imageview_button_press_event)
+            controller.set_button(3)
+            w.add_controller(controller)
 
     def set_files(self, gfiles, encodings=None):
         """Load the given files
@@ -274,24 +282,32 @@ class ImageDiff(Gtk.Box, MeldDoc):
         gfiles = [gfile]
         open_files_external(gfiles=gfiles)
 
-    @Gtk.Template.Callback()
-    def on_imageview_popup_menu(self, imageview):
-        self.popup_menu.popup_at_pointer()
-        return True
+    def on_imageview_button_press_event(self, controller, npress, x, y):
+        widget = controller.get_widget()
+        widget.grab_focus()
 
-    @Gtk.Template.Callback()
-    def on_imageview_button_press_event(self, event_box, event):
-        if event.button == 3:
-            event_box.grab_focus()
-            self.popup_menu.popup_at_pointer(event)
-            return True
-        return False
+        if isinstance(widget, Gtk.Viewport):
+            box = widget.get_first_child()
+            widget = box.get_first_child()
+
+        self.focus_pane = widget
+
+        popup_menu = Gtk.PopoverMenu.new_from_model(self.popup_menu_model)
+        popup_menu.set_parent(widget)
+
+        # FIXME: This sensitivity is very confused. Essentially, it's always
+        # enabled because we don't unset focus_pane, but the action uses the
+        # current pane focus (i.e., _get_focused_pane) instead of focus_pane.
+        have_file = self.focus_pane is not None
+        self.set_action_enabled("open-external", have_file)
+
+        popup_menu.popup()
 
     def _get_focused_pane(self):
-        for i in range(self.num_panes):
-            if self.image_event_box[i].is_focus():
-                return i
-        return -1
+        try:
+            return self.image_main.index(self.focus_pane)
+        except Exception as _ex:
+            return -1
 
     @with_focused_pane
     def action_copy_full_path(self, pane, *args):
@@ -300,22 +316,5 @@ class ImageDiff(Gtk.Box, MeldDoc):
             return
 
         path = gfile.get_path() or gfile.get_uri()
-        clip = Gtk.Clipboard.get_default(Gdk.Display.get_default())
-        clip.set_text(path, -1)
-        clip.store()
-
-    def _set_external_action_sensitivity(self):
-        # FIXME: This sensitivity is very confused. Essentially, it's always
-        # enabled because we don't unset focus_pane, but the action uses the
-        # current pane focus (i.e., _get_focused_pane) instead of focus_pane.
-        have_file = self.focus_pane is not None
-        self.set_action_enabled("open-external", have_file)
-
-    @Gtk.Template.Callback()
-    def on_imageview_focus_in_event(self, view, event):
-        self.focus_pane = view
-        self._set_external_action_sensitivity()
-
-    @Gtk.Template.Callback()
-    def on_imageview_focus_out_event(self, view, event):
-        self._set_external_action_sensitivity()
+        clip = Gdk.Display().get_default().get_clipboard()
+        clip.set(path)
