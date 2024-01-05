@@ -261,7 +261,21 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
 
     def on_setting_changed(self, settings, key):
         if key == 'font':
-            # self.override_font(settings.font) TODO use css
+            size = settings.font.get_size() / 1000
+            font_family = f"font-family: {settings.font.get_family()};"
+            font_size = f"font-size: {str(size)}pt;" if size > 0 else ""
+            style = f"""
+            * {{
+                {font_family}
+                {font_size}
+            }}
+            """
+
+            css_provider = Gtk.CssProvider()
+            css_provider.load_from_string(style)
+
+            style_context = self.get_style_context()
+            style_context.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
             self._approx_line_height = None
         elif key == 'style-scheme':
             self.highlight_color = colour_lookup_with_fallback(
