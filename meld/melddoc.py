@@ -62,7 +62,7 @@ def open_files_external(
             subprocess.Popen(["open", path])
         else:
             Gtk.show_uri(
-                Gdk.Screen.get_default(), uri, Gtk.get_current_event_time())
+                None, uri, Gdk.CURRENT_TIME)
 
     def open_cb(source, result, *data):
         info = source.query_info_finish(result)
