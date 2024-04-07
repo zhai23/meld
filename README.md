@@ -18,7 +18,7 @@ Requirements
 
 * Python 3.6
 * pycairo (Python3 bindings for cairo without GObject layer)
-* PyGObject 3.30 (Python3 bindings for GObject introspection)
+* PyGObject 3.36 (Python3 bindings for GObject introspection)
 * gsettings-desktop-schemas
 
 And following packages with GObject introspection:
@@ -124,4 +124,4 @@ Home page:      https://meld.app/
 
 Documentation:  https://meld.app/help/
 
-Wiki:           https://wiki.gnome.org/Apps/Meld
+Wiki:           https://gitlab.gnome.org/GNOME/meld/-/wikis/home
