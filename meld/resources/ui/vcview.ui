@@ -126,7 +126,7 @@
             </child>
           </object>
         </child>
-        <child type="GTK_PACK_END">
+        <child>
           <object class="GtkComboBox" id="combobox_vcs">
             <property name="model">liststore_vcs</property>
             <property name="popup_fixed_width">0</property>
@@ -169,10 +169,9 @@
             <property name="child">
               <object class="GtkTreeView" id="treeview">
                 <property name="focusable">1</property>
-                <signal name="button-press-event" handler="on_treeview_button_press_event" swapped="no"/>
                 <signal name="cursor-changed" handler="on_treeview_cursor_changed" swapped="no"/>
                 <signal name="row-activated" handler="on_row_activated" swapped="no"/>
-                <signal name="popup-menu" handler="on_treeview_popup_menu" swapped="no"/>
+                <!-- <signal name="popup-menu" handler="on_treeview_popup_menu" swapped="no"/> TODO -->
                 <child>
                   <object class="GtkTreeViewColumn" id="name_column">
                     <property name="title" translatable="1">Name</property>
@@ -244,7 +243,7 @@
                     <property name="focusable">1</property>
                     <property name="editable">0</property>
                     <property name="cursor_visible">0</property>
-                    <signal name="populate-popup" handler="on_consoleview_populate_popup" swapped="no"/>
+                    <!-- <signal name="populate-popup" handler="on_consoleview_populate_popup" swapped="no"/> TODO -->
                   </object>
                 </property>
               </object>

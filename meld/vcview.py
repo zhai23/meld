@@ -238,8 +238,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/vcview-menus.ui')
         context_menu = builder.get_object('vcview-context-menu')
-        self.popup_menu = Gtk.Menu.new_from_model(context_menu)
-        self.popup_menu.attach_to_widget(self)
+        self.popup_menu = Gtk.PopoverMenu.new_from_model(context_menu)
+        self.popup_menu.set_parent(self.treeview)
 
         self.model = VcTreeStore()
         self.treeview.set_model(self.model)
@@ -274,6 +274,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                       Gio.SettingsBindFlags.DEFAULT)
         settings.bind('vc-console-pane-position', self.vc_console_vpaned,
                       'position', Gio.SettingsBindFlags.DEFAULT)
+
+        self._add_treeview_gesture_controller(self.treeview)
 
     def on_container_switch_in_event(self, window):
         super().on_container_switch_in_event(window)
@@ -849,7 +851,6 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                 break
         return None
 
-    @Gtk.Template.Callback()
     def on_consoleview_populate_popup(self, textview, menu):
         buf = textview.get_buffer()
         clear_action = Gtk.MenuItem.new_with_label(_("Clear"))
@@ -859,14 +860,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         menu.insert(Gtk.SeparatorMenuItem(), 1)
         menu.show_all()
 
-    @Gtk.Template.Callback()
     def on_treeview_popup_menu(self, treeview):
         return tree.TreeviewCommon.on_treeview_popup_menu(self, treeview)
-
-    @Gtk.Template.Callback()
-    def on_treeview_button_press_event(self, treeview, event):
-        return tree.TreeviewCommon.on_treeview_button_press_event(
-            self, treeview, event)
 
     @Gtk.Template.Callback()
     def on_treeview_cursor_changed(self, *args):
