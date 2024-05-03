@@ -5,16 +5,16 @@
 # Özgür Sarıer <ozgursarier1011601115@gmail.com>, 2013.
 # Simge Sezgin <simgesezgin88@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2013-2021.
-# Sabri Ünal <libreajans@gmail.com>, 2019, 2022, 2023.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2017-2023.
+# Sabri Ünal <yakushabb@gmail.com>, 2019, 2022, 2023.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2017-2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: meld master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/meld/issues\n"
-"POT-Creation-Date: 2024-01-23 21:42+0000\n"
-"PO-Revision-Date: 2024-02-08 01:58+0300\n"
-"Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
+"POT-Creation-Date: 2024-04-25 04:05+0000\n"
+"PO-Revision-Date: 2024-04-25 19:46+0300\n"
+"Last-Translator: Sabri Ünal <yakushabb@gmail.com>\n"
 "Language-Team: Turkish <takim@gnome.org.tr>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -466,19 +466,23 @@ msgid ""
 "              (\"Version Control\", true, \"_MTN .bzr .svn .svn .hg ."
 "fslckout _FOSSIL_ .fos CVS _darcs .git .svn .osc\"),\n"
 "              (\"Binaries\", true, \"*.{pyc,a,obj,o,so,la,lib,dll,exe}\"),\n"
-"              (\"Media\", false, \"*.{jpg,gif,png,bmp,wav,mp3,ogg,flac,avi,"
-"mpg,xcf,xpm}\")\n"
+"              (\"Media\", false, \"*.{jxl,jpg,jpeg,gif,png,avif,webp,heif,"
+"heic,bmp,tif,tiff,raw,dng,cr2,wav,wave,mp3,ogg,oga,vorbis,spx,opus,flac,ac3,"
+"aac,aif,aiff,aifc,alac,m4a,3gp,wma,aup,aup3,avi,mov,mpg,mpeg,mp4,m4v,webm,"
+"ogv,flv,xcf,xpm,ora,kra,psd,psp}\")\n"
 "            ]"
 msgstr ""
 "[\n"
-"              (\"Yedek\", true, \"#*# .#* ~* *~ *.{orig,bak,swp}\"),\n"
-"              (\"İşletim Sistemine Özel Üst Veri\", true, \".DS_Store ._* ."
+"              (\"Yedekler\", true, \"#*# .#* ~* *~ *.{orig,bak,swp}\"),\n"
+"              (\"İşletim Sistemine Özgü Üst Veri\", true, \".DS_Store ._* ."
 "Spotlight-V100 .Trashes Thumbs.db Desktop.ini\"),\n"
 "              (\"Sürüm Denetimi\", true, \"_MTN .bzr .svn .svn .hg .fslckout "
 "_FOSSIL_ .fos CVS _darcs .git .svn .osc\"),\n"
-"              (\"İkili\", true, \"*.{pyc,a,obj,o,so,la,lib,dll,exe}\"),\n"
-"              (\"Ortam\", false, \"*.{jpg,gif,png,bmp,wav,mp3,ogg,flac,avi,"
-"mpg,xcf,xpm}\")\n"
+"              (\"İkililer\", true, \"*.{pyc,a,obj,o,so,la,lib,dll,exe}\"),\n"
+"              (\"Ortam\", false, \"*.{jxl,jpg,jpeg,gif,png,avif,webp,heif,"
+"heic,bmp,tif,tiff,raw,dng,cr2,wav,wave,mp3,ogg,oga,vorbis,spx,opus,flac,ac3,"
+"aac,aif,aiff,aifc,alac,m4a,3gp,wma,aup,aup3,avi,mov,mpg,mpeg,mp4,m4v,webm,"
+"ogv,flv,xcf,xpm,ora,kra,psd,psp}\")\n"
 "            ]"
 
 #: data/org.gnome.Meld.gschema.xml:249
@@ -1013,7 +1017,7 @@ msgid "translator-credits"
 msgstr ""
 "Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Muhammet Kara <muhammetk@gmail.com>\n"
-"Sabri Ünal <libreajans@gmail.com>\n"
+"Sabri Ünal <yakushabb@gmail.com>\n"
 "Özgür Sarıer <ozgursarier1011601115@gmail.com>\n"
 "Simge Sezgin <simgesezgin88@gmail.com>"
 
@@ -1299,31 +1303,47 @@ msgstr "_Ekle"
 msgid "Remove selected filter"
 msgstr "Seçili süzgeci kaldır"
 
-#: meld/resources/ui/findbar.ui:104
+#: meld/resources/ui/findbar.ui:16
+msgid "Previous Result"
+msgstr "Önceki Sonuç"
+
+#: meld/resources/ui/findbar.ui:38
+msgid "Next Result"
+msgstr "Sonraki Sonuç"
+
+#: meld/resources/ui/findbar.ui:69
+msgid "Find"
+msgstr "Bul"
+
+#: meld/resources/ui/findbar.ui:86
+msgid "Replace"
+msgstr "Değiştir"
+
+#: meld/resources/ui/findbar.ui:108
 msgid "_Match case"
 msgstr "Büyük küçük harf _eşleştir"
 
-#: meld/resources/ui/findbar.ui:120
+#: meld/resources/ui/findbar.ui:124
 msgid "Who_le word"
 msgstr "T_üm sözcük"
 
-#: meld/resources/ui/findbar.ui:136
+#: meld/resources/ui/findbar.ui:140
 msgid "Regular e_xpression"
 msgstr "Düzenli i_fade"
 
-#: meld/resources/ui/findbar.ui:177
+#: meld/resources/ui/findbar.ui:181
 msgid "Wrapped"
 msgstr "Kaydırılmış"
 
-#: meld/resources/ui/findbar.ui:195
+#: meld/resources/ui/findbar.ui:199
 msgid "Replace _All"
 msgstr "_Tümünü Değiştir"
 
-#: meld/resources/ui/findbar.ui:210 meld/dirdiff.py:1277 meld/iohelpers.py:117
+#: meld/resources/ui/findbar.ui:214 meld/dirdiff.py:1277 meld/iohelpers.py:117
 msgid "_Replace"
 msgstr "_Değiştir"
 
-#: meld/resources/ui/findbar.ui:228
+#: meld/resources/ui/findbar.ui:232
 msgid "Switch between Find and Find-and-Replace"
 msgstr "Bul ile Bul ve Değiştir arasında geçiş yap"
 
@@ -2465,16 +2485,16 @@ msgid "%d branch"
 msgid_plural "%d branches"
 msgstr[0] "%d dal"
 
-#: meld/vc/git.py:352
+#: meld/vc/git.py:353
 #, python-brace-format
 msgid "Mode changed from {old_mode} to {new_mode}"
 msgstr "Kip {old_mode}’den {new_mode}’e değiştirildi"
 
-#: meld/vc/git.py:360
+#: meld/vc/git.py:361
 msgid "Partially staged"
 msgstr "Kısmen sahnelendi"
 
-#: meld/vc/git.py:360
+#: meld/vc/git.py:361
 msgid "Staged"
 msgstr "Sahnelendi"
 

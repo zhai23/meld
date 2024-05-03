@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: meld master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/meld/issues\n"
-"POT-Creation-Date: 2024-03-23 04:29+0000\n"
-"PO-Revision-Date: 2024-03-25 00:07+0100\n"
+"POT-Creation-Date: 2024-04-25 04:05+0000\n"
+"PO-Revision-Date: 2024-04-29 00:22+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl_SI\n"
@@ -464,8 +464,10 @@ msgid ""
 "              (\"Version Control\", true, \"_MTN .bzr .svn .svn .hg ."
 "fslckout _FOSSIL_ .fos CVS _darcs .git .svn .osc\"),\n"
 "              (\"Binaries\", true, \"*.{pyc,a,obj,o,so,la,lib,dll,exe}\"),\n"
-"              (\"Media\", false, \"*.{jpg,gif,png,bmp,wav,mp3,ogg,flac,avi,"
-"mpg,xcf,xpm}\")\n"
+"              (\"Media\", false, \"*.{jxl,jpg,jpeg,gif,png,avif,webp,heif,"
+"heic,bmp,tif,tiff,raw,dng,cr2,wav,wave,mp3,ogg,oga,vorbis,spx,opus,flac,ac3,"
+"aac,aif,aiff,aifc,alac,m4a,3gp,wma,aup,aup3,avi,mov,mpg,mpeg,mp4,m4v,webm,"
+"ogv,flv,xcf,xpm,ora,kra,psd,psp}\")\n"
 "            ]"
 msgstr ""
 "[\n"
@@ -477,8 +479,10 @@ msgstr ""
 "fslckout _FOSSIL_ .fos CVS _darcs .git .svn .osc\"),\n"
 "              (\"Izvršljive datoteke\", true, \"*.{pyc,a,obj,o,so,la,lib,dll,"
 "exe}\"),\n"
-"              (\"Medijske datoteke\", false, \"*.{jpg,gif,png,bmp,wav,mp3,"
-"ogg,flac,avi,mpg,xcf,xpm}\")\n"
+"              (\"Medijske datoteke\", false, »*.{jxl,jpg,jpeg,gif,png,avif,"
+"webp,heif,heic,bmp,tif,tiff,raw,dng,cr2,wav,wave,mp3,ogg,oga,vorbis,spx,opus,"
+"flac,ac3,aac,aif,aiff,aifc,alac,m4a,3gp,wma,aup,aup3,avi,mov,mpg,mpeg,mp4,"
+"m4v,webm,ogv,flv,xcf,xpm,ora,kra,psd,psp}«)\n"
 "            ]"
 
 #: data/org.gnome.Meld.gschema.xml:249
@@ -1293,31 +1297,47 @@ msgstr "_Dodaj"
 msgid "Remove selected filter"
 msgstr "Odstrani izbrani filter"
 
-#: meld/resources/ui/findbar.ui:104
+#: meld/resources/ui/findbar.ui:16
+msgid "Previous Result"
+msgstr "Prejšnji rezultat"
+
+#: meld/resources/ui/findbar.ui:38
+msgid "Next Result"
+msgstr "Naslednji rezultat"
+
+#: meld/resources/ui/findbar.ui:69
+msgid "Find"
+msgstr "Najdi"
+
+#: meld/resources/ui/findbar.ui:86
+msgid "Replace"
+msgstr "Zamenjaj"
+
+#: meld/resources/ui/findbar.ui:108
 msgid "_Match case"
 msgstr "_Upoštevaj velikost črk"
 
-#: meld/resources/ui/findbar.ui:120
+#: meld/resources/ui/findbar.ui:124
 msgid "Who_le word"
 msgstr "Cele _besede"
 
-#: meld/resources/ui/findbar.ui:136
+#: meld/resources/ui/findbar.ui:140
 msgid "Regular e_xpression"
 msgstr "_Logični izraz"
 
-#: meld/resources/ui/findbar.ui:177
+#: meld/resources/ui/findbar.ui:181
 msgid "Wrapped"
 msgstr "Prelomljeno"
 
-#: meld/resources/ui/findbar.ui:195
+#: meld/resources/ui/findbar.ui:199
 msgid "Replace _All"
 msgstr "Zamenjaj _vse"
 
-#: meld/resources/ui/findbar.ui:210 meld/dirdiff.py:1277 meld/iohelpers.py:117
+#: meld/resources/ui/findbar.ui:214 meld/dirdiff.py:1277 meld/iohelpers.py:117
 msgid "_Replace"
 msgstr "_Zamenjaj"
 
-#: meld/resources/ui/findbar.ui:228
+#: meld/resources/ui/findbar.ui:232
 msgid "Switch between Find and Find-and-Replace"
 msgstr "Preklop med možnostima Najdi in Najdi in Zamenjaj"
 
