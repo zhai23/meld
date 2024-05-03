@@ -702,6 +702,10 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
         self.marked = None
 
+        self._add_treeview_gesture_controller(self.treeview0)
+        self._add_treeview_gesture_controller(self.treeview1)
+        self._add_treeview_gesture_controller(self.treeview2)
+
     def queue_draw(self):
         for treeview in self.treeview:
             treeview.queue_draw()
@@ -1445,10 +1449,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
     def on_treeview_popup_menu(self, treeview):
         return tree.TreeviewCommon.on_treeview_popup_menu(self, treeview)
-
-    def on_treeview_button_press_event(self, treeview, event):
-        return tree.TreeviewCommon.on_treeview_button_press_event(
-            self, treeview, event)
 
     @with_focused_pane
     def action_prev_pane(self, pane, *args):
