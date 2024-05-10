@@ -83,7 +83,7 @@ class Entry:
         STATE_SPINNER: _("Scanning…"),
     }
 
-    def __init__(self, path, name, state, isdir, options=None):
+    def __init__(self, path, name, state, isdir, options=None, size=None):
         self.path = path
         self.name = name
         self.state = state
@@ -91,6 +91,7 @@ class Entry:
         if isinstance(options, list):
             options = ','.join(options)
         self.options = options
+        self.size = size
 
     def __str__(self):
         return "<%s:%s %s>" % (self.__class__.__name__, self.path,
@@ -102,6 +103,9 @@ class Entry:
 
     def get_status(self):
         return self.state_names[self.state]
+
+    def get_size(self):
+        return self.size
 
     def is_present(self):
         """Should this Entry actually be present on the file system"""
@@ -283,7 +287,7 @@ class Vc:
     def get_entries(self, base):
         parent = Gio.File.new_for_path(base)
         enumerator = parent.enumerate_children(
-            'standard::name,standard::display-name,standard::type',
+            'standard::name,standard::display-name,standard::type,standard::size',
             Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, None)
 
         for file_info in enumerator:
@@ -296,7 +300,8 @@ class Vc:
             state = self._tree_cache.get(path, STATE_NORMAL)
             meta = self._tree_meta_cache.get(path, "")
             isdir = file_info.get_file_type() == Gio.FileType.DIRECTORY
-            yield Entry(path, name, state, isdir, options=meta)
+            size = str(file_info.get_size())
+            yield Entry(path, name, state, isdir, options=meta, size=size)
 
         # Removed entries are not in the filesystem, so must be added here
         for name in self._tree_missing_cache[base]:
@@ -326,18 +331,20 @@ class Vc:
                 'standard::*', Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, None)
             name = file_info.get_display_name()
             isdir = file_info.get_file_type() == Gio.FileType.DIRECTORY
+            size = str(file_info.get_size())
         except GLib.Error as e:
             if e.domain != 'g-io-error-quark':
                 raise
             # Handling for non-existent files (or other IO errors)
             name = path
             isdir = False
+            size = None
 
         path = gfile.get_path()
         state = self._tree_cache.get(path, STATE_NORMAL)
         meta = self._tree_meta_cache.get(path, "")
 
-        return Entry(path, name, state, isdir, options=meta)
+        return Entry(path, name, state, isdir, options=meta, size=size)
 
     @classmethod
     def is_installed(cls):

@@ -102,8 +102,8 @@ class ConsoleStream:
         self.textview.scroll_mark_onscreen(self.end_mark)
 
 
-COL_LOCATION, COL_STATUS, COL_OPTIONS, COL_END = \
-    list(range(tree.COL_END, tree.COL_END + 4))
+COL_LOCATION, COL_STATUS, COL_OPTIONS, COL_SIZE, COL_END = \
+    list(range(tree.COL_END, tree.COL_END + 5))
 
 
 class VcTreeStore(tree.DiffTreeStore):
@@ -167,6 +167,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
     name_renderer = Gtk.Template.Child()
     status_column = Gtk.Template.Child()
     status_renderer = Gtk.Template.Child()
+    size_column = Gtk.Template.Child()
+    size_renderer = Gtk.Template.Child()
     treeview = Gtk.Template.Child()
     vc_console_vpaned = Gtk.Template.Child()
 
@@ -265,6 +267,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             self.status_renderer, markup=COL_STATUS)
         self.extra_column.set_attributes(
             self.extra_renderer, markup=COL_OPTIONS)
+        self.size_column.set_attributes(
+            self.size_renderer, markup=COL_SIZE)
 
         self.consolestream = ConsoleStream(self.consoleview)
         self.location = None
@@ -820,6 +824,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.model.set_value(it, COL_LOCATION, display_location)
         self.model.set_value(it, COL_STATUS, entry.get_status())
         self.model.set_value(it, COL_OPTIONS, entry.options)
+        self.model.set_value(it, COL_SIZE, entry.get_size())
 
     def on_file_changed(self, filename):
         it = self.find_iter_by_name(filename)
