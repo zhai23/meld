@@ -267,7 +267,6 @@ class HandleWindow():
         self._pos = float(pos - xtrans) / width
 
     def realize(self, widget):
-        parent = widget.get_root()
         display = Gdk.Display.get_default()
         self._surface = Gdk.Surface.new_toplevel(display)
         # self._surface = Gdk.Surface.new_toplevel(parent)

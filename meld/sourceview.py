@@ -17,7 +17,7 @@
 import logging
 from enum import Enum
 
-from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource, Pango, Graphene
+from gi.repository import Gdk, Gio, GLib, GObject, Graphene, Gtk, GtkSource, Pango
 
 from meld.meldbuffer import MeldBuffer
 from meld.settings import bind_settings, get_meld_settings, settings
@@ -417,8 +417,8 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
             new_anim_chunks = []
             for c in self.animating_chunks:
                 current_time = GLib.get_monotonic_time()
-                percent = min(
-                    1.0, (current_time - c.start_time) / float(c.duration))
+                # percent = min(
+                #     1.0, (current_time - c.start_time) / float(c.duration))
                 # rgba_pairs = zip(c.start_rgba, c.end_rgba) TODO
                 # rgba = [s + (e - s) * percent for s, e in rgba_pairs]
 

@@ -19,7 +19,7 @@ import logging
 import optparse
 import os
 
-from gi.repository import Gdk, Gio, GLib, Gtk, Adw
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 import meld.accelerators
 import meld.conf
@@ -74,7 +74,7 @@ class MeldApp(Adw.Application):
             self.add_action(action)
 
         # Keep clipboard contents after application exit
-        clip = Gdk.Display().get_default().get_clipboard()
+        # clip = Gdk.Display().get_default().get_clipboard()
         # clip.set_can_store(None) TODO
 
         self.new_window()

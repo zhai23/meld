@@ -38,7 +38,7 @@ from typing import (
     Union,
 )
 
-from gi.repository import GLib, Gtk, Adw
+from gi.repository import Adw, GLib, Gtk
 
 from meld.conf import _
 

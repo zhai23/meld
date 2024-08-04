@@ -18,7 +18,7 @@ import logging
 import os
 from typing import Any, Dict, Optional, Sequence
 
-from gi.repository import Gdk, Gio, GLib, Gtk, Adw, GObject
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 # Import support module to get all builder-constructed widgets in the namespace
 import meld.ui.gladesupport  # noqa: F401
@@ -192,10 +192,11 @@ class MeldWindow(Adw.ApplicationWindow):
         return True
 
     def on_widget_drag_data_received(self, drop_target, value, x, y, data):
-        uris = selection_data.get_uris()
-        if uris:
-            self.open_paths([Gio.File.new_for_uri(uri) for uri in uris])
-            return True
+        # uris = selection_data.get_uris() # TODO
+        # if uris:
+        #     self.open_paths([Gio.File.new_for_uri(uri) for uri in uris])
+        #     return True
+        pass
 
     def on_idle(self):
         ret = self.scheduler.iteration()
@@ -525,4 +526,3 @@ class MeldWindow(Adw.ApplicationWindow):
             def __getattr__(self, a):
                 return lambda *x: None
         return DummyDoc()
-

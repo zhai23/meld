@@ -22,7 +22,6 @@ from meld.conf import _
 from meld.const import ActionMode, ChunkAction
 from meld.settings import get_meld_settings
 from meld.style import get_common_theme
-from meld.ui.gtkcompat import get_style
 from meld.ui.gtkutil import make_gdk_rgba
 
 

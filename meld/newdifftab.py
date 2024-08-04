@@ -15,7 +15,7 @@
 
 import enum
 
-from gi.repository import Gio, GLib, GObject, Gtk, Gdk
+from gi.repository import Gdk, Gio, GLib, GObject, Gtk
 
 from meld.conf import _
 from meld.melddoc import LabeledObjectMixin, MeldDoc
@@ -152,7 +152,7 @@ class NewDiffTab(Gtk.Box, LabeledObjectMixin):
                 path = another_dialog.get_current_folder()
             else:
                 path = Gio.File.new_for_path(GLib.get_home_dir())
-            
+
             self.file_chooser_dialogs[button] = dialog
         else:
             dialog = self.file_chooser_dialogs[button]

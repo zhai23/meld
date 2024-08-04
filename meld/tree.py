@@ -17,7 +17,7 @@
 import os
 
 from gi.module import get_introspection_module
-from gi.repository import Gtk, Gdk, GLib, GObject, Pango
+from gi.repository import Gdk, GLib, GObject, Gtk, Pango
 
 from meld.style import colour_lookup_with_fallback
 from meld.treehelpers import SearchableTreeStore

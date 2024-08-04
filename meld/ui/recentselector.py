@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from gi.repository import GObject, Gtk, Gio
+from gi.repository import Gio, GObject, Gtk
 
 from meld.recent import recent_comparisons
 

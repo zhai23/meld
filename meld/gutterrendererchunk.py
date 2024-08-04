@@ -113,6 +113,7 @@ class MeldGutterRenderer:
             # TODO: Remove when fixed in upstream GTK+
             background_rgba = get_background_rgba(self)
         self._chunk = chunk
+        _ = background_rgba # mark as unused until set_background is done
         # self.set_background(background_rgba) TODO
         return in_chunk
 

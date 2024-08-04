@@ -1,7 +1,7 @@
 
 from typing import Dict, Sequence, Union
 
-from gi.repository import Gtk, Adw
+from gi.repository import Adw
 
 VIEW_ACCELERATORS: Dict[str, Union[str, Sequence[str]]] = {
     'app.quit': '<Primary>Q',

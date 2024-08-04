@@ -21,7 +21,7 @@ import math
 from enum import Enum
 from typing import Optional, Tuple, Type
 
-from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource, Adw
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk, GtkSource
 
 # TODO: Don't from-import whole modules
 from meld import misc
@@ -551,16 +551,17 @@ class FileDiff(Gtk.Box, MeldDoc):
     keymask = property(get_keymask, set_keymask)
 
     def on_key_event(self, controller, keyval, keycode, state):
-        keymap = Gdk.Keymap.get_default()
-        ok, keyval, group, lvl, consumed = keymap.translate_keyboard_state(
-            event.hardware_keycode, 0, event.group)
-        mod_key = self.keylookup.get(keyval, 0)
-        if event.type == Gdk.EventType.KEY_PRESS:
-            self.keymask |= mod_key
-            if event.keyval == Gdk.KEY_Escape:
-                self.findbar.hide()
-        elif event.type == Gdk.EventType.KEY_RELEASE:
-            self.keymask &= ~mod_key
+        # keymap = Gdk.Keymap.get_default() TODO
+        # ok, keyval, group, lvl, consumed = keymap.translate_keyboard_state(
+        #     event.hardware_keycode, 0, event.group)
+        # mod_key = self.keylookup.get(keyval, 0)
+        # if event.type == Gdk.EventType.KEY_PRESS:
+        #     self.keymask |= mod_key
+        #     if event.keyval == Gdk.KEY_Escape:
+        #         self.findbar.hide()
+        # elif event.type == Gdk.EventType.KEY_RELEASE:
+        #     self.keymask &= ~mod_key
+        pass
 
     def on_overview_map_style_changed(self, *args):
         style = self.props.overview_map_style
@@ -854,7 +855,8 @@ class FileDiff(Gtk.Box, MeldDoc):
             anim_type=TextviewLineAnimationType.stroke)
 
     def on_linkmap_scroll_event(self, dx, dy): # TODO controller
-        self.next_diff(event.direction, use_viewport=True)
+        # self.next_diff(event.direction, use_viewport=True)
+        pass
 
     def _is_chunk_in_area(
             self, chunk_id: Optional[int], pane: int, area: Gdk.Rectangle):

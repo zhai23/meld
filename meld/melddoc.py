@@ -18,7 +18,7 @@ import enum
 import logging
 from typing import Sequence
 
-from gi.repository import Gio, GObject, Gtk
+from gi.repository import Gio, GObject
 
 from meld.conf import _
 from meld.recent import RecentType

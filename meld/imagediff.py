@@ -19,7 +19,7 @@ import logging
 from collections.abc import Sequence
 from typing import Optional
 
-from gi.repository import Gdk, GdkPixbuf, Gio, GObject, Gtk, GtkSource, GLib
+from gi.repository import Gdk, GdkPixbuf, Gio, GLib, GObject, Gtk, GtkSource
 
 # TODO: Don't from-import whole modules
 from meld import misc
