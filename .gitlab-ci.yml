@@ -52,16 +52,12 @@ pytest:
   variables:
       PYTHON_CHECK_COMMAND: "pytest"
 
-pytest-flatpak:
-  extends: .pythonflatpak
-  variables:
-      PYTHON_CHECK_COMMAND: "pytest"
-  # Ideally this wouldn't allow failure, but currently the flatpak environment
-  # is broken. https://gitlab.gnome.org/GNOME/gnome-runtime-images/-/issues/7
-  allow_failure: true
-
-.mingw-common:
+mingw64-dist:
   stage: build
+  variables:
+    MSYS2_ARCH: "x86_64"
+    MSYSTEM: "MINGW64"
+    CHERE_INVOKING: "yes"
   tags: # select gitlab runners with specific tag (unrelated to git repo tags)
     - win32-ps
   artifacts:
@@ -77,10 +73,10 @@ pytest-flatpak:
       mingw-w64-${env:MSYS2_ARCH}-gtk-update-icon-cache
       mingw-w64-${env:MSYS2_ARCH}-gtk3
       mingw-w64-${env:MSYS2_ARCH}-gtksourceview4
-      mingw-w64-${env:MSYS2_ARCH}-python3-cx_Freeze
-      mingw-w64-${env:MSYS2_ARCH}-python3-gobject
-      mingw-w64-${env:MSYS2_ARCH}-python3-pytest
-      mingw-w64-${env:MSYS2_ARCH}-python3-setuptools
+      mingw-w64-${env:MSYS2_ARCH}-python-cx-freeze
+      mingw-w64-${env:MSYS2_ARCH}-python-gobject
+      mingw-w64-${env:MSYS2_ARCH}-python-pytest
+      mingw-w64-${env:MSYS2_ARCH}-python-setuptools
       glib2-devel
       intltool
   script:
@@ -89,17 +85,3 @@ pytest-flatpak:
   # main purpose of this job is creating installers and not checking for breakage by changes in code
   # so allow failures since the status of the build may depend on updates of rolling-release msys2 packages
   allow_failure: true
-
-mingw64-dist:
-  extends: .mingw-common
-  variables:
-    MSYS2_ARCH: "x86_64"
-    MSYSTEM: "MINGW64"
-    CHERE_INVOKING: "yes"
-
-mingw32-dist:
-  extends: .mingw-common
-  variables:
-    MSYS2_ARCH: "i686"
-    MSYSTEM: "MINGW32"
-    CHERE_INVOKING: "yes"

@@ -32,7 +32,9 @@ from meld.const import (
     ActionMode,
     ChunkAction,
     FileComparisonMode,
+    FileLoadError,
 )
+from meld.externalhelpers import open_files_external
 from meld.gutterrendererchunk import GutterRendererChunkLines
 from meld.iohelpers import find_shared_parent_path, prompt_save_filename
 from meld.matchers.diffutil import Differ, merged_chunk_order
@@ -42,8 +44,9 @@ from meld.meldbuffer import (
     BufferDeletionAction,
     BufferInsertionAction,
     BufferLines,
+    MeldBufferState,
 )
-from meld.melddoc import ComparisonState, MeldDoc, open_files_external
+from meld.melddoc import ComparisonState, MeldDoc
 from meld.menuhelpers import replace_menu_section
 from meld.misc import user_critical, with_focused_pane
 from meld.patchdialog import PatchDialog
@@ -95,6 +98,9 @@ def with_scroll_lock(lock_attr):
 MASK_SHIFT, MASK_CTRL = 1, 2
 PANE_LEFT, PANE_RIGHT = -1, +1
 
+LOAD_PROGRESS_MARK = "meld-load-progress"
+#: Line length at which we'll cancel loads because of potential hangs
+LINE_LENGTH_LIMIT = 8 * 1024
 
 class CursorDetails:
     __slots__ = (
@@ -421,6 +427,7 @@ class FileDiff(Gtk.Box, MeldDoc):
         self.on_overview_map_style_changed()
 
         for buf in self.textbuffer:
+            buf.create_mark(LOAD_PROGRESS_MARK, buf.get_start_iter(), True)
             buf.undo_sequence = self.undosequence
             buf.connect(
                 'notify::has-selection', self.update_text_actions_sensitivity)
@@ -1627,7 +1634,7 @@ class FileDiff(Gtk.Box, MeldDoc):
             if gfile:
                 files.append((pane, gfile, encoding))
             else:
-                self.textbuffer[pane].data.loaded = True
+                self.textbuffer[pane].data.state = MeldBufferState.LOAD_FINISHED
 
         if not files:
             self.scheduler.add_task(self._compare_files_internal())
@@ -1661,7 +1668,7 @@ class FileDiff(Gtk.Box, MeldDoc):
         self.msgarea_mgr[pane].clear()
 
         buf = self.textbuffer[pane]
-        buf.data.reset(gfile)
+        buf.data.reset(gfile, MeldBufferState.LOADING)
         self.file_open_button[pane].props.file = gfile
 
         # FIXME: this was self.textbuffer[pane].data.label, which could be
@@ -1680,10 +1687,16 @@ class FileDiff(Gtk.Box, MeldDoc):
         if custom_candidates:
             loader.set_candidate_encodings(custom_candidates)
 
+        buf.move_mark_by_name(LOAD_PROGRESS_MARK, buf.get_start_iter())
+        cancellable = Gio.Cancellable()
+        errors = {}
         loader.load_async(
             GLib.PRIORITY_HIGH,
+            cancellable=cancellable,
+            progress_callback=self.file_load_progress,
+            progress_callback_data=(loader, cancellable, errors),
             callback=self.file_loaded,
-            user_data=(pane,)
+            user_data=(pane, errors),
         )
 
     def get_comparison(self):
@@ -1696,13 +1709,69 @@ class FileDiff(Gtk.Box, MeldDoc):
 
         return comparison_type, uris
 
-    def file_loaded(self, loader, result, user_data):
+    def file_load_progress(
+        self,
+        current_bytes: int,
+        total_bytes: int,
+        loader: GtkSource.FileLoader,
+        cancellable: Gio.Cancellable,
+        errors: dict[int, str],
+    ) -> None:
+        failed_it = None
+        buffer = loader.get_buffer()
+        progress_mark = buffer.get_mark(LOAD_PROGRESS_MARK)
 
+        # If forward_line() returns False it points to the current end of the
+        # buffer after the movement; if this happens, we assume that we don't
+        # yet have a full line, and so don't can't check it for length.
+        it = buffer.get_iter_at_mark(progress_mark)
+        last_it = it.copy()
+        while it.forward_line():
+            # last_it is now on a fully-loaded line, so we can check it
+            if last_it.get_chars_in_line() > LINE_LENGTH_LIMIT:
+                failed_it = last_it
+                break
+            last_it.assign(it)
+
+        # We also have to check the last line in the file, which would
+        # otherwise be skipped by the above logic.
+        if (current_bytes == total_bytes) and (it.get_chars_in_line() > LINE_LENGTH_LIMIT):
+            failed_it = it
+
+        if failed_it:
+            # Ideally we'd have custom GError handling here instead, but
+            # set_error_if_cancelled() doesn't appear to work in pygobject
+            # bindings.
+            errors[self.textbuffer.index(buffer)] = (
+                FileLoadError.LINE_TOO_LONG,
+                _(
+                    "Line {line_number} exceeded maximum line length "
+                    "({line_length} > {LINE_LENGTH_LIMIT})"
+                ).format(
+                    line_number=failed_it.get_line() + 1,
+                    line_length=failed_it.get_chars_in_line(),
+                    LINE_LENGTH_LIMIT=LINE_LENGTH_LIMIT,
+                )
+            )
+            cancellable.cancel()
+
+        # Moving the mark invalidates the text iterators, so this must happen
+        # *last* here, or the above line length accesses will be incorrect.
+        buffer.move_mark(progress_mark, last_it)
+
+    def file_loaded(
+        self,
+        loader: GtkSource.FileLoader,
+        result: Gio.AsyncResult,
+        user_data: Tuple[int, dict[int, str]],
+    ):
         gfile = loader.get_location()
-        pane = user_data[0]
+        buf = loader.get_buffer()
+        pane, errors = user_data
 
         try:
             loader.load_finish(result)
+            buf.data.state = MeldBufferState.LOAD_FINISHED
         except GLib.Error as err:
             if err.matches(
                     GLib.convert_error_quark(),
@@ -1714,7 +1783,6 @@ class FileDiff(Gtk.Box, MeldDoc):
                 #
                 # The handling here is fragile, but it's better than
                 # getting into a non-obvious corrupt state.
-                buf = loader.get_buffer()
                 buf.end_not_undoable_action()
                 buf.end_user_action()
 
@@ -1727,15 +1795,27 @@ class FileDiff(Gtk.Box, MeldDoc):
 
             filename = GLib.markup_escape_text(
                 gfile.get_parse_name())
-            primary = _(
-                "There was a problem opening the file “%s”." % filename)
+            primary = _("There was a problem opening the file “%s”." % filename)
+            # If we have custom errors defined, use those instead
+            if errors.get(pane):
+                error, error_text = errors[pane]
+            else:
+                error_text = err.message
             self.msgarea_mgr[pane].add_dismissable_msg(
-                'dialog-error-symbolic', primary, err.message)
+                "dialog-error-symbolic", primary, error_text
+            )
+            buf.data.state = MeldBufferState.LOAD_ERROR
 
-        buf = loader.get_buffer()
         start, end = buf.get_bounds()
         buffer_text = buf.get_text(start, end, False)
-        if not loader.get_encoding() and '\\00' in buffer_text:
+
+        # Don't risk overwriting a more-important "we didn't load the file
+        # correctly" message with this semi-helpful "is it binary?" prompt
+        if (
+            not loader.get_encoding()
+            and "\\00" in buffer_text
+            and not self.msgarea_mgr[pane].has_message()
+        ):
             filename = GLib.markup_escape_text(gfile.get_parse_name())
             primary = _("File %s appears to be a binary file.") % filename
             secondary = _(
@@ -1756,9 +1836,9 @@ class FileDiff(Gtk.Box, MeldDoc):
         self.update_buffer_writable(buf)
 
         buf.data.update_mtime()
-        buf.data.loaded = True
 
-        if all(b.data.loaded for b in self.textbuffer[:self.num_panes]):
+        buffer_states = [b.data.state for b in self.textbuffer[:self.num_panes]]
+        if all(state == MeldBufferState.LOAD_FINISHED for state in buffer_states):
             self.scheduler.add_task(self._compare_files_internal())
 
     def _merge_files(self):
@@ -1987,6 +2067,15 @@ class FileDiff(Gtk.Box, MeldDoc):
                         for o in matches:
                             start.set_offset(offset + o[1 + 2 * i])
                             end.set_offset(offset + o[2 + 2 * i])
+
+                            # Check whether the identified difference is just a
+                            # combining diacritic. If so, we want to highlight
+                            # the visual character it's a part of
+                            if not start.is_cursor_position():
+                                start.backward_cursor_position()
+                            if not end.is_cursor_position():
+                                end.forward_cursor_position()
+
                             bufs[i].apply_tag(tags[i], start, end)
 
                 start_marks = [
@@ -2005,16 +2094,22 @@ class FileDiff(Gtk.Box, MeldDoc):
         self._cached_match.clean(self.linediffer.diff_count())
 
         self._set_merge_action_sensitivity()
-        paths = [
-            tb.data.gfile.get_path()
-            for tb in self.textbuffer if tb.data.gfile
-        ]
-        duplicate_files = list(set(p for p in paths if paths.count(p) > 1))
-        if duplicate_files:
+
+        # Check for self-comparison using Gio's file IDs, so that we catch
+        # symlinks, admin:// URIs and similar situations.
+        duplicate_file = None
+        seen_file_ids = []
+        for tb in self.textbuffer:
+            if not tb.data.gfile:
+                continue
+            if tb.data.file_id in seen_file_ids:
+                duplicate_file = tb.data.label
+                break
+            seen_file_ids.append(tb.data.file_id)
+
+        if duplicate_file:
             for index in range(self.num_panes):
-                primary = _(
-                    'File {} is being compared to itself').format(
-                    duplicate_files[0])
+                primary = _("File {} is being compared to itself").format(duplicate_file)
                 self.msgarea_mgr[index].add_dismissable_msg(
                     'dialog-warning-symbolic', primary, '', self.msgarea_mgr)
         elif self.linediffer.sequences_identical():

@@ -36,8 +36,9 @@ from gi.repository import Gdk, Gio, GLib, GObject, Gtk
 from meld import misc, tree
 from meld.conf import _
 from meld.const import FILE_FILTER_ACTION_FORMAT, MISSING_TIMESTAMP
+from meld.externalhelpers import open_files_external
 from meld.iohelpers import find_shared_parent_path, trash_or_confirm
-from meld.melddoc import MeldDoc, open_files_external
+from meld.melddoc import MeldDoc
 from meld.misc import all_same, apply_text_filters, with_focused_pane
 from meld.recent import RecentType
 from meld.settings import bind_settings, get_meld_settings, settings
@@ -1635,9 +1636,8 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             self.model.value_path(self.model.get_iter(p), pane)
             for p in self._get_selected_paths(pane)
         ]
-        files = [f for f in files if f]
-        if files:
-            open_files_external(files)
+        gfiles = [Gio.File.new_for_path(f) for f in files if f]
+        open_files_external(gfiles)
 
     def action_copy_file_paths(self, *args):
         pane = self._get_focused_pane()

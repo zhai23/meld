@@ -36,6 +36,7 @@ from gi.repository import Gio, GLib, Gtk
 
 import meld.misc
 from meld.conf import _
+from meld.iohelpers import is_file_on_tmpfs
 
 log = logging.getLogger(__name__)
 
@@ -84,10 +85,17 @@ class RecentFiles:
 
         # While Meld handles comparisons including None, recording these as
         # recently-used comparisons just isn't that sane.
-        if None in gfiles:
+        if not gfiles or None in gfiles:
+            return
+
+        if any(is_file_on_tmpfs(f) for f in gfiles):
+            log.debug("Not adding comparison because it includes tmpfs path")
             return
 
         uris = [f.get_uri() for f in gfiles]
+        if not all(uris):
+            return
+
         names = [f.get_parse_name() for f in gfiles]
 
         # If a (type, uris) comparison is already registered, then re-add

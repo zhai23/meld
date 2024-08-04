@@ -28,8 +28,9 @@ from gi.repository import Gdk, Gio, GLib, GObject, Gtk, Pango
 
 from meld import tree
 from meld.conf import _
+from meld.externalhelpers import open_files_external
 from meld.iohelpers import trash_or_confirm
-from meld.melddoc import MeldDoc, open_files_external
+from meld.melddoc import MeldDoc
 from meld.misc import error_dialog, read_pipe_iter
 from meld.recent import RecentType
 from meld.settings import bind_settings, settings
@@ -404,7 +405,10 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.scheduler.add_task(self.on_treeview_cursor_changed)
 
     def get_comparison(self):
-        uris = [Gio.File.new_for_path(self.location)]
+        if self.location:
+            uris = [Gio.File.new_for_path(self.location)]
+        else:
+            uris = []
         return RecentType.VersionControl, uris
 
     def recompute_label(self):
@@ -786,7 +790,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             self.run_diff(f)
 
     def action_open_external(self, *args):
-        open_files_external(self._get_selected_files())
+        gfiles = [Gio.File.new_for_path(f) for f in self._get_selected_files() if f]
+        open_files_external(gfiles)
 
     def refresh(self):
         root = self.model.get_iter_first()
