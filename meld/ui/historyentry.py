@@ -89,7 +89,7 @@ class HistoryCombo(Gtk.ComboBox):
         rentext = Gtk.CellRendererText()
         rentext.props.width_chars = 60
         rentext.props.ellipsize = Pango.EllipsizeMode.END
-        self.prepend(rentext, True)
+        self.pack_start(rentext, True)
         self.add_attribute(rentext, 'text', 0)
 
         self.connect('notify::history-id',

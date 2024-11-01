@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <template class="CommitDialog" parent="GtkDialog">
+  <template class="CommitDialog" parent="AdwMessageDialog">
     <property name="margin-start">12</property>
     <property name="margin-top">12</property>
     <property name="margin-end">12</property>
     <property name="margin-bottom">12</property>
-    <property name="title" translatable="1">Commit</property>
-    <property name="modal">1</property>
-    <property name="window_position">center</property>
+    <property name="heading" translatable="1">Commit</property>
     <property name="default_width">450</property>
-    <child internal-child="content_area">
+    <child>
       <object class="GtkBox" id="dialog-vbox1">
         <property name="orientation">vertical</property>
         <property name="spacing">18</property>
@@ -39,18 +37,17 @@
                     <child>
                       <object class="GtkLabel" id="label1">
                         <property name="halign">center</property>
-                        <property name="xpad">12</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow_changed">
                         <property name="hexpand">1</property>
-                        <property name="visible">0</property>
+                        <property name="visible">1</property>
                         <property name="height_request">150</property>
                         <property name="focusable">1</property>
                         <property name="child">
                           <object class="GtkViewport" id="viewport_changed">
-                            <property name="visible">0</property>
+                            <property name="visible">1</property>
                             <property name="child">
                               <object class="GtkLabel" id="changedfiles">
                                 <property name="focusable">1</property>
@@ -88,7 +85,6 @@
                     <child>
                       <object class="GtkLabel" id="label4">
                         <property name="halign">center</property>
-                        <property name="xpad">12</property>
                       </object>
                     </child>
                     <child>
@@ -137,45 +133,6 @@
               </object>
             </child>
           </object>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="-6">cancelbutton1</action-widget>
-      <action-widget response="-5">okbutton1</action-widget>
-    </action-widgets>
-    <child internal-child="action_area">
-      <object class="GtkButtonBox" id="dialog-action_area1">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="layout_style">end</property>
-        <child>
-          <object class="GtkButton" id="cancelbutton1">
-            <property name="label" translatable="1">_Cancel</property>
-            <property name="focusable">1</property>
-            <property name="can_default">True</property>
-            <property name="use_underline">1</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="okbutton1">
-            <property name="label" translatable="1">Co_mmit</property>
-            <property name="focusable">1</property>
-            <property name="can_default">True</property>
-            <property name="use_underline">1</property>
-            <accelerator key="Return" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-            <accelerator key="KP_Enter" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
         </child>
       </object>
     </child>

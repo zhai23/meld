@@ -728,8 +728,11 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             self.vc.push(self.runner)
 
     def action_commit(self, *args):
-        response, commit_msg = CommitDialog(self).run()
-        if response == Gtk.ResponseType.OK:
+        CommitDialog(self).run(self._action_commit_response)
+
+    def _action_commit_response(self, dialog, response):
+        if response == "commit":
+            commit_msg = dialog.get_message()
             self.vc.commit(
                 self.runner, self._get_selected_files(), commit_msg)
 
