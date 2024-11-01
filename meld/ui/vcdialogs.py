@@ -17,7 +17,7 @@
 import os
 import textwrap
 
-from gi.repository import Gio, GObject, Gtk, Adw, Pango
+from gi.repository import Adw, Gio, GObject, Gtk, Pango
 
 from meld.conf import _
 from meld.settings import get_meld_settings, settings
@@ -56,7 +56,7 @@ class CommitDialog(Adw.MessageDialog):
         self.changedfiles.set_text("(in %s)\n%s" %
                                    (topdir, "\n".join(to_commit)))
 
-        font = get_meld_settings().font
+        _font = get_meld_settings().font
 
         # self.textview.modify_font(font) TODO set font
         commit_prefill = parent.vc.get_commit_message_prefill()
