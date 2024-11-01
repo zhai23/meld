@@ -721,8 +721,10 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.vc.update(self.runner)
 
     def action_push(self, *args):
-        response = PushDialog(self).run()
-        if response == Gtk.ResponseType.OK:
+        PushDialog(self).run(self._action_push_response)
+
+    def _action_push_response(self, _dialog, response):
+        if response == "push":
             self.vc.push(self.runner)
 
     def action_commit(self, *args):
