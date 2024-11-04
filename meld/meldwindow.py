@@ -100,7 +100,7 @@ class MeldWindow(Adw.ApplicationWindow):
             for attr in ('stop', 'hide', 'show', 'start'):
                 setattr(self.spinner, attr, lambda *args: True)
 
-        # TODO use Gtk.DropTarget
+        # TODO4 use Gtk.DropTarget
         drop_target = Gtk.DropTarget(formats=Gdk.ContentFormats.new(['text']))
         drop_target.connect("accept", self.on_widget_drag_data_accept)
         drop_target.connect("drop", self.on_widget_drag_data_received)
@@ -189,10 +189,10 @@ class MeldWindow(Adw.ApplicationWindow):
         replace_menu_section(filter_model, section)
 
     def on_widget_drag_data_accept(self, drop_target, drop):
-        return True
+        return True # TODO4
 
     def on_widget_drag_data_received(self, drop_target, value, x, y, data):
-        # uris = selection_data.get_uris() # TODO
+        # uris = selection_data.get_uris() # TODO4
         # if uris:
         #     self.open_paths([Gio.File.new_for_uri(uri) for uri in uris])
         #     return True

@@ -861,7 +861,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                 break
         return None
 
-    def on_consoleview_populate_popup(self, textview, menu):
+    def on_consoleview_populate_popup(self, textview, menu): # TODO4
         buf = textview.get_buffer()
         clear_action = Gtk.MenuItem.new_with_label(_("Clear"))
         clear_action.connect(
@@ -870,7 +870,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         menu.insert(Gtk.SeparatorMenuItem(), 1)
         menu.show_all()
 
-    def on_treeview_popup_menu(self, treeview):
+    def on_treeview_popup_menu(self, treeview): # TODO4
         return tree.TreeviewCommon.on_treeview_popup_menu(self, treeview)
 
     @Gtk.Template.Callback()

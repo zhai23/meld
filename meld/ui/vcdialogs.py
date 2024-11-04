@@ -58,7 +58,7 @@ class CommitDialog(Adw.MessageDialog):
 
         _font = get_meld_settings().font
 
-        # self.textview.modify_font(font) TODO set font
+        # self.textview.modify_font(font) TODO4 set font
         commit_prefill = parent.vc.get_commit_message_prefill()
         if commit_prefill:
             buf = self.textview.get_buffer()

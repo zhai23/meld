@@ -29,7 +29,7 @@ action-gutter {
     background-color: @theme_bg_color;
 }
 
-/* @binding-set ChunkMovementBindings { TODO */
+/* @binding-set ChunkMovementBindings { TODO4 */
     /* Gdk.ScrollDirection.UP */
     /* bind "<Alt>Up" { "move-diff" (0) };
     bind "<Alt>KP_Up" { "move-diff" (0) };
@@ -40,7 +40,7 @@ action-gutter {
     bind "<Primary>D" { "move-diff" (1) };
 } */
 
-/* meld-file-diff { TODO
+/* meld-file-diff { TODO4
     -gtk-key-bindings: ChunkMovementBindings;
 }
 
@@ -52,7 +52,7 @@ meld-vc-view {
     -gtk-key-bindings: ChunkMovementBindings;
 } */
 
-/* @binding-set MeldFindbarBindings { TODO
+/* @binding-set MeldFindbarBindings { TODO4
     bind "<Shift>Return" { "activate-secondary" () };
 } */
 

@@ -59,7 +59,7 @@ class RecentFiles:
 
     def __init__(self):
         self.recent_manager = Gtk.RecentManager.get_default()
-        self.recent_filter = None # TODO
+        self.recent_filter = None # TODO4
         # self.recent_filter = Gtk.RecentFilter()
         # self.recent_filter.add_mime_type(self.mime_type)
         self._stored_comparisons = {}

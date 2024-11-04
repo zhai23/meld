@@ -186,7 +186,7 @@ class ActionGutter(Gtk.DrawingArea):
             }
 
     def do_realize(self):
-        # self.set_events(
+        # self.set_events( TODO4
         #     Gdk.EventMask.ENTER_NOTIFY_MASK |
         #     Gdk.EventMask.LEAVE_NOTIFY_MASK |
         #     Gdk.EventMask.POINTER_MOTION_MASK |
@@ -357,7 +357,7 @@ class ActionGutter(Gtk.DrawingArea):
             button_y += 1
             button_height -= 2
 
-            # button_style_context = get_style(None, 'button.flat.image-button') TODO render button
+            # button_style_context = get_style(None, 'button.flat.image-button') TODO4 render button
             # if chunk == self.pointer_chunk:
             #     button_style_context.set_state(Gtk.StateFlags.PRELIGHT)
 
@@ -381,7 +381,7 @@ class ActionGutter(Gtk.DrawingArea):
                 )
             )
 
-            # pixbuf = self.action_map.get(action) TODO draw icon
+            # pixbuf = self.action_map.get(action) TODO4 draw icon
             # icon_x = button_x + (button_width - pixbuf.props.width) // 2
             # icon_y = button_y + (button_height - pixbuf.props.height) // 2
             # Gtk.render_icon(

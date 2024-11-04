@@ -122,7 +122,7 @@ class PathLabel(Gtk.MenuButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # self.drag_dest_set( TODO
+        # self.drag_dest_set( TODO4
         #     Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT |
         #     Gtk.DestDefaults.DROP,
         #     None,

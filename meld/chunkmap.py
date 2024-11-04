@@ -90,7 +90,7 @@ class ChunkMap(Gtk.DrawingArea):
                 f'{self.__gtype_name__} initialized without an adjustment')
             return Gtk.DrawingArea.do_realize(self)
 
-        # self.set_events( TODO
+        # self.set_events( TODO4
         #     Gdk.EventMask.POINTER_MOTION_MASK |
         #     Gdk.EventMask.BUTTON_PRESS_MASK |
         #     Gdk.EventMask.BUTTON_RELEASE_MASK

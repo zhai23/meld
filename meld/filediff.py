@@ -445,10 +445,10 @@ class FileDiff(Gtk.Box, MeldDoc):
             controller.connect("enter", self.on_current_diff_changed)
             controller.connect("leave", self.on_current_diff_changed)
             t.add_controller(controller)
-            # t.connect( TODO
+            # t.connect( TODO4
             #     "drag_data_received", self.on_textview_drag_data_received)
 
-        # for label in self.filelabel: TODO
+        # for label in self.filelabel: TODO4
         #     label.connect(
         #         "drag_data_received", self.on_textview_drag_data_received
         #     )
@@ -551,7 +551,7 @@ class FileDiff(Gtk.Box, MeldDoc):
     keymask = property(get_keymask, set_keymask)
 
     def on_key_event(self, controller, keyval, keycode, state):
-        # keymap = Gdk.Keymap.get_default() TODO
+        # keymap = Gdk.Keymap.get_default() TODO4
         # ok, keyval, group, lvl, consumed = keymap.translate_keyboard_state(
         #     event.hardware_keycode, 0, event.group)
         # mod_key = self.keylookup.get(keyval, 0)
@@ -854,7 +854,7 @@ class FileDiff(Gtk.Box, MeldDoc):
             mark0, mark1, 'focus-highlight', 400000, starting_alpha=0.3,
             anim_type=TextviewLineAnimationType.stroke)
 
-    def on_linkmap_scroll_event(self, dx, dy): # TODO controller
+    def on_linkmap_scroll_event(self, dx, dy): # TODO4 controller
         # self.next_diff(event.direction, use_viewport=True)
         pass
 
@@ -1186,7 +1186,7 @@ class FileDiff(Gtk.Box, MeldDoc):
                     self.set_file(pane, gfiles[0])
             return True
 
-    def on_textview_focus_in_event(self, view, event): # TODO controller
+    def on_textview_focus_in_event(self, view, event): # TODO4 controller
         self.focus_pane = view
         self.findbar.set_text_view(self.focus_pane)
         self.on_cursor_position_changed(view.get_buffer(), None, True)
@@ -1194,7 +1194,7 @@ class FileDiff(Gtk.Box, MeldDoc):
         self._set_merge_action_sensitivity()
         self._set_external_action_sensitivity()
 
-    def on_textview_focus_out_event(self, view, event): # TODO controller
+    def on_textview_focus_out_event(self, view, event): # TODO4 controller
         self.keymask = 0
         self._set_merge_action_sensitivity()
         self._set_external_action_sensitivity()
@@ -1324,7 +1324,7 @@ class FileDiff(Gtk.Box, MeldDoc):
                 # we return a cancel here, so that other closing logic
                 # doesn't run. Instead, the file-saved callback from
                 # save_file() handles closing files and setting state.
-                return # TODO maybe close directly
+                return # TODO4 maybe close directly
             elif response == "close":
                 response = "save"
 
@@ -1468,14 +1468,14 @@ class FileDiff(Gtk.Box, MeldDoc):
     def action_go_to_line(self, pane, *args):
         self.statusbar[pane].emit('start-go-to-line')
 
-    def on_scrolledwindow_size_allocate(self, scrolledwindow, allocation):
+    def on_scrolledwindow_size_allocate(self, scrolledwindow, allocation): # TODO4
         index = self.scrolledwindow.index(scrolledwindow)
         if index == 0 or index == 1:
             self.linkmap[0].queue_draw()
         if index == 1 or index == 2:
             self.linkmap[1].queue_draw()
 
-    def on_textview_popup_menu(self, textview): # TODO
+    def on_textview_popup_menu(self, textview): # TODO4
         buffer = textview.get_buffer()
         cursor_it = buffer.get_iter_at_mark(buffer.get_insert())
         location = textview.get_iter_location(cursor_it)

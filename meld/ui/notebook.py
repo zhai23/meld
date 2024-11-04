@@ -75,7 +75,7 @@ class MeldNotebook(Gtk.Notebook):
         stylecontext = self.get_style_context()
         stylecontext.add_class('meld-notebook')
 
-        # self.connect('button-press-event', self.on_button_press_event) TODO
+        # self.connect('button-press-event', self.on_button_press_event) TODO4
         # self.connect('popup-menu', self.on_popup_menu)
         self.connect('page-added', self.on_page_added)
         self.connect('page-removed', self.on_page_removed)

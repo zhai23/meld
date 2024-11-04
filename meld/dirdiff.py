@@ -1448,7 +1448,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
         self.current_path = cursor_path
 
-    def on_treeview_popup_menu(self, treeview):
+    def on_treeview_popup_menu(self, treeview): # TODO4
         return tree.TreeviewCommon.on_treeview_popup_menu(self, treeview)
 
     @with_focused_pane
@@ -1461,7 +1461,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         new_pane = (pane + 1) % self.num_panes
         self.change_focused_tree(self.treeview[pane], self.treeview[new_pane])
 
-    def on_treeview_key_press_event(self, view, event):
+    def on_treeview_key_press_event(self, view, event): # TODO4
         if event.keyval not in (Gdk.KEY_Left, Gdk.KEY_Right):
             return False
 
@@ -1523,7 +1523,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.row_expansions.discard(str(path))
         self._do_to_others(view, self.treeview, "collapse_row", (path,))
 
-    def on_treeview_focus_in_event(self, tree, event):
+    def on_treeview_focus_in_event(self, tree, event): # TODO4
         self.focus_pane = tree
         self.update_action_sensitivity()
         tree.emit("cursor-changed")

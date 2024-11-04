@@ -133,7 +133,7 @@ class MeldStatusBar(Gtk.Box):
         self.props.margin_bottom = 0
         self.props.spacing = 6
 
-        # hbox = self.get_message_area() TODO statusbar is deprecated
+        # hbox = self.get_message_area() TODO4 statusbar is deprecated
         # label = hbox.get_children()[0]
         # hbox.props.spacing = 6
         # label.props.ellipsize = Pango.EllipsizeMode.NONE

@@ -188,11 +188,11 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # self.drag_dest_add_uri_targets() TODO still needed?
+        # self.drag_dest_add_uri_targets() TODO4 still needed?
 
         # Most bindings are on SourceView, except the Page Up/Down ones
         # which are on TextView.
-        # binding_set_names = ('GtkSourceView', 'GtkTextView') TODO
+        # binding_set_names = ('GtkSourceView', 'GtkTextView') TODO4
         # for set_name in binding_set_names:
         #     binding_set = Gtk.binding_set_find(set_name)
         #     for key, modifiers in self.replaced_entries:
@@ -419,7 +419,7 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
                 current_time = GLib.get_monotonic_time()
                 # percent = min(
                 #     1.0, (current_time - c.start_time) / float(c.duration))
-                # rgba_pairs = zip(c.start_rgba, c.end_rgba) TODO
+                # rgba_pairs = zip(c.start_rgba, c.end_rgba) TODO4
                 # rgba = [s + (e - s) * percent for s, e in rgba_pairs]
 
                 it = textbuffer.get_iter_at_mark(c.start_mark)
@@ -431,7 +431,7 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
 
                 cairo = snapshot.append_cairo(Graphene.Rect(x, ystart, width, yend - ystart))
                 cairo.set_line_width(1.0)
-                cairo.set_source_rgba(1,0,1,1) # TODO use rgba from above
+                cairo.set_source_rgba(1,0,1,1) # TODO4 use rgba from above
                 if c.anim_type == TextviewLineAnimationType.stroke:
                     cairo.stroke()
                 else:

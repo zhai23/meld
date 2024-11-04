@@ -149,7 +149,7 @@ class DiffGrid(Gtk.Grid):
         #     Gtk.Grid.do_size_allocate(self, allocation)
         # However, when we do this, we hit issues with doing multiple
         # allocations in a single allocation cycle (see bgo#779883).
-        x = 0 # TODO where to get x, y from?
+        x = 0 # TODO4 where to get x, y from?
         y = 0
 
         self.do_size_allocate(width, height, baseline)
@@ -269,24 +269,24 @@ class HandleWindow():
     def realize(self, widget):
         display = Gdk.Display.get_default()
         self._surface = Gdk.Surface.new_toplevel(display)
-        # self._surface = Gdk.Surface.new_toplevel(parent)
+        # self._surface = Gdk.Surface.new_toplevel(parent) TODO4
         # self._surface.handle = self
         self._widget = widget
         # self._widget.register_window(self._surface)
 
     def unrealize(self):
         # self._widget.unregister_window(self._surface)
-        pass # TODO
+        pass # TODO4
 
     def set_visible(self, visible):
         # if visible:
         #     self._surface.show()
         # else:
         #     self._surface.hide()
-        pass # TODO
+        pass # TODO4
 
     def move_resize(self, x, y, width, height):
-        # self._surface.move_resize(x, y, width, height) TODO
+        # self._surface.move_resize(x, y, width, height) TODO4
         self._area_x = x
         self._area_y = y
         self._area_width = width

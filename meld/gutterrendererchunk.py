@@ -114,7 +114,7 @@ class MeldGutterRenderer:
             background_rgba = get_background_rgba(self)
         self._chunk = chunk
         _ = background_rgba # mark as unused until set_background is done
-        # self.set_background(background_rgba) TODO
+        # self.set_background(background_rgba) TODO4
         return in_chunk
 
 
@@ -150,7 +150,7 @@ class GutterRendererChunkLines(
         if not self.get_view():
             return
 
-        # self.get_view().connect("style-updated", self.on_view_style_updated) TODO deprecated
+        # self.get_view().connect("style-updated", self.on_view_style_updated) TODO4 deprecated
 
     def on_view_style_updated(self, view: GtkSource.View) -> None:
         stylecontext = view.get_style_context()

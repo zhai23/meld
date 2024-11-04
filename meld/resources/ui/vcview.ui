@@ -171,7 +171,7 @@
                 <property name="focusable">1</property>
                 <signal name="cursor-changed" handler="on_treeview_cursor_changed" swapped="no"/>
                 <signal name="row-activated" handler="on_row_activated" swapped="no"/>
-                <!-- <signal name="popup-menu" handler="on_treeview_popup_menu" swapped="no"/> TODO -->
+                <!-- <signal name="popup-menu" handler="on_treeview_popup_menu" swapped="no"/> TODO4 -->
                 <child>
                   <object class="GtkTreeViewColumn" id="name_column">
                     <property name="title" translatable="1">Name</property>
@@ -243,7 +243,7 @@
                     <property name="focusable">1</property>
                     <property name="editable">0</property>
                     <property name="cursor_visible">0</property>
-                    <!-- <signal name="populate-popup" handler="on_consoleview_populate_popup" swapped="no"/> TODO -->
+                    <!-- <signal name="populate-popup" handler="on_consoleview_populate_popup" swapped="no"/> TODO4 -->
                   </object>
                 </property>
               </object>

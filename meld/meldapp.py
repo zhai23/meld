@@ -75,7 +75,7 @@ class MeldApp(Adw.Application):
 
         # Keep clipboard contents after application exit
         # clip = Gdk.Display().get_default().get_clipboard()
-        # clip.set_can_store(None) TODO
+        # clip.set_can_store(None) TODO4
 
         self.new_window()
 
