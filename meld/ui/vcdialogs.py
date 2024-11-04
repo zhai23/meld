@@ -56,9 +56,23 @@ class CommitDialog(Adw.MessageDialog):
         self.changedfiles.set_text("(in %s)\n%s" %
                                    (topdir, "\n".join(to_commit)))
 
-        _font = get_meld_settings().font
+        font = get_meld_settings().font
 
-        # self.textview.modify_font(font) TODO4 set font
+        size = font.get_size() / 1000
+        font_family = f"font-family: {font.get_family()};"
+        font_size = f"font-size: {str(size)}pt;" if size > 0 else ""
+        style = f"""
+        * {{
+            {font_family}
+            {font_size}
+        }}
+        """
+
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_string(style)
+
+        style_context = self.get_style_context()
+        style_context.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         commit_prefill = parent.vc.get_commit_message_prefill()
         if commit_prefill:
             buf = self.textview.get_buffer()
