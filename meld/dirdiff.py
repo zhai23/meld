@@ -703,9 +703,9 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
         self.marked = None
 
-        self._add_treeview_gesture_controller(self.treeview0)
-        self._add_treeview_gesture_controller(self.treeview1)
-        self._add_treeview_gesture_controller(self.treeview2)
+        for treeview in [self.treeview0, self.treeview1, self.treeview2]:
+            self._add_treeview_gesture_controller(treeview)
+            self._add_treeview_key_controller(treeview)
 
     def queue_draw(self):
         for treeview in self.treeview:
@@ -1461,12 +1461,13 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         new_pane = (pane + 1) % self.num_panes
         self.change_focused_tree(self.treeview[pane], self.treeview[new_pane])
 
-    def on_treeview_key_press_event(self, view, event): # TODO4
-        if event.keyval not in (Gdk.KEY_Left, Gdk.KEY_Right):
+    def on_treeview_key_press_event(self, controller, keyval, keycode, state):
+        if keyval not in (Gdk.KEY_Left, Gdk.KEY_Right):
             return False
 
+        view = controller.widget
         pane = self.treeview.index(view)
-        target_pane = pane + 1 if event.keyval == Gdk.KEY_Right else pane - 1
+        target_pane = pane + 1 if keyval == Gdk.KEY_Right else pane - 1
         if 0 <= target_pane < self.num_panes:
             self.change_focused_tree(view, self.treeview[target_pane])
 
@@ -1523,10 +1524,10 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.row_expansions.discard(str(path))
         self._do_to_others(view, self.treeview, "collapse_row", (path,))
 
-    def on_treeview_focus_in_event(self, tree, event): # TODO4
-        self.focus_pane = tree
+    def on_treeview_focus_in_event(self, widget, data):
+        self.focus_pane = widget
         self.update_action_sensitivity()
-        tree.emit("cursor-changed")
+        widget.emit("cursor-changed")
 
     def run_diff_from_iter(self, it):
         rows = self.model.value_paths(it)
