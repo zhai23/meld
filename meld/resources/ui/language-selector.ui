@@ -20,8 +20,7 @@
     <property name="margin-bottom">6</property>
     <child>
       <object class="GtkSearchEntry" id="entry">
-        <!-- <property name="focusable">1</property>
-        <property name="has_focus">1</property> TODO4 set as default widget -->
+        <property name="focusable">1</property>
         <property name="activates_default">1</property>
         <property name="placeholder_text" translatable="1">Search highlight mode…</property>
         <layout>
