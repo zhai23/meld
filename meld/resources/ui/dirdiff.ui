@@ -8,7 +8,7 @@
   <template class="DirDiff" parent="GtkBox">
     <property name="visible">True</property>
     <property name="orientation">vertical</property>
-    <property name="can_focus">False</property>
+    <property name="focusable">False</property>
     <child>
       <object class="GtkGrid" id="grid">
         <property name="vexpand">1</property>
@@ -22,7 +22,7 @@
                 <child>
                   <object class="MeldFileButton" id="folder_open_button0">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="focusable">False</property>
                     <property name="pane">0</property>
                     <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
                     <property name="dialog_label" translatable="1">Select Folder</property>
@@ -33,7 +33,7 @@
                 <child>
                   <object class="PathLabel" id="folder_label0">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="focusable">False</property>
                     <property name="label" translatable="1">Folder 1</property>
                   </object>
                 </child>
@@ -58,7 +58,7 @@
                 <child>
                   <object class="MeldFileButton" id="folder_open_button1">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="focusable">False</property>
                     <property name="pane">1</property>
                     <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
                     <property name="dialog_label" translatable="1">Select Folder</property>
@@ -69,7 +69,7 @@
                 <child>
                   <object class="PathLabel" id="folder_label1">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="focusable">False</property>
                     <property name="label" translatable="1">Folder 2</property>
                   </object>
                 </child>
@@ -94,7 +94,7 @@
                 <child>
                   <object class="MeldFileButton" id="folder_open_button2">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="focusable">False</property>
                     <property name="pane">2</property>
                     <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
                     <property name="dialog_label" translatable="1">Select Folder</property>
@@ -105,7 +105,7 @@
                 <child>
                   <object class="PathLabel" id="folder_label2">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="focusable">False</property>
                     <property name="label" translatable="1">Folder 3</property>
                   </object>
                 </child>
@@ -135,7 +135,7 @@
           <object class="ScrollLinkMap" id="linkmap1">
             <property name="width_request">50</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="focusable">False</property>
             <property name="vexpand">True</property>
             <layout>
               <property name="column">3</property>
@@ -158,7 +158,7 @@
           <object class="ScrollLinkMap" id="linkmap0">
             <property name="width_request">50</property>
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="focusable">False</property>
             <property name="vexpand">True</property>
             <layout>
               <property name="column">1</property>
@@ -169,12 +169,12 @@
         <child>
           <object class="GtkBox" id="vbox0">
             <property name="orientation">vertical</property>
-            <property name="can_focus">0</property>
+            <property name="focusable">0</property>
             <property name="hexpand">1</property>
             <child>
               <object class="MsgAreaController" id="msgarea_mgr0">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="focusable">False</property>
                 <child>
                   <placeholder/>
                 </child>
@@ -210,12 +210,12 @@
         <child>
           <object class="GtkBox" id="vbox1">
             <property name="orientation">vertical</property>
-            <property name="can_focus">0</property>
+            <property name="focusable">0</property>
             <property name="hexpand">1</property>
             <child>
               <object class="MsgAreaController" id="msgarea_mgr1">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="focusable">False</property>
                 <child>
                   <placeholder/>
                 </child>
@@ -251,12 +251,12 @@
         <child>
           <object class="GtkBox" id="vbox2">
             <property name="orientation">vertical</property>
-            <property name="can_focus">0</property>
+            <property name="focusable">0</property>
             <property name="hexpand">1</property>
             <child>
               <object class="MsgAreaController" id="msgarea_mgr2">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="focusable">False</property>
                 <child>
                   <placeholder/>
                 </child>

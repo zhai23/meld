@@ -100,7 +100,7 @@
                             <child>
                               <object class="CommitMessageSourceView" id="textview">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="focusable">True</property>
                                 <property name="wrap_mode">word</property>
                               </object>
                             </child>
@@ -119,7 +119,7 @@
                               <object class="HistoryCombo" id="previousentry">
                                 <property name="hexpand">1</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
+                                <property name="focusable">False</property>
                                 <property name="history_id">commit-messages</property>
                                 <signal name="changed" handler="on_previousentry_activate" swapped="no"/>
                               </object>

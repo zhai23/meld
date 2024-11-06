@@ -4,7 +4,7 @@
   <template class="VcView" parent="GtkBox">
     <property name="orientation">vertical</property>
     <property name="visible">True</property>
-    <property name="can_focus">False</property>
+    <property name="focusable">False</property>
     <child>
       <object class="GtkActionBar" id="file_toolbar">
         <child>
@@ -108,7 +108,7 @@
             <child>
               <object class="MeldFileButton" id="file_open_button0">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="focusable">False</property>
                 <property name="pane">0</property>
                 <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
                 <property name="local-only">True</property>
@@ -120,7 +120,7 @@
             <child>
               <object class="PathLabel" id="filelabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="focusable">False</property>
                 <property name="label" translatable="1">File 1</property>
               </object>
             </child>
@@ -152,7 +152,7 @@
     <child>
       <object class="MsgAreaController" id="msgarea_mgr">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="focusable">False</property>
       </object>
     </child>
     <child>

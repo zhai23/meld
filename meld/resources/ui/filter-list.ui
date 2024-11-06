@@ -80,13 +80,13 @@
       <object class="GtkBox" id="list_toolbar">
         <property name="valign">center</property>
         <property name="css-classes">toolbar</property>
-        <property name="can_focus">0</property>
+        <property name="focusable">0</property>
         <style>
           <class name="prefs-list-widget-toolbar"/>
         </style>
         <child>
           <object class="GtkButton" id="add">
-            <property name="can_focus">0</property>
+            <property name="focusable">0</property>
             <property name="tooltip_text" translatable="1">Add new filter</property>
             <property name="label" translatable="1">_Add</property>
             <property name="use_underline">1</property>
@@ -96,7 +96,7 @@
         </child>
         <child>
           <object class="GtkButton" id="remove">
-            <property name="can_focus">0</property>
+            <property name="focusable">0</property>
             <property name="tooltip_text" translatable="1">Remove selected filter</property>
             <property name="label" translatable="1">_Remove</property>
             <property name="use_underline">1</property>
@@ -107,12 +107,12 @@
         <child>
           <object class="GtkSeparator" id="up_down_sep">
             <property name="orientation">vertical</property>
-            <property name="can_focus">0</property>
+            <property name="focusable">0</property>
           </object>
         </child>
         <child>
           <object class="GtkButton" id="move_up">
-            <property name="can_focus">0</property>
+            <property name="focusable">0</property>
             <property name="tooltip_text" translatable="1">Move item up</property>
             <property name="label" translatable="1">Move _Up</property>
             <property name="use_underline">1</property>
@@ -122,7 +122,7 @@
         </child>
         <child>
           <object class="GtkButton" id="move_down">
-            <property name="can_focus">0</property>
+            <property name="focusable">0</property>
             <property name="tooltip_text" translatable="1">Move item down</property>
             <property name="label" translatable="1">Move _Down</property>
             <property name="use_underline">1</property>

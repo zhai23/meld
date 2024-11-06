@@ -73,7 +73,7 @@
     </child>
     <child>
       <object class="GtkBox" id="find_options">
-        <property name="can_focus">0</property>
+        <property name="focusable">0</property>
         <property name="spacing">6</property>
         <child>
           <object class="GtkCheckButton" id="match_case">
@@ -106,7 +106,7 @@
     </child>
     <child>
       <object class="GtkBox" id="wrap_box">
-        <property name="can_focus">0</property>
+        <property name="focusable">0</property>
         <property name="spacing">6</property>
         <child>
           <object class="GtkImage" id="wrap_image">

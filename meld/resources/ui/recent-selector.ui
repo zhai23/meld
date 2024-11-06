@@ -26,7 +26,7 @@
         <child>
           <object class="GtkListBox" id="recent_chooser">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="focusable">True</property>
             <property name="vexpand">True</property>
             <property name="activate_on_single_click">False</property>
             <signal name="row-activated" handler="on_row_activate" swapped="no"/>
