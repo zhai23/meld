@@ -12,7 +12,7 @@
         <child>
           <object class="GtkButton">
             <property name="action-name">view.file-push-left</property>
-            <property name="tooltip-text" translatable="1">Push current change to the left</property>
+            <property name="tooltip-text" translatable="yes">Push current change to the left</property>
             <property name="focus_on_click">0</property>
             <style>
               <class name="image-button"/>
@@ -28,7 +28,7 @@
         <child>
           <object class="GtkButton">
             <property name="action-name">view.file-push-right</property>
-            <property name="tooltip-text" translatable="1">Push current change to the right</property>
+            <property name="tooltip-text" translatable="yes">Push current change to the right</property>
             <property name="focus_on_click">0</property>
             <style>
               <class name="image-button"/>
@@ -46,7 +46,7 @@
     <child>
       <object class="GtkMenuButton" id="copy_action_button">
         <property name="focus_on_click">0</property>
-        <property name="tooltip-text" translatable="1">Copy chunks</property>
+        <property name="tooltip-text" translatable="yes">Copy chunks</property>
         <style>
           <class name="image-button"/>
         </style>
@@ -60,7 +60,7 @@
     <child>
       <object class="GtkButton">
         <property name="action-name">view.file-delete</property>
-        <property name="tooltip-text" translatable="1">Delete change</property>
+        <property name="tooltip-text" translatable="yes">Delete change</property>
         <property name="focus_on_click">0</property>
         <style>
           <class name="image-button"/>

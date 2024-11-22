@@ -6,7 +6,7 @@
     <property name="margin-top">12</property>
     <property name="margin-end">12</property>
     <property name="margin-bottom">12</property>
-    <property name="title" translatable="1">Format as Patch</property>
+    <property name="title" translatable="yes">Format as Patch</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <child internal-child="content_area">
@@ -20,7 +20,7 @@
             <property name="spacing">6</property>
             <child>
               <object class="GtkLabel" id="side_selection_label">
-                <property name="label" translatable="1">Use differences between:</property>
+                <property name="label" translatable="yes">Use differences between:</property>
                 <property name="xalign">0</property>
               </object>
             </child>
@@ -31,7 +31,7 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkCheckButton" id="left_radiobutton">
-                    <property name="label" translatable="1">Left and middle panes</property>
+                    <property name="label" translatable="yes">Left and middle panes</property>
                     <property name="xalign">0</property>
                     <property name="active">1</property>
                     <signal name="toggled" handler="on_buffer_selection_changed" swapped="no"/>
@@ -39,7 +39,7 @@
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="right_radiobutton">
-                    <property name="label" translatable="1">Middle and right panes</property>
+                    <property name="label" translatable="yes">Middle and right panes</property>
                     <property name="xalign">0</property>
                     <property name="group">left_radiobutton</property>
                     <signal name="toggled" handler="on_buffer_selection_changed" swapped="no"/>
@@ -49,7 +49,7 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="reverse_checkbutton">
-                <property name="label" translatable="1">_Reverse patch direction</property>
+                <property name="label" translatable="yes">_Reverse patch direction</property>
                 <property name="focusable">1</property>
                 <property name="use_underline">1</property>
                 <property name="xalign">0</property>
@@ -88,7 +88,7 @@
         <property name="layout_style">end</property>
         <child>
           <object class="GtkButton" id="button1">
-            <property name="label" translatable="1">Copy to Clipboard</property>
+            <property name="label" translatable="yes">Copy to Clipboard</property>
             <property name="focusable">1</property>
             <property name="can_default">True</property>
           </object>
@@ -100,7 +100,7 @@
         </child>
         <child>
           <object class="GtkButton" id="button9">
-            <property name="label" translatable="1">_Cancel</property>
+            <property name="label" translatable="yes">_Cancel</property>
             <property name="focusable">1</property>
             <property name="can_default">True</property>
             <property name="use_underline">1</property>
@@ -114,7 +114,7 @@
         </child>
         <child>
           <object class="GtkButton" id="button7">
-            <property name="label" translatable="1">Save Patch</property>
+            <property name="label" translatable="yes">Save Patch</property>
             <property name="focusable">1</property>
             <property name="can_default">True</property>
             <property name="receives_default">1</property>

@@ -17,7 +17,7 @@
             <property name="spacing">12</property>
             <child>
               <object class="GtkLabel">
-                <property name="label" translatable="1">Path</property>
+                <property name="label" translatable="yes">Path</property>
                 <property name="can-focus">1</property>
                 <style>
                   <class name="dim-label"/>

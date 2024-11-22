@@ -10,10 +10,10 @@
         <child>
           <object class="GtkButton">
             <property name="action_name">view.vc-commit</property>
-            <property name="tooltip_text" translatable="1">Commit changes to version control</property>
+            <property name="tooltip_text" translatable="yes">Commit changes to version control</property>
             <child>
               <object class="GtkLabel">
-                <property name="label" translatable="1">Commit…</property>
+                <property name="label" translatable="yes">Commit…</property>
               </object>
             </child>
           </object>
@@ -27,7 +27,7 @@
             <child>
               <object class="GtkButton">
                 <property name="action_name">view.vc-update</property>
-                <property name="tooltip_text" translatable="1">Pull remote changes to the local repository</property>
+                <property name="tooltip_text" translatable="yes">Pull remote changes to the local repository</property>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">vc-pull-symbolic</property>
@@ -38,7 +38,7 @@
             <child>
               <object class="GtkButton">
                 <property name="action_name">view.vc-push</property>
-                <property name="tooltip_text" translatable="1">Push local changes to remote</property>
+                <property name="tooltip_text" translatable="yes">Push local changes to remote</property>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">vc-push-symbolic</property>
@@ -57,7 +57,7 @@
             <child>
               <object class="GtkButton">
                 <property name="action_name">view.vc-add</property>
-                <property name="tooltip_text" translatable="1">Add to version control</property>
+                <property name="tooltip_text" translatable="yes">Add to version control</property>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">list-add-symbolic</property>
@@ -68,7 +68,7 @@
             <child>
               <object class="GtkButton">
                 <property name="action_name">view.vc-remove</property>
-                <property name="tooltip_text" translatable="1">Remove from version control</property>
+                <property name="tooltip_text" translatable="yes">Remove from version control</property>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">list-remove-symbolic</property>
@@ -79,7 +79,7 @@
             <child>
               <object class="GtkButton">
                 <property name="action_name">view.vc-revert</property>
-                <property name="tooltip_text" translatable="1">Revert working copy to original state</property>
+                <property name="tooltip_text" translatable="yes">Revert working copy to original state</property>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">document-revert-symbolic</property>
@@ -90,7 +90,7 @@
             <child>
               <object class="GtkButton">
                 <property name="action_name">view.vc-resolve</property>
-                <property name="tooltip_text" translatable="1">Mark as resolved in version control</property>
+                <property name="tooltip_text" translatable="yes">Mark as resolved in version control</property>
                 <child>
                   <object class="GtkImage">
                     <property name="icon-name">emblem-ok-symbolic</property>
@@ -112,8 +112,8 @@
                 <property name="pane">0</property>
                 <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
                 <property name="local-only">True</property>
-                <property name="dialog_label" translatable="1">Select Folder</property>
-                <property name="tooltip_text" translatable="1">Open version controlled folder in this pane</property>
+                <property name="dialog_label" translatable="yes">Select Folder</property>
+                <property name="tooltip_text" translatable="yes">Open version controlled folder in this pane</property>
                 <signal name="file-selected" handler="on_file_selected" swapped="no"/>
               </object>
             </child>
@@ -121,7 +121,7 @@
               <object class="PathLabel" id="filelabel">
                 <property name="visible">True</property>
                 <property name="focusable">False</property>
-                <property name="label" translatable="1">File 1</property>
+                <property name="label" translatable="yes">File 1</property>
               </object>
             </child>
           </object>
@@ -174,7 +174,7 @@
                 <!-- <signal name="popup-menu" handler="on_treeview_popup_menu" swapped="no"/> TODO4 -->
                 <child>
                   <object class="GtkTreeViewColumn" id="name_column">
-                    <property name="title" translatable="1">Name</property>
+                    <property name="title" translatable="yes">Name</property>
                     <property name="resizable">1</property>
                     <child>
                       <object class="EmblemCellRenderer" id="emblem_renderer"/>
@@ -186,7 +186,7 @@
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="location_column">
-                    <property name="title" translatable="1">Location</property>
+                    <property name="title" translatable="yes">Location</property>
                     <property name="resizable">1</property>
                     <child>
                       <object class="GtkCellRendererText" id="location_renderer"/>
@@ -195,7 +195,7 @@
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="status_column">
-                    <property name="title" translatable="1">Status</property>
+                    <property name="title" translatable="yes">Status</property>
                     <property name="resizable">1</property>
                     <child>
                       <object class="GtkCellRendererText" id="status_renderer"/>
@@ -204,7 +204,7 @@
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="extra_column">
-                    <property name="title" translatable="1">Extra</property>
+                    <property name="title" translatable="yes">Extra</property>
                     <property name="resizable">1</property>
                     <child>
                       <object class="GtkCellRendererText" id="extra_renderer"/>
@@ -228,7 +228,7 @@
             <child>
               <object class="GtkLabel" id="label5">
                 <property name="xalign">0</property>
-                <property name="label" translatable="1">Console output</property>
+                <property name="label" translatable="yes">Console output</property>
                 <attributes>
                   <attribute name="weight" value="bold"></attribute>
                 </attributes>

@@ -4,8 +4,8 @@
   <object class="GtkMessageDialog" id="revert_dialog">
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">question</property>
-    <property name="text" translatable="1">Discard unsaved changes to documents?</property>
-    <property name="secondary_text" translatable="1">Changes made to the following documents will be permanently lost:</property>
+    <property name="text" translatable="yes">Discard unsaved changes to documents?</property>
+    <property name="secondary_text" translatable="yes">Changes made to the following documents will be permanently lost:</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox2">
         <property name="orientation">vertical</property>
@@ -17,7 +17,7 @@
             <property name="layout_style">expand</property>
             <child>
               <object class="GtkButton" id="cancel_button1">
-                <property name="label" translatable="1">_Cancel</property>
+                <property name="label" translatable="yes">_Cancel</property>
                 <property name="focusable">1</property>
                 <property name="receives_default">1</property>
                 <property name="use_underline">1</property>
@@ -30,7 +30,7 @@
             </child>
             <child>
               <object class="GtkButton" id="revert_button">
-                <property name="label" translatable="1">_Discard</property>
+                <property name="label" translatable="yes">_Discard</property>
                 <property name="focusable">1</property>
                 <property name="receives_default">1</property>
                 <property name="use_underline">1</property>

@@ -25,8 +25,8 @@
                     <property name="focusable">False</property>
                     <property name="pane">0</property>
                     <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                    <property name="dialog_label" translatable="1">Select Folder</property>
-                    <property name="tooltip_text" translatable="1">Select folder to open in this pane</property>
+                    <property name="dialog_label" translatable="yes">Select Folder</property>
+                    <property name="tooltip_text" translatable="yes">Select folder to open in this pane</property>
                     <signal name="file-selected" handler="on_file_selected" swapped="no"/>
                   </object>
                 </child>
@@ -34,7 +34,7 @@
                   <object class="PathLabel" id="folder_label0">
                     <property name="visible">True</property>
                     <property name="focusable">False</property>
-                    <property name="label" translatable="1">Folder 1</property>
+                    <property name="label" translatable="yes">Folder 1</property>
                   </object>
                 </child>
               </object>
@@ -61,8 +61,8 @@
                     <property name="focusable">False</property>
                     <property name="pane">1</property>
                     <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                    <property name="dialog_label" translatable="1">Select Folder</property>
-                    <property name="tooltip_text" translatable="1">Select folder to open in this pane</property>
+                    <property name="dialog_label" translatable="yes">Select Folder</property>
+                    <property name="tooltip_text" translatable="yes">Select folder to open in this pane</property>
                     <signal name="file-selected" handler="on_file_selected" swapped="no"/>
                   </object>
                 </child>
@@ -70,7 +70,7 @@
                   <object class="PathLabel" id="folder_label1">
                     <property name="visible">True</property>
                     <property name="focusable">False</property>
-                    <property name="label" translatable="1">Folder 2</property>
+                    <property name="label" translatable="yes">Folder 2</property>
                   </object>
                 </child>
               </object>
@@ -97,8 +97,8 @@
                     <property name="focusable">False</property>
                     <property name="pane">2</property>
                     <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
-                    <property name="dialog_label" translatable="1">Select Folder</property>
-                    <property name="tooltip_text" translatable="1">Select folder to open in this pane</property>
+                    <property name="dialog_label" translatable="yes">Select Folder</property>
+                    <property name="tooltip_text" translatable="yes">Select folder to open in this pane</property>
                     <signal name="file-selected" handler="on_file_selected" swapped="no"/>
                   </object>
                 </child>
@@ -106,7 +106,7 @@
                   <object class="PathLabel" id="folder_label2">
                     <property name="visible">True</property>
                     <property name="focusable">False</property>
-                    <property name="label" translatable="1">Folder 3</property>
+                    <property name="label" translatable="yes">Folder 3</property>
                   </object>
                 </child>
               </object>

@@ -16,7 +16,7 @@
     <property name="page_increment">10</property>
   </object>
   <template class="PreferencesDialog" parent="AdwPreferencesWindow">
-    <property name="title" translatable="1">Preferences</property>
+    <property name="title" translatable="yes">Preferences</property>
     <property name="modal">1</property>
     <property name="destroy_with_parent">1</property>
     <property name="width_request">800</property>
@@ -32,7 +32,7 @@
             <property name="title">Font</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Use the system fixed width font</property>
+                <property name="title" translatable="yes">Use the system fixed width font</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_default_font">
                     <property name="valign">center</property>
@@ -42,7 +42,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Editor Font</property>
+                <property name="title" translatable="yes">Editor Font</property>
                 <child>
                   <object class="GtkFontButton" id="fontpicker">
                     <property name="hexpand">1</property>
@@ -61,7 +61,7 @@
             <property name="title">Display</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Tab Width</property>
+                <property name="title" translatable="yes">Tab Width</property>
                 <child>
                   <object class="GtkSpinButton" id="spinbutton_tabsize">
                     <property name="valign">center</property>
@@ -74,7 +74,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Insert spaces instead of tabs</property>
+                <property name="title" translatable="yes">Insert spaces instead of tabs</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_spaces_instead_of_tabs">
                     <property name="valign">center</property>
@@ -84,7 +84,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Enable text wrapping</property>
+                <property name="title" translatable="yes">Enable text wrapping</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_wrap_text">
                     <property name="valign">center</property>
@@ -95,7 +95,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Do not split words over two lines</property>
+                <property name="title" translatable="yes">Do not split words over two lines</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_wrap_word">
                     <property name="valign">center</property>
@@ -106,7 +106,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Highlight current line</property>
+                <property name="title" translatable="yes">Highlight current line</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_highlight_current_line">
                     <property name="valign">center</property>
@@ -116,7 +116,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Show line numbers</property>
+                <property name="title" translatable="yes">Show line numbers</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_show_line_numbers">
                     <property name="valign">center</property>
@@ -126,7 +126,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Show whitespace</property>
+                <property name="title" translatable="yes">Show whitespace</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_show_whitespace">
                     <property name="valign">center</property>
@@ -136,7 +136,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Prefer dark theme</property>
+                <property name="title" translatable="yes">Prefer dark theme</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_prefer_dark_theme">
                     <property name="valign">center</property>
@@ -146,7 +146,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Use syntax highlighting</property>
+                <property name="title" translatable="yes">Use syntax highlighting</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_use_syntax_highlighting">
                     <property name="valign">center</property>
@@ -156,7 +156,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Syntax highlighting color scheme</property>
+                <property name="title" translatable="yes">Syntax highlighting color scheme</property>
                 <child>
                   <object class="GSettingsStringComboBox" id="combobox_style_scheme">
                     <property name="hexpand">1</property>
@@ -183,7 +183,7 @@
             <property name="title">Code Overview</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Show overview map</property>
+                <property name="title" translatable="yes">Show overview map</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_show_overview_map">
                     <property name="valign">center</property>
@@ -193,7 +193,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Overview map style</property>
+                <property name="title" translatable="yes">Overview map style</property>
                 <child>
                   <object class="GSettingsStringComboBox" id="combo_overview_map">
                     <property name="valign">center</property>
@@ -220,7 +220,7 @@
             <property name="title">External Editor</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Use default system editor</property>
+                <property name="title" translatable="yes">Use default system editor</property>
                 <child>
                   <object class="GtkSwitch" id="system_editor_checkbutton">
                     <property name="valign">center</property>
@@ -230,7 +230,7 @@
             </child>
             <child>
               <object class="AdwEntryRow" id="custom_edit_command_entry">
-                <property name="title" translatable="1">Editor command</property>
+                <property name="title" translatable="yes">Editor command</property>
               </object>
             </child>
           </object>
@@ -249,7 +249,7 @@
             <property name="title">Shallow Comparison</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Compare files based only on size and timestamp</property>
+                <property name="title" translatable="yes">Compare files based only on size and timestamp</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_shallow_compare">
                     <property name="valign">center</property>
@@ -259,7 +259,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Timestamp resolution</property>
+                <property name="title" translatable="yes">Timestamp resolution</property>
                 <child>
                   <object class="GSettingsIntComboBox" id="combo_timestamp">
                     <property name="valign">center</property>
@@ -279,8 +279,8 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Apply text filters during folder comparisons</property>
-                <property name="subtitle" translatable="1">Note: enabling text filters may make comparing large files much slower</property>
+                <property name="title" translatable="yes">Apply text filters during folder comparisons</property>
+                <property name="subtitle" translatable="yes">Note: enabling text filters may make comparing large files much slower</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_folder_filter_text">
                     <property name="valign">center</property>
@@ -296,7 +296,7 @@
             <property name="title">Symbolic Links</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Ignore symbolic links</property>
+                <property name="title" translatable="yes">Ignore symbolic links</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_ignore_symlinks">
                     <property name="valign">center</property>
@@ -326,7 +326,7 @@
             <property name="title">Version Comparison</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Order when comparing file revisions</property>
+                <property name="title" translatable="yes">Order when comparing file revisions</property>
                 <child>
                   <object class="GSettingsBoolComboBox" id="combo_file_order">
                     <property name="valign">center</property>
@@ -346,7 +346,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Order when merging files</property>
+                <property name="title" translatable="yes">Order when merging files</property>
                 <child>
                   <object class="GSettingsStringComboBox" id="combo_merge_order">
                     <property name="valign">center</property>
@@ -372,7 +372,7 @@
             <property name="title">Commit Messages</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Show right margin</property>
+                <property name="title" translatable="yes">Show right margin</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_show_commit_margin">
                     <property name="valign">center</property>
@@ -382,7 +382,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Show right margin at</property>
+                <property name="title" translatable="yes">Show right margin at</property>
                 <child>
                   <object class="GtkSpinButton" id="spinbutton_commit_margin">
                     <property name="halign">center</property>
@@ -396,7 +396,7 @@
             </child>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Automatically break lines at right margin on commit</property>
+                <property name="title" translatable="yes">Automatically break lines at right margin on commit</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_break_commit_lines">
                     <property name="valign">center</property>
@@ -435,7 +435,7 @@
             <property name="title">Change trimming</property>
             <child>
               <object class="AdwActionRow">
-                <property name="title" translatable="1">Trim blank line differences from the start and end of changes</property>
+                <property name="title" translatable="yes">Trim blank line differences from the start and end of changes</property>
                 <child>
                   <object class="GtkSwitch" id="checkbutton_ignore_blank_lines">
                     <property name="valign">center</property>

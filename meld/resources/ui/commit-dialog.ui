@@ -6,7 +6,7 @@
     <property name="margin-top">12</property>
     <property name="margin-end">12</property>
     <property name="margin-bottom">12</property>
-    <property name="heading" translatable="1">Commit</property>
+    <property name="heading" translatable="yes">Commit</property>
     <property name="default_width">450</property>
     <child>
       <object class="GtkBox" id="dialog-vbox1">
@@ -25,7 +25,7 @@
                 <child>
                   <object class="GtkLabel" id="label2">
                     <property name="xalign">0</property>
-                    <property name="label" translatable="1">Commit Files</property>
+                    <property name="label" translatable="yes">Commit Files</property>
                     <attributes>
                       <attribute name="weight" value="bold"></attribute>
                     </attributes>
@@ -73,7 +73,7 @@
                 <child>
                   <object class="GtkLabel" id="label3">
                     <property name="xalign">0</property>
-                    <property name="label" translatable="1">Log Message</property>
+                    <property name="label" translatable="yes">Log Message</property>
                     <attributes>
                       <attribute name="weight" value="bold"></attribute>
                     </attributes>
@@ -112,7 +112,7 @@
                             <child>
                               <object class="GtkLabel" id="previouslogs_label">
                                 <property name="halign">center</property>
-                                <property name="label" translatable="1">Previous logs:</property>
+                                <property name="label" translatable="yes">Previous logs:</property>
                               </object>
                             </child>
                             <child>

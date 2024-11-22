@@ -6,13 +6,13 @@
     <property name="developer-name">Kai Willadsen</property>
     <property name="issue-url">https://gitlab.gnome.org/GNOME/meld/-/issues</property>
     <property name="support-url">https://discourse.gnome.org/tag/meld</property>
-    <property name="copyright" translatable="1">Copyright © 2002-2009 Stephen Kennedy
+    <property name="copyright" translatable="yes">Copyright © 2002-2009 Stephen Kennedy
 Copyright © 2009-2022 Kai Willadsen</property>
     <property name="website">https://meld.app/</property>
     <property name="developers">Stephen Kennedy
 Kai Willadsen
 Vincent Legoll</property>
-    <property name="translator_credits" translatable="1">translator-credits</property>
+    <property name="translator_credits" translatable="yes">translator-credits</property>
     <property name="artists">GNOME Project
 Josef Vybíral</property>
     <property name="license_type">gpl-2-0</property>

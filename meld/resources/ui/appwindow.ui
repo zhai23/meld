@@ -4,7 +4,7 @@
   <template class="MeldWindow" parent="AdwApplicationWindow">
     <property name="name">meldapp</property>
     <property name="height_request">400</property>
-    <property name="title" translatable="1">Meld</property>
+    <property name="title" translatable="yes">Meld</property>
     <signal name="close-request" handler="on_close_request" />
     <child>
       <object class="GtkBox">
@@ -20,7 +20,7 @@
                 <child>
                   <object class="GtkButton">
                     <property name="action-name">win.new-tab</property>
-                    <property name="tooltip-text" translatable="1">Start Comparison</property>
+                    <property name="tooltip-text" translatable="yes">Start Comparison</property>
                     <property name="focus_on_click">0</property>
                     <child>
                       <object class="GtkImage">
@@ -31,7 +31,7 @@
                 </child>
                 <child>
                   <object class="GtkMenuButton" id="recent_menu_button">
-                    <property name="tooltip-text" translatable="1">Open Recent Comparison</property>
+                    <property name="tooltip-text" translatable="yes">Open Recent Comparison</property>
                     <property name="popover">recent_popover</property>
                     <property name="icon-name">document-open-recent-symbolic</property>
                   </object>
@@ -47,7 +47,7 @@
                 <child>
                   <object class="GtkButton">
                     <!-- <property name="action-name">view.previous-change</property> -->
-                    <property name="tooltip-text" translatable="1">Previous Change</property>
+                    <property name="tooltip-text" translatable="yes">Previous Change</property>
                     <property name="focus_on_click">0</property>
                     <style>
                       <class name="image-button"/>
@@ -62,7 +62,7 @@
                 <child>
                   <object class="GtkButton">
                     <property name="action-name">view.next-change</property>
-                    <property name="tooltip-text" translatable="1">Next Change</property>
+                    <property name="tooltip-text" translatable="yes">Next Change</property>
                     <property name="focus_on_click">0</property>
                     <style>
                       <class name="image-button"/>
@@ -85,7 +85,7 @@
                 <child>
                   <object class="GtkButton" id="previous_conflict_button">
                     <!-- <property name="action-name">view.file-previous-conflict</property> -->
-                    <property name="tooltip-text" translatable="1">Go to the previous conflict</property>
+                    <property name="tooltip-text" translatable="yes">Go to the previous conflict</property>
                     <property name="focus_on_click">0</property>
                     <style>
                       <class name="image-button"/>
@@ -100,7 +100,7 @@
                 <child>
                   <object class="GtkButton" id="next_conflict_button">
                     <!-- <property name="action-name">view.file-next-conflict</property> -->
-                    <property name="tooltip-text" translatable="1">Go to the next conflict</property>
+                    <property name="tooltip-text" translatable="yes">Go to the next conflict</property>
                     <property name="focus_on_click">0</property>
                     <style>
                       <class name="image-button"/>
@@ -119,28 +119,28 @@
             </child>
             <child type="end">
               <object class="GtkMenuButton" id="gear_menu_button">
-                <!-- <property name="action-name">win.gear-menu</property> -->
-                <property name="tooltip-text" translatable="1">Main Menu</property>
+                <!-- <property name="action-name">win.gear-menu</property> TODO4 -->
+                <property name="tooltip-text" translatable="yes">Main Menu</property>
                 <property name="icon-name">open-menu-symbolic</property>
                 <property name="primary">True</property>
               </object>
             </child>
             <child type="end">
               <object class="GtkMenuButton" id="vc_filter_button">
-                <!-- <property name="action-name">view.vc-filter</property> -->
-                <property name="label" translatable="1">Version Filters</property>
+                <!-- <property name="action-name">view.vc-filter</property> TODO4 -->
+                <property name="label" translatable="yes">Version Filters</property>
               </object>
             </child>
             <child type="end">
               <object class="GtkMenuButton" id="folder_filter_button">
-                <!-- <property name="action-name">view.folder-filter</property> -->
-                <property name="label" translatable="1">File Filters</property>
+                <!-- <property name="action-name">view.folder-filter</property> TODO4 -->
+                <property name="label" translatable="yes">File Filters</property>
               </object>
             </child>
             <child type="end">
               <object class="GtkMenuButton" id="text_filter_button">
-                <!-- <property name="action-name">view.text-filter</property> -->
-                <property name="label" translatable="1">Text Filters</property>
+                <!-- <property name="action-name">view.text-filter</property> TODO4 -->
+                <property name="label" translatable="yes">Text Filters</property>
               </object>
             </child>
             <child type="end">

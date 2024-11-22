@@ -27,7 +27,7 @@
             <property name="rubber_banding">1</property>
             <child>
               <object class="GtkTreeViewColumn" id="active_column">
-                <property name="title" translatable="1">Active</property>
+                <property name="title" translatable="yes">Active</property>
                 <child>
                   <object class="GtkCellRendererToggle" id="cr_active">
                     <signal name="toggled" handler="on_cellrenderertoggle_toggled" swapped="no"/>
@@ -40,7 +40,7 @@
             </child>
             <child>
               <object class="GtkTreeViewColumn" id="name_column">
-                <property name="title" translatable="1">Column Name</property>
+                <property name="title" translatable="yes">Column Name</property>
                 <child>
                   <object class="GtkCellRendererText" id="cr_name"/>
                   <attributes>
@@ -63,7 +63,7 @@
         <child>
           <object class="GtkButton" id="remove">
             <property name="focusable">0</property>
-            <property name="label" translatable="1">_Remove</property>
+            <property name="label" translatable="yes">_Remove</property>
             <property name="use_underline">1</property>
             <property name="icon_name">list-remove</property>
           </object>
@@ -71,8 +71,8 @@
         <child>
           <object class="GtkButton" id="move_up">
             <property name="focusable">0</property>
-            <property name="tooltip_text" translatable="1">Move item up</property>
-            <property name="label" translatable="1">Move _Up</property>
+            <property name="tooltip_text" translatable="yes">Move item up</property>
+            <property name="label" translatable="yes">Move _Up</property>
             <property name="use_underline">1</property>
             <property name="icon_name">go-up-symbolic</property>
             <signal name="clicked" handler="on_move_up_clicked" swapped="no"/>
@@ -81,8 +81,8 @@
         <child>
           <object class="GtkButton" id="move_down">
             <property name="focusable">0</property>
-            <property name="tooltip_text" translatable="1">Move item down</property>
-            <property name="label" translatable="1">Move _Down</property>
+            <property name="tooltip_text" translatable="yes">Move item down</property>
+            <property name="label" translatable="yes">Move _Down</property>
             <property name="use_underline">1</property>
             <property name="icon_name">go-down-symbolic</property>
             <signal name="clicked" handler="on_move_down_clicked" swapped="no"/>
