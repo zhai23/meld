@@ -193,11 +193,11 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         MeldDoc.__init__(self)
         bind_settings(self)
 
-        binding_set_names = ("GtkScrolledWindow", "GtkTreeView")
-        for set_name in binding_set_names:
-            binding_set = Gtk.binding_set_find(set_name)
-            for key, modifiers in self.replaced_entries:
-                Gtk.binding_entry_remove(binding_set, key, modifiers)
+        # binding_set_names = ("GtkScrolledWindow", "GtkTreeView") TODO4
+        # for set_name in binding_set_names:
+        #     binding_set = Gtk.binding_set_find(set_name)
+        #     for key, modifiers in self.replaced_entries:
+        #         Gtk.binding_entry_remove(binding_set, key, modifiers)
 
         # Set up per-view action group for top-level menu insertion
         self.view_action_group = Gio.SimpleActionGroup()
