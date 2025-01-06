@@ -341,7 +341,7 @@ class ActionGutter(Gtk.DrawingArea):
                 context.fill_preserve()
                 if view.current_chunk_check(chunk):
                     highlight = self.fill_colors['current-chunk-highlight']
-                    context.set_source_rgba(highlight.red, highlight.green, highlight.blue, highlight)
+                    context.set_source_rgba(highlight.red, highlight.green, highlight.blue, highlight.alpha)
                     context.fill_preserve()
             color = self.line_colors[change_type]
             context.set_source_rgba(color.red, color.green, color.blue, color.alpha)
