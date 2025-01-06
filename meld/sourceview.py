@@ -345,7 +345,6 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
 
         snapshot.save()
         try:
-            width = self.get_width() + 1
             bounds = (
                 self.get_line_num_for_y(0),
                 self.get_line_num_for_y(self.get_height()),
