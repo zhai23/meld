@@ -27,7 +27,7 @@ def get_non_python_libs():
 
     if 'mingw' in sysconfig.get_platform():
         # dll imported by dll dependencies expected to be auto-resolved later
-        inst_root = [os.path.join(local_bin, 'libgtksourceview-4-0.dll')]
+        inst_root = [os.path.join(local_bin, 'libgtksourceview-5-0.dll')]
 
         # required for communicating multiple instances
         inst_lib.append(os.path.join(local_bin, 'gdbus.exe'))
@@ -52,7 +52,7 @@ gtk_data_dirs = [
     'lib/girepository-1.0',
     'share/fontconfig',
     'share/glib-2.0',
-    'share/gtksourceview-4',
+    'share/gtksourceview-5',
     'share/icons',
 ]
 

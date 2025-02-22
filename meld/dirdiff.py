@@ -505,11 +505,11 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         MeldDoc.__init__(self)
         bind_settings(self)
 
-        binding_set_names = ("GtkScrolledWindow", "GtkTreeView")
-        for set_name in binding_set_names:
-            binding_set = Gtk.binding_set_find(set_name)
-            for key, modifiers in self.replaced_entries:
-                Gtk.binding_entry_remove(binding_set, key, modifiers)
+        # binding_set_names = ("GtkScrolledWindow", "GtkTreeView") TODO4
+        # for set_name in binding_set_names:
+        #     binding_set = Gtk.binding_set_find(set_name)
+        #     for key, modifiers in self.replaced_entries:
+        #         Gtk.binding_entry_remove(binding_set, key, modifiers)
 
         self.view_action_group = Gio.SimpleActionGroup()
 
@@ -567,8 +567,8 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/dirdiff-menus.ui')
         context_menu = builder.get_object('dirdiff-context-menu')
-        self.popup_menu = Gtk.Menu.new_from_model(context_menu)
-        self.popup_menu.attach_to_widget(self)
+        self.popup_menu = Gtk.PopoverMenu.new_from_model(context_menu)
+        self.popup_menu.set_parent(self)
 
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/dirdiff-actions.ui')
@@ -612,8 +612,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                 "pane_actionbar", "folder_open_button",
             ],
         )
-
-        self.ensure_style()
 
         self.custom_labels = []
         self.set_num_panes(num_panes)
@@ -718,6 +716,11 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self._scan_in_progress = 0
 
         self.marked = None
+
+        for treeview in [self.treeview0, self.treeview1, self.treeview2]:
+            self._add_treeview_gesture_controller(treeview)
+            self._add_treeview_key_controller(treeview)
+            self._add_treeview_focus_controler(treeview)
 
     def queue_draw(self):
         for treeview in self.treeview:
@@ -901,7 +904,7 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         for m in self.msgarea_mgr:
             m.clear()
         child = self.model.add_entries(None, locations)
-        self.on_treeview_focus_in_event(self.treeview0, None)
+        self.on_treeview_focus_in_event(None)
         self._update_item_state(child)
         self.recompute_label()
         self.scheduler.remove_all_tasks()
@@ -1357,10 +1360,16 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             return
         self.update_action_sensitivity()
 
-    def update_action_sensitivity(self):
-        pane = self._get_focused_pane()
-        if pane is not None:
-            selection = self.treeview[pane].get_selection()
+    def update_action_sensitivity(self, focus_tree=None):
+        if focus_tree is not None:
+            pane = self.treeview.index(focus_tree)
+        else:
+            pane = self._get_focused_pane()
+            if pane is not None:
+                focus_tree = self.treeview[pane]
+
+        if focus_tree is not None:
+            selection = focus_tree.get_selection()
             have_selection = bool(selection.count_selected_rows())
         else:
             have_selection = False
@@ -1460,14 +1469,8 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
         self.current_path = cursor_path
 
-    @Gtk.Template.Callback()
-    def on_treeview_popup_menu(self, treeview):
+    def on_treeview_popup_menu(self, treeview): # TODO4
         return tree.TreeviewCommon.on_treeview_popup_menu(self, treeview)
-
-    @Gtk.Template.Callback()
-    def on_treeview_button_press_event(self, treeview, event):
-        return tree.TreeviewCommon.on_treeview_button_press_event(
-            self, treeview, event)
 
     @with_focused_pane
     def action_prev_pane(self, pane, *args):
@@ -1479,13 +1482,13 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         new_pane = (pane + 1) % self.num_panes
         self.change_focused_tree(self.treeview[pane], self.treeview[new_pane])
 
-    @Gtk.Template.Callback()
-    def on_treeview_key_press_event(self, view, event):
-        if event.keyval not in (Gdk.KEY_Left, Gdk.KEY_Right):
+    def on_treeview_key_press_event(self, controller, keyval, keycode, state):
+        if keyval not in (Gdk.KEY_Left, Gdk.KEY_Right):
             return False
 
+        view = controller.get_widget()
         pane = self.treeview.index(view)
-        target_pane = pane + 1 if event.keyval == Gdk.KEY_Right else pane - 1
+        target_pane = pane + 1 if keyval == Gdk.KEY_Right else pane - 1
         if 0 <= target_pane < self.num_panes:
             self.change_focused_tree(view, self.treeview[target_pane])
 
@@ -1542,11 +1545,13 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.row_expansions.discard(str(path))
         self._do_to_others(view, self.treeview, "collapse_row", (path,))
 
-    @Gtk.Template.Callback()
-    def on_treeview_focus_in_event(self, tree, event):
-        self.focus_pane = tree
-        self.update_action_sensitivity()
-        tree.emit("cursor-changed")
+    def on_treeview_focus_in_event(self, controller):
+        old_pane = self.focus_pane
+        self.focus_pane = controller.get_widget() if controller else self.treeview0
+        self.update_action_sensitivity(self.focus_pane)
+        if old_pane:
+            old_pane.get_selection().unselect_all()
+        self.focus_pane.emit("cursor-changed")
 
     def run_diff_from_iter(self, it):
         rows = self.model.value_paths(it)
@@ -1965,7 +1970,6 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             self._update_item_state(model.get_iter(path))
         self.force_cursor_recalculate = True
 
-    @Gtk.Template.Callback()
     def on_linkmap_scroll_event(self, linkmap, event):
         self.next_diff(event.direction)
 
@@ -1993,12 +1997,14 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
     def action_refresh(self, *args):
         self.refresh()
 
-    def on_delete_event(self):
+    def request_close(self, external_callback=None):
         meld_settings = get_meld_settings()
         for h in self.settings_handlers:
             meld_settings.disconnect(h)
         self.close_signal.emit(0)
-        return Gtk.ResponseType.OK
+
+        if external_callback is not None and callable(external_callback):
+                external_callback(True)
 
     def action_find(self, *args):
         self.focus_pane.emit("start-interactive-search")

@@ -110,7 +110,7 @@ class SchedulerBase:
                 ret = task()
         except StopIteration:
             pass
-        except Exception:
+        except Exception as _ex:
             traceback.print_exc()
         else:
             if ret:

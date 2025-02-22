@@ -144,36 +144,38 @@ class DiffGrid(Gtk.Grid):
         self._handle2.set_position(pos2)
         return int(round(pos1)), int(round(pos2))
 
-    def do_size_allocate(self, allocation):
+    def do_size_allocate(self, width, height, baseline):
         # We should be chaining up here to:
         #     Gtk.Grid.do_size_allocate(self, allocation)
         # However, when we do this, we hit issues with doing multiple
         # allocations in a single allocation cycle (see bgo#779883).
+        x = 0 # TODO4 where to get x, y from?
+        y = 0
 
-        self.set_allocation(allocation)
+        self.do_size_allocate(width, height, baseline)
         wcols, hrows = self._get_min_sizes()
-        yrows = [allocation.y,
-                 allocation.y + hrows[0],
+        yrows = [y,
+                 y + hrows[0],
                  # Roughly equivalent to hard-coding row 1 to expand=True
-                 allocation.y + (allocation.height - hrows[2] - hrows[3]),
-                 allocation.y + (allocation.height - hrows[3]),
-                 allocation.y + allocation.height]
+                 y + (height - hrows[2] - hrows[3]),
+                 y + (height - hrows[3]),
+                 y + height]
 
         (wpane1, wgutter1, wlink1, wgutter2, wpane2, wgutter3, wlink2,
             wgutter4, wpane3, wmap) = wcols
-        xmin = allocation.x
-        xmax = allocation.x + allocation.width - wmap
+        xmin = x
+        xmax = x + width - wmap
         pane_sep_width_1 = wgutter1 + wlink1 + wgutter2
         pane_sep_width_2 = wgutter3 + wlink2 + wgutter4
         pos1, pos2 = self._calculate_positions(
             xmin, xmax, pane_sep_width_1, pane_sep_width_2,
             wpane1, wpane2, wpane3
         )
-        wpane1 = pos1 - allocation.x
+        wpane1 = pos1 - x
         wpane2 = pos2 - (pos1 + pane_sep_width_1)
         wpane3 = xmax - (pos2 + pane_sep_width_2)
         wcols = (
-            allocation.x, wpane1, wgutter1, wlink1, wgutter2, wpane2,
+            x, wpane1, wgutter1, wlink1, wgutter2, wpane2,
             wgutter3, wlink2, wgutter4, wpane3, wmap)
         columns = [sum(wcols[:i + 1]) for i in range(len(wcols))]
 
@@ -192,8 +194,8 @@ class DiffGrid(Gtk.Grid):
 
             if self.get_direction() == Gtk.TextDirection.RTL:
                 child_alloc.x = (
-                    allocation.x + allocation.width -
-                    (child_alloc.x - allocation.x) - child_alloc.width)
+                    x + width -
+                    (child_alloc.x - x) - child_alloc.width)
 
             child.size_allocate(child_alloc)
 
@@ -233,10 +235,10 @@ class DiffGrid(Gtk.Grid):
                     hrows[row] = max(hrows[row], msize.height, nsize.height)
         return wcols, hrows
 
-    def do_draw(self, context):
-        Gtk.Grid.do_draw(self, context)
-        self._handle1.draw(context)
-        self._handle2.draw(context)
+    def do_snapshot(self, snapshot):
+        Gtk.Grid.do_snapshot(self, snapshot)
+        self._handle1.draw(snapshot)
+        self._handle2.draw(snapshot)
 
 
 class HandleWindow():
@@ -247,7 +249,7 @@ class HandleWindow():
 
     def __init__(self):
         self._widget = None
-        self._window = None
+        self._surface = None
         self._area_x = -1
         self._area_y = -1
         self._area_width = 1
@@ -265,44 +267,26 @@ class HandleWindow():
         self._pos = float(pos - xtrans) / width
 
     def realize(self, widget):
-        attr = Gdk.WindowAttr()
-        attr.window_type = Gdk.WindowType.CHILD
-        attr.x = self._area_x
-        attr.y = self._area_y
-        attr.width = self._area_width
-        attr.height = self._area_height
-        attr.wclass = Gdk.WindowWindowClass.INPUT_OUTPUT
-        attr.event_mask = (widget.get_events() |
-                           Gdk.EventMask.BUTTON_PRESS_MASK |
-                           Gdk.EventMask.BUTTON_RELEASE_MASK |
-                           Gdk.EventMask.ENTER_NOTIFY_MASK |
-                           Gdk.EventMask.LEAVE_NOTIFY_MASK |
-                           Gdk.EventMask.POINTER_MOTION_MASK)
-        attr.cursor = Gdk.Cursor.new_from_name(
-            widget.get_display(),
-            "col-resize",
-        )
-        attr_mask = (Gdk.WindowAttributesType.X |
-                     Gdk.WindowAttributesType.Y |
-                     Gdk.WindowAttributesType.CURSOR)
-
-        parent = widget.get_parent_window()
-        self._window = Gdk.Window(parent, attr, attr_mask)
-        self._window.handle = self
+        display = Gdk.Display.get_default()
+        self._surface = Gdk.Surface.new_toplevel(display)
+        # self._surface = Gdk.Surface.new_toplevel(parent) TODO4
+        # self._surface.handle = self
         self._widget = widget
-        self._widget.register_window(self._window)
+        # self._widget.register_window(self._surface)
 
     def unrealize(self):
-        self._widget.unregister_window(self._window)
+        # self._widget.unregister_window(self._surface)
+        pass # TODO4
 
     def set_visible(self, visible):
-        if visible:
-            self._window.show()
-        else:
-            self._window.hide()
+        # if visible:
+        #     self._surface.show()
+        # else:
+        #     self._surface.hide()
+        pass # TODO4
 
     def move_resize(self, x, y, width, height):
-        self._window.move_resize(x, y, width, height)
+        # self._surface.move_resize(x, y, width, height) TODO4
         self._area_x = x
         self._area_y = y
         self._area_width = width
@@ -313,7 +297,7 @@ class HandleWindow():
         self._widget.queue_draw_area(self._area_x, self._area_y,
                                      self._area_width, self._area_height)
 
-    def draw(self, cairocontext):
+    def draw(self, snapshot):
         alloc = self._widget.get_allocation()
         padding = 5
         x = self._area_x - alloc.x + padding
@@ -331,7 +315,7 @@ class HandleWindow():
         if self._prelit:
             state |= Gtk.StateFlags.PRELIGHT
 
-        if Gtk.cairo_should_draw_window(cairocontext, self._window):
+        if Gtk.cairo_should_draw_window(snapshot, self._surface):
             stylecontext.save()
             stylecontext.set_state(state)
             stylecontext.add_class(Gtk.STYLE_CLASS_PANE_SEPARATOR)
@@ -340,10 +324,10 @@ class HandleWindow():
             if color.alpha > 0.0:
                 xcenter = x + width / 2.0 - self.handle_width / 2.0
                 Gtk.render_handle(
-                    stylecontext, cairocontext,
+                    stylecontext, snapshot,
                     xcenter, y, self.handle_width, height)
             else:
                 xcenter = x + width / 2.0
-                Gtk.render_line(stylecontext, cairocontext,
+                Gtk.render_line(stylecontext, snapshot,
                                 xcenter, y, xcenter, y + height)
             stylecontext.restore()

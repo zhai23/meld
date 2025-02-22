@@ -1,7 +1,7 @@
 
 from typing import Dict, Sequence, Union
 
-from gi.repository import Gtk
+from gi.repository import Adw
 
 VIEW_ACCELERATORS: Dict[str, Union[str, Sequence[str]]] = {
     'app.quit': '<Primary>Q',
@@ -26,7 +26,6 @@ VIEW_ACCELERATORS: Dict[str, Union[str, Sequence[str]]] = {
     'view.save-as': '<Primary><Shift>S',
     'view.undo': '<Primary>Z',
     'win.close': '<Primary>W',
-    'win.gear-menu': 'F10',
     'win.fullscreen': 'F11',
     'win.new-tab': '<Primary>N',
     'win.stop': 'Escape',
@@ -60,7 +59,7 @@ VIEW_ACCELERATORS: Dict[str, Union[str, Sequence[str]]] = {
 }
 
 
-def register_accels(app: Gtk.Application):
+def register_accels(app: Adw.Application):
     for name, accel in VIEW_ACCELERATORS.items():
         accel = accel if isinstance(accel, tuple) else (accel,)
         app.set_accels_for_action(name, accel)

@@ -19,7 +19,7 @@ import logging
 import optparse
 import os
 
-from gi.repository import Gdk, Gio, GLib, Gtk
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 import meld.accelerators
 import meld.conf
@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 optparse._ = _
 
 
-class MeldApp(Gtk.Application):
+class MeldApp(Adw.Application):
 
     def __init__(self):
         super().__init__(
@@ -46,20 +46,20 @@ class MeldApp(Gtk.Application):
         )
         GLib.set_application_name(meld.conf.APPLICATION_NAME)
         GLib.set_prgname(meld.conf.APPLICATION_ID)
-        Gtk.Window.set_default_icon_name(meld.conf.APPLICATION_ID)
+        Adw.Window.set_default_icon_name(meld.conf.APPLICATION_ID)
         self.set_resource_base_path(meld.conf.RESOURCE_BASE)
 
         provider = Gtk.CssProvider()
         provider.load_from_resource(self.make_resource_path('meld.css'))
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), provider,
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(), provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def make_resource_path(self, resource_path: str) -> str:
         return f'{self.props.resource_base_path}/{resource_path}'
 
     def do_startup(self):
-        Gtk.Application.do_startup(self)
+        Adw.Application.do_startup(self)
         meld.accelerators.register_accels(self)
 
         actions = (
@@ -74,8 +74,8 @@ class MeldApp(Gtk.Application):
             self.add_action(action)
 
         # Keep clipboard contents after application exit
-        clip = Gtk.Clipboard.get_default(Gdk.Display.get_default())
-        clip.set_can_store(None)
+        # clip = Gdk.Display().get_default().get_clipboard()
+        # clip.set_can_store(None) TODO4
 
         self.new_window()
 
@@ -105,7 +105,7 @@ class MeldApp(Gtk.Application):
         return 0
 
     def do_window_removed(self, widget):
-        Gtk.Application.do_window_removed(self, widget)
+        Adw.Application.do_window_removed(self, widget)
         if not len(self.get_windows()):
             self.quit()
 
@@ -125,23 +125,22 @@ class MeldApp(Gtk.Application):
             uri = "https://meld.app/help/"
         else:
             uri = "help:meld"
-        Gtk.show_uri(
-            Gdk.Screen.get_default(), uri, Gtk.get_current_event_time())
+        launcher = Gtk.UriLauncher()
+        launcher.set_uri(uri)
+        launcher.launch(None, None)
 
     def about_callback(self, action, parameter):
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/about-dialog.ui')
         dialog = builder.get_object('about-dialog')
         dialog.set_version(meld.conf.__version__)
-        dialog.set_logo_icon_name(meld.conf.APPLICATION_ID)
+        dialog.set_application_icon(meld.conf.APPLICATION_ID)
         dialog.set_transient_for(self.get_active_window())
-        dialog.run()
-        dialog.destroy()
+        dialog.present()
 
     def quit_callback(self, action, parameter):
         for window in self.get_windows():
-            cancelled = window.emit(
-                "delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
+            cancelled = window.emit('close-request')
             if cancelled:
                 return
             window.destroy()

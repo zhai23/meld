@@ -62,9 +62,7 @@ class MeldFileButton(Gtk.Button):
     def do_realize(self) -> None:
         Gtk.Button.do_realize(self)
 
-        image = Gtk.Image.new_from_icon_name(
-            self.icon_action_map[self.action], Gtk.IconSize.BUTTON)
-        self.set_image(image)
+        self.set_icon_name(self.icon_action_map[self.action])
 
     def do_clicked(self) -> None:
         dialog = Gtk.FileChooserNative(

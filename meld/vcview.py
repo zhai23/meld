@@ -193,11 +193,11 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         MeldDoc.__init__(self)
         bind_settings(self)
 
-        binding_set_names = ("GtkScrolledWindow", "GtkTreeView")
-        for set_name in binding_set_names:
-            binding_set = Gtk.binding_set_find(set_name)
-            for key, modifiers in self.replaced_entries:
-                Gtk.binding_entry_remove(binding_set, key, modifiers)
+        # binding_set_names = ("GtkScrolledWindow", "GtkTreeView") TODO4
+        # for set_name in binding_set_names:
+        #     binding_set = Gtk.binding_set_find(set_name)
+        #     for key, modifiers in self.replaced_entries:
+        #         Gtk.binding_entry_remove(binding_set, key, modifiers)
 
         # Set up per-view action group for top-level menu insertion
         self.view_action_group = Gio.SimpleActionGroup()
@@ -254,8 +254,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/vcview-menus.ui')
         context_menu = builder.get_object('vcview-context-menu')
-        self.popup_menu = Gtk.Menu.new_from_model(context_menu)
-        self.popup_menu.attach_to_widget(self)
+        self.popup_menu = Gtk.PopoverMenu.new_from_model(context_menu)
+        self.popup_menu.set_parent(self.treeview)
 
         self.model = VcTreeStore()
         self.treeview.set_model(self.model)
@@ -290,6 +290,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                       Gio.SettingsBindFlags.DEFAULT)
         settings.bind('vc-console-pane-position', self.vc_console_vpaned,
                       'position', Gio.SettingsBindFlags.DEFAULT)
+
+        self._add_treeview_gesture_controller(self.treeview)
 
     def on_container_switch_in_event(self, window):
         super().on_container_switch_in_event(window)
@@ -527,10 +529,12 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         path = file.get_path()
         self.set_location(path)
 
-    def on_delete_event(self):
+    def request_close(self, external_callback=None):
         self.scheduler.remove_all_tasks()
         self.close_signal.emit(0)
-        return Gtk.ResponseType.OK
+
+        if external_callback is not None and callable(external_callback):
+            external_callback(True)
 
     @Gtk.Template.Callback()
     def on_row_activated(self, treeview, path, tvc):
@@ -738,13 +742,18 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.vc.update(self.runner)
 
     def action_push(self, *args):
-        response = PushDialog(self).run()
-        if response == Gtk.ResponseType.OK:
+        PushDialog(self).run(self._action_push_response)
+
+    def _action_push_response(self, _dialog, response):
+        if response == "push":
             self.vc.push(self.runner)
 
     def action_commit(self, *args):
-        response, commit_msg = CommitDialog(self).run()
-        if response == Gtk.ResponseType.OK:
+        CommitDialog(self).run(self._action_commit_response)
+
+    def _action_commit_response(self, dialog, response):
+        if response == "commit":
+            commit_msg = dialog.get_message()
             self.vc.commit(
                 self.runner, self._get_selected_files(), commit_msg)
 
@@ -873,8 +882,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                 break
         return None
 
-    @Gtk.Template.Callback()
-    def on_consoleview_populate_popup(self, textview, menu):
+    def on_consoleview_populate_popup(self, textview, menu): # TODO4
         buf = textview.get_buffer()
         clear_action = Gtk.MenuItem.new_with_label(_("Clear"))
         clear_action.connect(
@@ -883,14 +891,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         menu.insert(Gtk.SeparatorMenuItem(), 1)
         menu.show_all()
 
-    @Gtk.Template.Callback()
-    def on_treeview_popup_menu(self, treeview):
+    def on_treeview_popup_menu(self, treeview): # TODO4
         return tree.TreeviewCommon.on_treeview_popup_menu(self, treeview)
-
-    @Gtk.Template.Callback()
-    def on_treeview_button_press_event(self, treeview, event):
-        return tree.TreeviewCommon.on_treeview_button_press_event(
-            self, treeview, event)
 
     @Gtk.Template.Callback()
     def on_treeview_cursor_changed(self, *args):

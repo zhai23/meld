@@ -17,14 +17,14 @@
 import os
 import textwrap
 
-from gi.repository import Gio, GObject, Gtk, Pango
+from gi.repository import Adw, Gio, GObject, Gtk, Pango
 
 from meld.conf import _
 from meld.settings import get_meld_settings, settings
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/commit-dialog.ui')
-class CommitDialog(Gtk.Dialog):
+class CommitDialog(Adw.MessageDialog):
 
     __gtype_name__ = "CommitDialog"
 
@@ -38,7 +38,9 @@ class CommitDialog(Gtk.Dialog):
     def __init__(self, parent):
         super().__init__()
 
-        self.set_transient_for(parent.get_toplevel())
+        self.set_transient_for(parent.get_root())
+        self.add_response("cancel", "_Cancel")
+        self.add_response("commit", "Co_mmit")
         selected = parent._get_selected_files()
 
         try:
@@ -56,7 +58,21 @@ class CommitDialog(Gtk.Dialog):
 
         font = get_meld_settings().font
 
-        self.textview.modify_font(font)
+        size = font.get_size() / 1000
+        font_family = f"font-family: {font.get_family()};"
+        font_size = f"font-size: {str(size)}pt;" if size > 0 else ""
+        style = f"""
+        * {{
+            {font_family}
+            {font_size}
+        }}
+        """
+
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_string(style)
+
+        style_context = self.get_style_context()
+        style_context.add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         commit_prefill = parent.vc.get_commit_message_prefill()
         if commit_prefill:
             buf = self.textview.get_buffer()
@@ -77,26 +93,26 @@ class CommitDialog(Gtk.Dialog):
                       'right-margin-position', Gio.SettingsBindFlags.DEFAULT)
         settings.bind('vc-break-commit-message', self,
                       'break-commit-message', Gio.SettingsBindFlags.DEFAULT)
-        self.show_all()
 
-    def run(self):
+    def run(self, response):
         self.previousentry.set_active(-1)
         self.textview.grab_focus()
-        response = super().run()
-        msg = None
-        if response == Gtk.ResponseType.OK:
-            show_margin = self.textview.get_show_right_margin()
-            margin = self.textview.get_right_margin_position()
-            buf = self.textview.get_buffer()
-            msg = buf.get_text(*buf.get_bounds(), include_hidden_chars=False)
-            # This is a dependent option because of the margin column
-            if show_margin and self.props.break_commit_message:
-                paragraphs = msg.split("\n\n")
-                msg = "\n\n".join(textwrap.fill(p, margin) for p in paragraphs)
-            if msg.strip():
-                self.previousentry.prepend_history(msg)
-        self.destroy()
-        return response, msg
+        self.connect("response", response)
+        self.present()
+
+    def get_message(self):
+        show_margin = self.textview.get_show_right_margin()
+        margin = self.textview.get_right_margin_position()
+        buf = self.textview.get_buffer()
+        msg = buf.get_text(*buf.get_bounds(), include_hidden_chars=False)
+        # This is a dependent option because of the margin column
+        if show_margin and self.props.break_commit_message:
+            paragraphs = msg.split("\n\n")
+            msg = "\n\n".join(textwrap.fill(p, margin) for p in paragraphs)
+        if msg.strip():
+            self.previousentry.prepend_history(msg)
+
+        return msg
 
     @Gtk.Template.Callback()
     def on_previousentry_activate(self, gentry):
@@ -107,21 +123,19 @@ class CommitDialog(Gtk.Dialog):
             buf.set_text(model[idx][1])
 
 
-@Gtk.Template(resource_path='/org/gnome/meld/ui/push-dialog.ui')
-class PushDialog(Gtk.MessageDialog):
-
-    __gtype_name__ = "PushDialog"
+class PushDialog(Adw.MessageDialog):
 
     def __init__(self, parent):
         super().__init__()
 
-        self.set_transient_for(parent.get_toplevel())
-        self.show_all()
+        self.set_transient_for(parent.get_root())
+        self.set_heading("Push local commits to remote?")
+        self.set_body("The commits to be pushed are determined by your version control system.")
+        self.add_response("cancel", "_Cancel")
+        self.add_response("push", "_Push commits")
 
-    def run(self):
+    def run(self, callback):
         # TODO: Ask the VC for a more informative label for what will happen.
         # In git, this is probably the parsed output of push --dry-run.
-
-        response = super().run()
-        self.destroy()
-        return response
+        self.connect("response", callback)
+        self.present()

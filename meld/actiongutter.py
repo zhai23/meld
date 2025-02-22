@@ -22,7 +22,6 @@ from meld.conf import _
 from meld.const import ActionMode, ChunkAction
 from meld.settings import get_meld_settings
 from meld.style import get_common_theme
-from meld.ui.gtkcompat import get_style
 from meld.ui.gtkutil import make_gdk_rgba
 
 
@@ -40,9 +39,15 @@ class ActionIcons:
         icon = cls.icon_cache.get(icon_name)
 
         if not icon:
-            icon_theme = Gtk.IconTheme.get_default()
-            icon = icon_theme.load_icon(
-                f'{cls.icon_name_prefix}-{icon_name}', cls.pixbuf_height, 0)
+            display = Gdk.Display.get_default()
+            icon_theme = Gtk.IconTheme.get_for_display(display)
+            icon = icon_theme.lookup_icon(
+                f'{cls.icon_name_prefix}-{icon_name}',
+                None,
+                cls.pixbuf_height,
+                1,
+                Gtk.TextDirection.LTR,
+                0)
             cls.icon_cache[icon_name] = icon
 
         return icon
@@ -163,7 +168,9 @@ class ActionGutter(Gtk.DrawingArea):
         self.pointer_chunk = None
         self.pressed_chunk = None
 
-        self.motion_controller = Gtk.EventControllerMotion(widget=self)
+        self.set_draw_func(self.draw)
+
+        self.motion_controller = Gtk.EventControllerMotion()
         self.motion_controller.set_propagation_phase(Gtk.PropagationPhase.TARGET)
         self.motion_controller.connect("enter", self.motion_event)
         self.motion_controller.connect("leave", self.motion_event)
@@ -174,19 +181,19 @@ class ActionGutter(Gtk.DrawingArea):
             self.fill_colors, self.line_colors = get_common_theme()
             alpha = self.fill_colors['current-chunk-highlight'].alpha
             self.chunk_highlights = {
-                state: make_gdk_rgba(*[alpha + c * (1.0 - alpha) for c in colour])
+                state: make_gdk_rgba(*[alpha + c * (1.0 - alpha) for c in [colour.red, colour.green, colour.blue, colour.alpha]])
                 for state, colour in self.fill_colors.items()
             }
 
     def do_realize(self):
-        self.set_events(
-            Gdk.EventMask.ENTER_NOTIFY_MASK |
-            Gdk.EventMask.LEAVE_NOTIFY_MASK |
-            Gdk.EventMask.POINTER_MOTION_MASK |
-            Gdk.EventMask.BUTTON_PRESS_MASK |
-            Gdk.EventMask.BUTTON_RELEASE_MASK |
-            Gdk.EventMask.SCROLL_MASK
-        )
+        # self.set_events( TODO4
+        #     Gdk.EventMask.ENTER_NOTIFY_MASK |
+        #     Gdk.EventMask.LEAVE_NOTIFY_MASK |
+        #     Gdk.EventMask.POINTER_MOTION_MASK |
+        #     Gdk.EventMask.BUTTON_PRESS_MASK |
+        #     Gdk.EventMask.BUTTON_RELEASE_MASK |
+        #     Gdk.EventMask.SCROLL_MASK
+        # )
         self.connect('notify::action-mode', lambda *args: self.queue_draw())
 
         meld_settings = get_meld_settings()
@@ -287,7 +294,7 @@ class ActionGutter(Gtk.DrawingArea):
 
         return self.chunks[start_idx:end_idx]
 
-    def do_draw(self, context):
+    def draw(self, _gutter, context, width, height):
         view = self.source_view
         if not view or not view.get_realized():
             return
@@ -329,13 +336,15 @@ class ActionGutter(Gtk.DrawingArea):
             # if in the focused chunk, and then stroke the border.
             context.rectangle(-0.5, rect_y + 0.5, width + 1, rect_height)
             if start_line != end_line:
-                context.set_source_rgba(*self.fill_colors[change_type])
+                color = self.fill_colors[change_type]
+                context.set_source_rgba(color.red, color.green, color.blue, color.alpha)
                 context.fill_preserve()
                 if view.current_chunk_check(chunk):
                     highlight = self.fill_colors['current-chunk-highlight']
-                    context.set_source_rgba(*highlight)
+                    context.set_source_rgba(highlight.red, highlight.green, highlight.blue, highlight.alpha)
                     context.fill_preserve()
-            context.set_source_rgba(*self.line_colors[change_type])
+            color = self.line_colors[change_type]
+            context.set_source_rgba(color.red, color.green, color.blue, color.alpha)
             context.stroke()
 
             # Button rendering and tracking
@@ -343,21 +352,21 @@ class ActionGutter(Gtk.DrawingArea):
             if action is None:
                 continue
 
-            it = buf.get_iter_at_line(start_line)
+            _, it = buf.get_iter_at_line(start_line)
             button_y, button_height = view.get_line_yrange(it)
             button_y += 1
             button_height -= 2
 
-            button_style_context = get_style(None, 'button.flat.image-button')
-            if chunk == self.pointer_chunk:
-                button_style_context.set_state(Gtk.StateFlags.PRELIGHT)
+            # button_style_context = get_style(None, 'button.flat.image-button') TODO4 render button
+            # if chunk == self.pointer_chunk:
+            #     button_style_context.set_state(Gtk.StateFlags.PRELIGHT)
 
-            Gtk.render_background(
-                button_style_context, context, button_x, button_y,
-                button_width, button_height)
-            Gtk.render_frame(
-                button_style_context, context, button_x, button_y,
-                button_width, button_height)
+            # Gtk.render_background(
+            #     button_style_context, context, button_x, button_y,
+            #     button_width, button_height)
+            # Gtk.render_frame(
+            #     button_style_context, context, button_x, button_y,
+            #     button_width, button_height)
 
             # TODO: Ideally we'd do this in a pre-render step of some
             # kind, but I'm having trouble figuring out what that would
@@ -372,11 +381,11 @@ class ActionGutter(Gtk.DrawingArea):
                 )
             )
 
-            pixbuf = self.action_map.get(action)
-            icon_x = button_x + (button_width - pixbuf.props.width) // 2
-            icon_y = button_y + (button_height - pixbuf.props.height) // 2
-            Gtk.render_icon(
-                button_style_context, context, pixbuf, icon_x, icon_y)
+            # pixbuf = self.action_map.get(action) TODO4 draw icon
+            # icon_x = button_x + (button_width - pixbuf.props.width) // 2
+            # icon_y = button_y + (button_height - pixbuf.props.height) // 2
+            # Gtk.render_icon(
+            #     button_style_context, context, pixbuf, icon_x, icon_y)
 
         context.restore()
 

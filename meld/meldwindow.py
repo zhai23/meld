@@ -18,7 +18,7 @@ import logging
 import os
 from typing import Any, Dict, Optional, Sequence
 
-from gi.repository import Gdk, Gio, GLib, Gtk
+from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 # Import support module to get all builder-constructed widgets in the namespace
 import meld.ui.gladesupport  # noqa: F401
@@ -47,7 +47,7 @@ log = logging.getLogger(__name__)
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/appwindow.ui')
-class MeldWindow(Gtk.ApplicationWindow):
+class MeldWindow(Adw.ApplicationWindow):
 
     __gtype_name__ = 'MeldWindow'
 
@@ -100,13 +100,18 @@ class MeldWindow(Gtk.ApplicationWindow):
             for attr in ('stop', 'hide', 'show', 'start'):
                 setattr(self.spinner, attr, lambda *args: True)
 
-        self.drag_dest_set(
-            Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT |
-            Gtk.DestDefaults.DROP,
-            None, Gdk.DragAction.COPY)
-        self.drag_dest_add_uri_targets()
-        self.connect(
-            "drag_data_received", self.on_widget_drag_data_received)
+        # TODO4 use Gtk.DropTarget
+        drop_target = Gtk.DropTarget(formats=Gdk.ContentFormats.new(['text']))
+        drop_target.connect("accept", self.on_widget_drag_data_accept)
+        drop_target.connect("drop", self.on_widget_drag_data_received)
+        self.add_controller(drop_target)
+        # self.drag_dest_set(
+        #     Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT |
+        #     Gtk.DestDefaults.DROP,
+        #     None, Gdk.DragAction.COPY)
+        # self.drag_dest_add_uri_targets()
+        # self.connect(
+        #     "drag_data_received", self.on_widget_drag_data_received)
 
         self.window_state = SavedWindowState()
         self.window_state.bind(self)
@@ -120,25 +125,32 @@ class MeldWindow(Gtk.ApplicationWindow):
             style_context = self.get_style_context()
             style_context.add_class("devel")
 
+        keycontroller = Gtk.EventControllerKey()
+        keycontroller.connect("key-pressed", self.on_key_pressed_event)
+        self.add_controller(keycontroller)
+
+    def on_key_pressed_event(self, controller, keyval, keycode, state):
+        self.notebook.on_key_pressed_event(controller, keyval, keycode, state)
+
     def do_realize(self):
-        Gtk.ApplicationWindow.do_realize(self)
+        Adw.ApplicationWindow.do_realize(self)
 
         app = self.get_application()
         menu = app.get_menu_by_id("gear-menu")
         self.gear_menu_button.set_popover(
-            Gtk.Popover.new_from_model(self.gear_menu_button, menu))
+            Gtk.PopoverMenu.new_from_model(menu))
 
         filter_model = app.get_menu_by_id("text-filter-menu")
         self.text_filter_button.set_popover(
-            Gtk.Popover.new_from_model(self.text_filter_button, filter_model))
+            Gtk.PopoverMenu.new_from_model(filter_model))
 
         filter_menu = app.get_menu_by_id("folder-status-filter-menu")
         self.folder_filter_button.set_popover(
-            Gtk.Popover.new_from_model(self.folder_filter_button, filter_menu))
+            Gtk.PopoverMenu.new_from_model(filter_menu))
 
         vc_filter_model = app.get_menu_by_id('vc-status-filter-menu')
         self.vc_filter_button.set_popover(
-            Gtk.Popover.new_from_model(self.vc_filter_button, vc_filter_model))
+            Gtk.PopoverMenu.new_from_model(vc_filter_model))
 
         meld_settings = get_meld_settings()
         self.update_text_filters(meld_settings)
@@ -176,12 +188,15 @@ class MeldWindow(Gtk.ApplicationWindow):
         filter_model = app.get_menu_by_id("text-filter-menu")
         replace_menu_section(filter_model, section)
 
-    def on_widget_drag_data_received(
-            self, wid, context, x, y, selection_data, info, time):
-        uris = selection_data.get_uris()
-        if uris:
-            self.open_paths([Gio.File.new_for_uri(uri) for uri in uris])
-            return True
+    def on_widget_drag_data_accept(self, drop_target, drop):
+        return True # TODO4
+
+    def on_widget_drag_data_received(self, drop_target, value, x, y, data):
+        # uris = selection_data.get_uris() # TODO4
+        # if uris:
+        #     self.open_paths([Gio.File.new_for_uri(uri) for uri in uris])
+        #     return True
+        pass
 
     def on_idle(self):
         ret = self.scheduler.iteration()
@@ -210,27 +225,29 @@ class MeldWindow(Gtk.ApplicationWindow):
             self.idle_hooked = GLib.idle_add(self.on_idle)
 
     @Gtk.Template.Callback()
-    def on_delete_event(self, *extra):
-        # Delete pages from right-to-left.  This ensures that if a version
-        # control page is open in the far left page, it will be closed last.
-        responses = []
-        for page in reversed(self.notebook.get_children()):
-            self.notebook.set_current_page(self.notebook.page_num(page))
-            responses.append(page.on_delete_event())
+    def on_close_request(self, window):
+        if self.notebook.get_n_pages() > 0:
+            GLib.idle_add(self.close_window_async, True)
 
-        have_cancelled_tabs = any(r == Gtk.ResponseType.CANCEL for r in responses)
-        have_saving_tabs = any(r == Gtk.ResponseType.APPLY for r in responses)
+            # prevent close, will be done by thread if all pages are closed
+            return True
 
-        # If we have tabs that are not straight OK responses, we cancel the
-        # close. Either something has cancelled the close, or we temporarily
-        # cancel the close while async saving is happening.
-        cancel_delete = have_cancelled_tabs or have_saving_tabs or self.has_pages()
-        # If we have only saving and no cancelled tabs, we record that we
-        # should close once the other tabs have closed (assuming the state)
-        # doesn't otherwise change.
-        self.should_close = have_saving_tabs and not have_cancelled_tabs
+        return False
 
-        return cancel_delete
+    def close_window_async(self, last_closed):
+        if last_closed:
+            # Delete pages from right-to-left.  This ensures that if a version
+            # control page is open in the far left page, it will be closed last.
+            n_pages = self.notebook.get_n_pages()
+
+            if n_pages > 0:
+                page = self.notebook.get_nth_page(n_pages - 1)
+                page_num = self.notebook.page_num(page)
+                self.notebook.set_current_page(page_num)
+                page.request_close(self.close_window_async)
+            else:
+                # all pages have been closed, close window
+                self.close()
 
     def has_pages(self):
         return self.notebook.get_n_pages() > 0
@@ -252,9 +269,13 @@ class MeldWindow(Gtk.ApplicationWindow):
         if hasattr(newdoc, 'scheduler'):
             self.scheduler.add_task(newdoc.scheduler)
 
-        self.view_toolbar.foreach(self.view_toolbar.remove)
+        child = self.view_toolbar.get_first_child()
+        while child:
+            self.view_toolbar.remove(child)
+            child = self.view_toolbar.get_first_child()
+
         if hasattr(newdoc, 'toolbar_actions'):
-            self.view_toolbar.add(newdoc.toolbar_actions)
+            self.view_toolbar.append(newdoc.toolbar_actions)
 
     @Gtk.Template.Callback()
     def after_switch_page(self, notebook, page, which):
@@ -268,11 +289,11 @@ class MeldWindow(Gtk.ApplicationWindow):
         i = self.notebook.get_current_page()
         if i >= 0:
             page = self.notebook.get_nth_page(i)
-            page.on_delete_event()
+            page.request_close()
 
     def action_fullscreen_change(self, action, state):
-        window_state = self.get_window().get_state()
-        is_full = window_state & Gdk.WindowState.FULLSCREEN
+        root = self.get_root()
+        is_full = root.is_fullscreen()
         action.set_state(state)
         if state and not is_full:
             self.fullscreen()
@@ -299,8 +320,7 @@ class MeldWindow(Gtk.ApplicationWindow):
         if not self.has_pages():
             self.on_switch_page(self.notebook, page, -1)
             if self.should_close:
-                cancelled = self.emit(
-                    'delete-event', Gdk.Event.new(Gdk.EventType.DELETE))
+                cancelled = self.emit('close-request')
                 if not cancelled:
                     self.destroy()
 
@@ -325,7 +345,8 @@ class MeldWindow(Gtk.ApplicationWindow):
     def _append_page(self, page):
         nbl = NotebookLabel(page=page)
         self.notebook.append_page(page, nbl)
-        self.notebook.child_set_property(page, 'tab-expand', True)
+        real_page = self.notebook.get_page(page)
+        real_page.set_property("tab-expand", True)
 
         # Change focus to the newly created page only if the user is on a
         # DirDiff or VcView page, or if it's a new tab page. This prevents
@@ -352,7 +373,7 @@ class MeldWindow(Gtk.ApplicationWindow):
         self.notebook.on_label_changed(doc, _("New comparison"), None)
 
         def diff_created_cb(doc, newdoc):
-            doc.on_delete_event()
+            doc.request_close()
             idx = self.notebook.page_num(newdoc)
             self.notebook.set_current_page(idx)
 

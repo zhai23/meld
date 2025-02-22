@@ -33,25 +33,6 @@ class MeldNotebook(Gtk.Notebook):
         'page-label-changed': (0, None, (GObject.TYPE_STRING,)),
     }
 
-    # Python 3.4; no bytes formatting
-    css = (
-        b"""
-        @binding-set TabSwitchBindings {
-          bind "<Alt>1" { "tab-switch" (0) };
-          bind "<Alt>2" { "tab-switch" (1) };
-          bind "<Alt>3" { "tab-switch" (2) };
-          bind "<Alt>4" { "tab-switch" (3) };
-          bind "<Alt>5" { "tab-switch" (4) };
-          bind "<Alt>6" { "tab-switch" (5) };
-          bind "<Alt>7" { "tab-switch" (6) };
-          bind "<Alt>8" { "tab-switch" (7) };
-          bind "<Alt>9" { "tab-switch" (8) };
-          bind "<Alt>0" { "tab-switch" (9) };
-        }
-        notebook.meld-notebook { -gtk-key-bindings: TabSwitchBindings; }
-        """
-    )
-
     ui = """
       <?xml version="1.0" encoding="UTF-8"?>
       <interface>
@@ -71,14 +52,6 @@ class MeldNotebook(Gtk.Notebook):
         </menu>
       </interface>
     """
-
-    provider = Gtk.CssProvider()
-    provider.load_from_data(css)
-    Gtk.StyleContext.add_provider_for_screen(
-        Gdk.Screen.get_default(),
-        provider,
-        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -102,40 +75,40 @@ class MeldNotebook(Gtk.Notebook):
         stylecontext = self.get_style_context()
         stylecontext.add_class('meld-notebook')
 
-        self.connect('button-press-event', self.on_button_press_event)
-        self.connect('popup-menu', self.on_popup_menu)
         self.connect('page-added', self.on_page_added)
         self.connect('page-removed', self.on_page_removed)
+
+    def on_key_pressed_event(self, controller, keyval, keycode, state):
+        if state == Gdk.ModifierType.ALT_MASK:
+            if keyval >= Gdk.KEY_0 and keyval <= Gdk.KEY_9:
+                self.emit("tab-switch", keyval - Gdk.KEY_0)
+
+    def append_page(self, child, tab_label):
+        super().append_page(child, tab_label)
+
+        gesture = Gtk.GestureClick()
+        gesture.set_button(3)
+        gesture.connect("pressed", self.on_button_press_event)
+        tab_label.add_controller(gesture)
 
     def do_tab_switch(self, page_num):
         self.set_current_page(page_num)
 
-    def on_popup_menu(self, widget, event=None):
+    def on_popup_menu(self, widget):
         self.action_group.lookup_action("tabmoveleft").set_enabled(
             self.get_current_page() > 0)
         self.action_group.lookup_action("tabmoveright").set_enabled(
             self.get_current_page() < self.get_n_pages() - 1)
 
-        popup = Gtk.Menu.new_from_model(self.popup_menu)
-        popup.attach_to_widget(widget, None)
-        popup.show_all()
+        popup = Gtk.PopoverMenu.new_from_model(self.popup_menu)
+        popup.set_parent(widget)
+        popup.popup()
 
-        if event:
-            popup.popup_at_pointer(event)
-        else:
-            popup.popup_at_widget(
-                widget,
-                Gdk.Gravity.NORTH_WEST,
-                Gdk.Gravity.NORTH_WEST,
-                event,
-            )
-        return True
-
-    def on_button_press_event(self, widget, event):
-        if (event.triggers_context_menu() and
-                event.type == Gdk.EventType.BUTTON_PRESS):
-            return self.on_popup_menu(widget, event)
-        return False
+    def on_button_press_event(self, gesture, n_press, x, y):
+        widget = gesture.get_widget()
+        index = self.page_num(widget.page)
+        self.set_current_page(index)
+        self.on_popup_menu(widget)
 
     def on_tab_move_left(self, *args):
         page_num = self.get_current_page()
@@ -164,4 +137,6 @@ class MeldNotebook(Gtk.Notebook):
         # Only update the window title if the current page is active
         if self.get_current_page() == self.page_num(page):
             self.emit('page-label-changed', text)
-        self.child_set_property(page, "menu-label", text)
+
+        real_page = self.get_page(page)
+        real_page.set_property("menu-label", text)

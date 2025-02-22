@@ -38,7 +38,7 @@ from typing import (
     Union,
 )
 
-from gi.repository import GLib, Gtk
+from gi.repository import Adw, GLib, Gtk
 
 from meld.conf import _
 
@@ -69,7 +69,7 @@ def with_focused_pane(function):
 def get_modal_parent(widget: Optional[Gtk.Widget] = None) -> Gtk.Window:
     parent: Gtk.Window
     if not widget:
-        parent = Gtk.Application.get_default().get_active_window()
+        parent = Adw.Application.get_default().get_active_window()
     elif not isinstance(widget, Gtk.Window):
         parent = widget.get_toplevel()
     else:

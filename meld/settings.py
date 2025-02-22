@@ -80,7 +80,7 @@ class MeldSettings(GObject.GObject):
                 font_string = interface_settings.get_string(
                     'monospace-font-name')
             else:
-                font_string = 'monospace'
+                font_string = 'monospace 11'
         else:
             font_string = settings.get_string('custom-font')
         return Pango.FontDescription(font_string)

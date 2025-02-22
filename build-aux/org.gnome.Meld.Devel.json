@@ -37,14 +37,12 @@
     {
       "name": "gtksourceview",
       "buildsystem": "meson",
-      "config-opts": [
-        "-Dgtk_doc=false"
-      ],
+      "config-opts": [],
       "sources": [
         {
           "type": "archive",
-          "url": "https://download.gnome.org/sources/gtksourceview/4.4/gtksourceview-4.4.0.tar.xz",
-          "sha256": "9ddb914aef70a29a66acd93b4f762d5681202e44094d2d6370e51c9e389e689a"
+          "url": "https://download.gnome.org/sources/gtksourceview/5.12/gtksourceview-5.12.1.tar.xz",
+          "sha256": "84c82aad985c5aadae7cea7804904a76341ec82b268d46594c1a478f39b42c1f"
         }
       ]
     },
@@ -72,8 +70,8 @@
       "sources": [
         {
           "type": "git",
-          "url": "https://gitlab.gnome.org/GNOME/meld.git",
-          "branch": "main"
+          "url": "https://gitlab.gnome.org/philippun1/meld.git",
+          "branch": "gtk4"
         }
       ],
       "config-opts": [
