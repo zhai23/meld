@@ -122,7 +122,7 @@ class CellRendererFileMode(Gtk.CellRendererText):
 
     file_mode = GObject.Property(
         type=int,
-        nick="Byte size to display",
+        nick="File mode to display",
         getter=get_file_mode,
         setter=set_file_mode,
     )
