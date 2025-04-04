@@ -1,4 +1,5 @@
 # Copyright (C) 2016 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+from typing import Final
 
 from gi.repository import GObject, Gtk
 
@@ -23,16 +25,20 @@ class CellRendererDate(Gtk.CellRendererText):
     __gtype_name__ = "CellRendererDate"
 
     #: We use negative 32-bit Unix timestamp to threshold our valid values
-    MIN_TIMESTAMP = -2147483648
-    DATETIME_FORMAT = "%a %d %b %Y %H:%M:%S"
+    MIN_TIMESTAMP: Final[int] = -2147483648
+    DATETIME_FORMAT: Final[str] = "%a %d %b %Y %H:%M:%S"
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._datetime: float = self.MIN_TIMESTAMP
 
     def _format_datetime(self, dt: datetime.datetime) -> str:
         return dt.strftime(self.DATETIME_FORMAT)
 
-    def get_timestamp(self):
+    def get_timestamp(self) -> float:
         return getattr(self, '_datetime', self.MIN_TIMESTAMP)
 
-    def set_timestamp(self, value):
+    def set_timestamp(self, value: float) -> None:
         if value == self.get_timestamp():
             return
         if value <= self.MIN_TIMESTAMP:
@@ -68,10 +74,14 @@ class CellRendererByteSize(Gtk.CellRendererText):
 
     __gtype_name__ = "CellRendererByteSize"
 
-    def get_bytesize(self):
+    def __init__(self) -> None:
+        super().__init__()
+        self._bytesize: int = -1
+
+    def get_bytesize(self) -> int:
         return getattr(self, '_bytesize', -1)
 
-    def set_bytesize(self, value):
+    def set_bytesize(self, value: int) -> None:
         if value == self.get_bytesize():
             return
         if value == -1:
@@ -102,10 +112,14 @@ class CellRendererFileMode(Gtk.CellRendererText):
 
     __gtype_name__ = "CellRendererFileMode"
 
-    def get_file_mode(self):
+    def __init__(self) -> None:
+        super().__init__()
+        self._file_mode: int = -1
+
+    def get_file_mode(self) -> int:
         return getattr(self, '_file_mode', -1)
 
-    def set_file_mode(self, value):
+    def set_file_mode(self, value: int) -> None:
         if value == self.get_file_mode():
             return
         if value == -1.0:

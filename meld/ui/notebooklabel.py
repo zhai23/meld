@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2009 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2008-2009, 2013, 2019 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,6 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from typing import Any
 
 from gi.repository import Gdk, GObject, Gtk
 
@@ -36,7 +39,7 @@ class NotebookLabel(Gtk.EventBox):
         default=None,
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
         self.bind_property(
@@ -49,11 +52,11 @@ class NotebookLabel(Gtk.EventBox):
         )
 
     @Gtk.Template.Callback()
-    def on_label_button_press_event(self, widget, event):
+    def on_label_button_press_event(self, _widget: Gtk.Widget, event: Gdk.EventButton) -> bool:
         # Middle-click on the tab closes the tab.
         if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:
             self.page.on_delete_event()
 
     @Gtk.Template.Callback()
-    def on_close_button_clicked(self, widget):
+    def on_close_button_clicked(self, _widget: Gtk.Button) -> None:
         self.page.on_delete_event()

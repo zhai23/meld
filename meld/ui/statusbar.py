@@ -1,4 +1,5 @@
 # Copyright (C) 2012-2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,6 +13,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from typing import Tuple
 
 from gi.repository import GObject, Gtk, GtkSource, Pango
 
@@ -39,10 +42,10 @@ class MeldStatusMenuButton(Gtk.MenuButton):
     css_provider = Gtk.CssProvider()
     css_provider.load_from_data(style)
 
-    def get_label(self):
+    def get_label(self) -> str:
         return self._label.get_text()
 
-    def set_label(self, markup):
+    def set_label(self, markup: str) -> None:
         if markup == self._label.get_text():
             return
         self._label.set_markup(markup)
@@ -54,7 +57,7 @@ class MeldStatusMenuButton(Gtk.MenuButton):
         setter=set_label,
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         style_context = self.get_style_context()
@@ -85,9 +88,9 @@ class MeldStatusMenuButton(Gtk.MenuButton):
         self.remove(self.get_child())
         self.add(box)
 
-        self._label = label
+        self._label: Gtk.Label = label
 
-    def set_label_width(self, width):
+    def set_label_width(self, width: int) -> None:
         self._label.set_width_chars(width)
 
 
@@ -124,7 +127,7 @@ class MeldStatusBar(Gtk.Statusbar):
     # Abbreviation for line, column so that it will fit in the status bar
     _line_column_text = _("Ln {line}, Col {column}")
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.props.margin = 0
         self.props.spacing = 6
@@ -136,7 +139,7 @@ class MeldStatusBar(Gtk.Statusbar):
         hbox.remove(label)
         hbox.pack_end(label, False, True, 0)
 
-    def do_realize(self):
+    def do_realize(self) -> None:
         Gtk.Statusbar.do_realize(self)
 
         self.box_box = Gtk.Box(
@@ -153,33 +156,33 @@ class MeldStatusBar(Gtk.Statusbar):
             self.construct_display_popover(), False, True, 0)
         self.box_box.show_all()
 
-    def construct_line_display(self):
+    def construct_line_display(self) -> MeldStatusMenuButton:
 
         # Note that we're receiving one-based line numbers from the
         # user and storing and emitting zero-base line numbers.
 
-        def go_to_line_text(text):
+        def go_to_line_text(text: str) -> None:
             try:
                 line = int(text)
             except ValueError:
                 return
             self.emit('go-to-line', max(0, line - 1))
 
-        def line_entry_mapped(entry):
-            line, offset = self.props.cursor_position
+        def line_entry_mapped(entry: Gtk.Entry) -> None:
+            line, _ = self.props.cursor_position
             entry.set_text(str(line + 1))
 
         # This handler causes a failed assertion due to the `position`
         # out param (see pygobject#12), but we don't need it here.
-        def line_entry_insert_text(entry, new_text, length, position):
+        def line_entry_insert_text(entry: Gtk.Entry, new_text: str, _length: int, _position: int) -> None:
             if not new_text.isdigit():
                 GObject.signal_stop_emission_by_name(entry, 'insert-text')
                 return
 
-        def line_entry_changed(entry):
+        def line_entry_changed(entry: Gtk.Entry) -> None:
             go_to_line_text(entry.get_text())
 
-        def line_entry_activated(entry):
+        def line_entry_activated(entry: Gtk.Entry) -> None:
             go_to_line_text(entry.get_text())
             pop.popdown()
 
@@ -203,7 +206,7 @@ class MeldStatusBar(Gtk.Statusbar):
         pop.set_position(Gtk.PositionType.TOP)
         pop.add(selector)
 
-        def format_cursor_position(binding, cursor):
+        def format_cursor_position(_binding: GObject.Binding, cursor: Tuple[int, int]) -> str:
             line, offset = cursor
             return self._line_column_text.format(
                 line=line + 1, column=offset + 1)
@@ -221,12 +224,12 @@ class MeldStatusBar(Gtk.Statusbar):
 
         return button
 
-    def construct_encoding_selector(self):
-        def change_encoding(selector, encoding):
+    def construct_encoding_selector(self) -> MeldStatusMenuButton:
+        def change_encoding(_selector: EncodingSelector, encoding: GtkSource.Encoding) -> None:
             self.emit('encoding-changed', encoding)
             pop.hide()
 
-        def set_initial_encoding(selector):
+        def set_initial_encoding(selector: EncodingSelector) -> None:
             selector.select_value(self.props.source_encoding)
 
         selector = EncodingSelector()
@@ -247,8 +250,8 @@ class MeldStatusBar(Gtk.Statusbar):
 
         return button
 
-    def construct_highlighting_selector(self):
-        def change_language(selector, lang):
+    def construct_highlighting_selector(self) -> MeldStatusMenuButton:
+        def change_language(_selector: SourceLangSelector, lang: GtkSource.Language) -> None:
             # TODO: Our other GObject properties are expected to be
             # updated through a bound state from our parent. This is
             # the only place where we assign to them instead of
@@ -257,7 +260,7 @@ class MeldStatusBar(Gtk.Statusbar):
             self.props.source_language = lang
             pop.hide()
 
-        def set_initial_language(selector):
+        def set_initial_language(selector: SourceLangSelector) -> None:
             selector.select_value(self.props.source_language)
 
         selector = SourceLangSelector()
@@ -278,7 +281,7 @@ class MeldStatusBar(Gtk.Statusbar):
 
         return button
 
-    def construct_display_popover(self):
+    def construct_display_popover(self) -> MeldStatusMenuButton:
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/statusbar-menu.ui')
         menu = builder.get_object('statusbar-menu')

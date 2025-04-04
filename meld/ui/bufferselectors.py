@@ -1,3 +1,4 @@
+from typing import Any, Final, Optional
 
 from gi.repository import GObject, Gtk, GtkSource
 
@@ -16,31 +17,33 @@ class FilteredListSelector:
     # Copyright (C) 2013 - Ignacio Casal Quinteiro
     # Python translation and adaptations
     # Copyright (C) 2015, 2017 Kai Willadsen <kai.willadsen@gmail.com>
+    # Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 
     __gtype_name__ = 'FilteredListSelector'
 
-    NAME_COLUMN, VALUE_COLUMN = 0, 1
+    NAME_COLUMN: Final[int] = 0
+    VALUE_COLUMN: Final[int] = 1
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self.treeview_selection = self.treeview.get_selection()
+        self.treeview_selection: Gtk.TreeSelection = self.treeview.get_selection()
         # FIXME: Should be able to access as a template child, but can't.
-        self.listfilter = self.treeview.get_model()
-        self.liststore = self.listfilter.get_model()
+        self.listfilter: Gtk.TreeModelFilter = self.treeview.get_model()
+        self.liststore: Gtk.ListStore = self.listfilter.get_model()
 
         self.populate_model()
-        self.filter_string = ''
+        self.filter_string: str = ''
         self.entry.connect('changed', self.on_entry_changed)
         self.listfilter.set_visible_func(self.name_filter)
 
         self.entry.connect('activate', self.on_activate)
         self.treeview.connect('row-activated', self.on_activate)
 
-    def populate_model(self):
+    def populate_model(self) -> None:
         raise NotImplementedError
 
-    def select_value(self, value):
+    def select_value(self, value: Any) -> None:
         if not value:
             return
 
@@ -55,20 +58,20 @@ class FilteredListSelector:
             self.treeview_selection.select_path(row.path)
             self.treeview.scroll_to_cell(row.path, None, True, 0.5, 0)
 
-    def name_filter(self, model, it, *args):
+    def name_filter(self, model: Gtk.TreeModel, it: Gtk.TreeIter, *args: Any) -> bool:
         if not self.filter_string:
             return True
         name = model.get_value(it, self.NAME_COLUMN).lower()
         return self.filter_string.lower() in name
 
-    def on_entry_changed(self, entry):
+    def on_entry_changed(self, entry: Gtk.Entry) -> None:
         self.filter_string = entry.get_text()
         self.listfilter.refilter()
         first = self.listfilter.get_iter_first()
         if first:
             self.treeview_selection.select_iter(first)
 
-    def on_activate(self, *args):
+    def on_activate(self, *args: Any) -> None:
         model, it = self.treeview_selection.get_selected()
         if not it:
             return
@@ -102,11 +105,11 @@ class EncodingSelector(FilteredListSelector, Gtk.Grid):
     entry = Gtk.Template.Child('entry')
     treeview = Gtk.Template.Child('treeview')
 
-    def populate_model(self):
+    def populate_model(self) -> None:
         for enc in GtkSource.Encoding.get_all():
             self.liststore.append((self.get_value_label(enc), enc))
 
-    def get_value_label(self, enc):
+    def get_value_label(self, enc: GtkSource.Encoding) -> str:
         return _('{name} ({charset})').format(
             name=enc.get_name(), charset=enc.get_charset())
 
@@ -116,6 +119,7 @@ class EncodingSelector(FilteredListSelector, Gtk.Grid):
 # Copyright (C) 2013 - Ignacio Casal Quinteiro
 # Python translation and adaptations
 # Copyright (C) 2015, 2017 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 
 
 @Gtk.Template(resource_path='/org/gnome/meld/ui/language-selector.ui')
@@ -136,14 +140,14 @@ class SourceLangSelector(FilteredListSelector, Gtk.Grid):
     entry = Gtk.Template.Child('entry')
     treeview = Gtk.Template.Child('treeview')
 
-    def populate_model(self):
+    def populate_model(self) -> None:
         self.liststore.append((_("Plain Text"), None))
         manager = GtkSource.LanguageManager.get_default()
         for lang_id in manager.get_language_ids():
             lang = manager.get_language(lang_id)
             self.liststore.append((lang.get_name(), lang))
 
-    def get_value_label(self, lang):
+    def get_value_label(self, lang: Optional[GtkSource.Language]) -> str:
         if not lang:
             return _("Plain Text")
         return lang.get_name()

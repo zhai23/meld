@@ -1,4 +1,5 @@
 # Copyright (C) 2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,14 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from typing import List
+from typing import Any, List, Sequence
 
 from gi.repository import Gio, GObject, Gtk
 
 log = logging.getLogger(__name__)
 
 
-def map_widgets_into_lists(widget, widgetnames):
+def map_widgets_into_lists(widget: Any, widgetnames: Sequence[str]) -> None:
     """Put sequentially numbered widgets into lists.
 
     Given an object with widgets self.button0, self.button1, ...,
@@ -50,7 +51,7 @@ def map_widgets_into_lists(widget, widgetnames):
 
 
 def extract_accel_from_menu_item(
-        model: Gio.MenuModel, item: int, app: Gtk.Application):
+        model: Gio.MenuModel, item: int, app: Gtk.Application) -> None:
 
     accel, action, target = None, None, None
 
@@ -68,7 +69,7 @@ def extract_accel_from_menu_item(
         app.set_accels_for_action(detailed_action_name, [accel])
 
 
-def extract_accels_from_menu(model: Gio.MenuModel, app: Gtk.Application):
+def extract_accels_from_menu(model: Gio.MenuModel, app: Gtk.Application) -> None:
     for i in range(model.get_n_items()):
         extract_accel_from_menu_item(model, i, app)
 

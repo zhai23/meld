@@ -18,8 +18,9 @@
 # Additional modifications made for use in Meld and adaptations for
 # newer GTK+.
 # Copyright (C) 2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 
-from typing import Optional
+from typing import Any, Callable, List, Optional
 
 from gi.repository import Gtk, Pango
 
@@ -30,7 +31,7 @@ def layout_text_and_icon(
     primary_text: str,
     secondary_text: Optional[str] = None,
     icon_name: Optional[str] = None,
-):
+) -> Gtk.Box:
     hbox_content = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
 
     if icon_name:
@@ -71,24 +72,24 @@ def layout_text_and_icon(
 class MsgAreaController(Gtk.Box):
     __gtype_name__ = "MsgAreaController"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self.__msgarea = None
-        self.__msgid = None
+        self.__msgarea: Optional[Gtk.InfoBar] = None
+        self.__msgid: Optional[str] = None
 
         self.props.orientation = Gtk.Orientation.HORIZONTAL
 
-    def has_message(self):
+    def has_message(self) -> bool:
         return self.__msgarea is not None
 
-    def get_msg_id(self):
+    def get_msg_id(self) -> Optional[str]:
         return self.__msgid
 
-    def set_msg_id(self, msgid):
+    def set_msg_id(self, msgid: str) -> None:
         self.__msgid = msgid
 
-    def clear(self):
+    def clear(self) -> None:
         if self.__msgarea is not None:
             self.remove(self.__msgarea)
             self.__msgarea.destroy()
@@ -100,7 +101,7 @@ class MsgAreaController(Gtk.Box):
         primary: str,
         secondary: Optional[str] = None,
         icon_name: Optional[str] = None,
-    ):
+    ) -> Gtk.InfoBar:
         self.clear()
         msgarea = self.__msgarea = Gtk.InfoBar()
 
@@ -116,8 +117,14 @@ class MsgAreaController(Gtk.Box):
         self.pack_start(msgarea, True, True, 0)
         return msgarea
 
-    def add_dismissable_msg(self, icon, primary, secondary, close_panes=None):
-        def clear_all(*args):
+    def add_dismissable_msg(
+        self,
+        icon: str,
+        primary: str,
+        secondary: Optional[str],
+        close_panes: Optional[List["MsgAreaController"]] = None
+    ) -> Gtk.InfoBar:
+        def clear_all(*args: Any) -> None:
             if close_panes:
                 for pane in close_panes:
                     pane.clear()
@@ -129,8 +136,15 @@ class MsgAreaController(Gtk.Box):
         msgarea.show_all()
         return msgarea
 
-    def add_action_msg(self, icon, primary, secondary, action_label, callback):
-        def on_response(msgarea, response_id, *args):
+    def add_action_msg(
+        self,
+        icon: str,
+        primary: str,
+        secondary: Optional[str],
+        action_label: str,
+        callback: Callable[[], None]
+    ) -> Gtk.InfoBar:
+        def on_response(msgarea: Gtk.InfoBar, response_id: int, *args: Any) -> None:
             self.clear()
             if response_id == Gtk.ResponseType.ACCEPT:
                 callback()
