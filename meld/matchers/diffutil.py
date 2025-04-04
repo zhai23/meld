@@ -182,8 +182,8 @@ class Differ(GObject.GObject):
                         break
             return next_chunk
 
-        prev = [None, None, None]
-        next = [find_next(0, 0, -1), find_next(0, 1, -1), find_next(1, 2, -1)]
+        prev_chunks = [None, None, None]
+        next_chunks = [find_next(0, 0, -1), find_next(0, 1, -1), find_next(1, 2, -1)]
         old_end = [0, 0, 0]
 
         for i, c in enumerate(self._merge_cache):
@@ -197,22 +197,22 @@ class Differ(GObject.GObject):
 
                 start, end, last = c[diff][lo], c[diff][hi], old_end[seq]
                 if (start > last):
-                    chunk_ids = [(None, prev[seq], next[seq])] * (start - last)
+                    chunk_ids = [(None, prev_chunks[seq], next_chunks[seq])] * (start - last)
                     self._line_cache[seq][last:start] = chunk_ids
 
                 # For insert chunks, claim the subsequent line.
                 if start == end:
                     end += 1
 
-                next[seq] = find_next(diff, seq, i)
-                chunk_ids = [(i, prev[seq], next[seq])] * (end - start)
+                next_chunks[seq] = find_next(diff, seq, i)
+                chunk_ids = [(i, prev_chunks[seq], next_chunks[seq])] * (end - start)
                 self._line_cache[seq][start:end] = chunk_ids
-                prev[seq], old_end[seq] = i, end
+                prev_chunks[seq], old_end[seq] = i, end
 
         for seq in range(3):
             last, end = old_end[seq], len(self._line_cache[seq])
-            if (last < end):
-                chunk_ids = [(None, prev[seq], next[seq])] * (end - last)
+            if last < end:
+                chunk_ids = [(None, prev_chunks[seq], next_chunks[seq])] * (end - last)
                 self._line_cache[seq][last:end] = chunk_ids
 
     def change_sequence(
