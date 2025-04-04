@@ -88,14 +88,14 @@ class MyersSequenceMatcher(difflib.SequenceMatcher):
     def __init__(
         self, isjunk: Optional[Callable[[str], bool]] = None, a: str = "", b: str = ""
     ) -> None:
+        super().__init__(isjunk, a[:], b[:])
         if isjunk is not None:
             raise NotImplementedError('isjunk is not supported yet')
         # The sequences we're comparing must be considered immutable;
         # calling e.g., GtkTextBuffer methods to retrieve these line-by-line
         # isn't really a thing we can or should do.
-        self.a = a[:]
-        self.b = b[:]
-        self.matching_blocks = self.opcodes = None
+        self.matching_blocks: Optional[List[Tuple[int, int, int]]] = None
+        self.opcodes: Optional[List[DiffChunk]] = None
         self.aindex: List[int] = []
         self.bindex: List[int] = []
         self.common_prefix = self.common_suffix = 0
@@ -383,6 +383,7 @@ class SyncPointMyersSequenceMatcher(MyersSequenceMatcher):
         super().__init__(isjunk, a, b)
         self.isjunk = isjunk
         self.syncpoints = syncpoints
+        self.split_matching_blocks: Optional[List[Tuple[int, int, int]]] = None
 
     def initialise(self) -> Generator[Optional[int], None, None]:
         if self.syncpoints is None or len(self.syncpoints) == 0:

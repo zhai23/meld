@@ -210,6 +210,7 @@ class AutoMergeDiffer(diffutil.Differ):
 class Merger(diffutil.Differ):
 
     def __init__(self) -> None:
+        super().__init__()
         self.differ: AutoMergeDiffer = AutoMergeDiffer()
         self.differ.auto_merge = True
         self.differ.unresolved = []
