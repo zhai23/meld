@@ -19,7 +19,7 @@ import logging
 import multiprocessing
 import queue
 import time
-from typing import Dict, List, Literal, Tuple, Callable, Type
+from typing import Callable, Dict, Final, List, Tuple, Type
 
 from gi.repository import GLib
 
@@ -32,11 +32,13 @@ log = logging.getLogger(__name__)
 
 class MatcherWorker(multiprocessing.Process):
 
-    END_TASK: Literal[-1] = -1
+    END_TASK: Final[int] = -1
 
     matcher_class: Type[myers.MyersSequenceMatcher] = myers.InlineMyersSequenceMatcher
 
-    def __init__(self, tasks: multiprocessing.Queue, results: multiprocessing.Queue) -> None:
+    def __init__(
+        self, tasks: multiprocessing.Queue, results: multiprocessing.Queue
+    ) -> None:
         super().__init__()
         self.tasks = tasks
         self.results = results
@@ -64,7 +66,7 @@ class CachedSequenceMatcher:
     eviction is overly simplistic, but is okay for our usage pattern.
     """
 
-    TASK_GRACE_PERIOD: Literal[1] = 1
+    TASK_GRACE_PERIOD: Final[int] = 1
 
     def __init__(self, scheduler: SchedulerBase) -> None:
         """Create a new caching sequence matcher
@@ -84,7 +86,9 @@ class CachedSequenceMatcher:
         self.results.cancel_join_thread()
         self.thread = MatcherWorker(self.tasks, self.results)
         self.task_id = 1
-        self.queued_matches: Dict[int, Tuple[Tuple[str, str], Callable[[List[DiffChunk]], None]]] = {}
+        self.queued_matches: Dict[
+            int, Tuple[Tuple[str, str], Callable[[List[DiffChunk]], None]]
+        ] = {}
         GLib.idle_add(self.thread.start)
 
     def stop(self) -> None:
@@ -94,9 +98,13 @@ class CachedSequenceMatcher:
             if self.thread.exitcode is None:
                 self.thread.terminate()
         self.cache: Dict[Tuple[str, str], Tuple[List[DiffChunk], float]] = {}
-        self.queued_matches: Dict[int, Tuple[Tuple[str, str], Callable[[List[DiffChunk]], None]]] = {}
+        self.queued_matches: Dict[
+            int, Tuple[Tuple[str, str], Callable[[List[DiffChunk]], None]]
+        ] = {}
 
-    def match(self, text1: str, textn: str, cb: Callable[[List[DiffChunk]], None]) -> None:
+    def match(
+        self, text1: str, textn: str, cb: Callable[[List[DiffChunk]], None]
+    ) -> None:
         texts = (text1, textn)
         try:
             self.cache[texts][1] = time.time()
@@ -105,7 +113,9 @@ class CachedSequenceMatcher:
         except KeyError:
             GLib.idle_add(lambda: self.enqueue_task(texts, cb))
 
-    def enqueue_task(self, texts: Tuple[str, str], cb: Callable[[List[DiffChunk]], None]) -> None:
+    def enqueue_task(
+        self, texts: Tuple[str, str], cb: Callable[[List[DiffChunk]], None]
+    ) -> None:
         if not bool(self.queued_matches):
             self.scheduler.add_task(self.check_results)
         self.queued_matches[self.task_id] = (texts, cb)

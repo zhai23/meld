@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2009, 2012-2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import Dict, Final, Generator, Iterator, List, Optional, Set, Tuple
+
 from gi.repository import GObject
 
 from meld.matchers.myers import (
@@ -22,34 +25,39 @@ from meld.matchers.myers import (
     SyncPointMyersSequenceMatcher,
 )
 
-LO, HI = 1, 2
+LO: Final[int] = 1
+HI: Final[int] = 2
 
-opcode_reverse = {
+opcode_reverse: Dict[str, str] = {
     "replace": "replace",
     "insert": "delete",
     "delete": "insert",
     "conflict": "conflict",
-    "equal": "equal"
+    "equal": "equal",
 }
 
 
-def merged_chunk_order(merged_chunk):
+def merged_chunk_order(
+    merged_chunk: Tuple[Optional[DiffChunk], Optional[DiffChunk]],
+) -> int:
     if not merged_chunk:
         return 0
     chunk = merged_chunk[0] or merged_chunk[1]
     return chunk.start_a
 
 
-def reverse_chunk(chunk):
+def reverse_chunk(chunk: DiffChunk) -> DiffChunk:
     tag = opcode_reverse[chunk[0]]
     return DiffChunk._make((tag, chunk[3], chunk[4], chunk[1], chunk[2]))
 
 
-def consume_blank_lines(chunk, texts, pane1, pane2):
+def consume_blank_lines(
+    chunk: Optional[DiffChunk], texts: List[str], pane1: int, pane2: int
+) -> Optional[DiffChunk]:
     if chunk is None:
         return None
 
-    def _find_blank_lines(txt, lo, hi):
+    def _find_blank_lines(txt: str, lo: int, hi: int) -> Tuple[int, int]:
         while lo < hi and not txt[lo]:
             lo += 1
         while lo < hi and not txt[hi - 1]:
@@ -80,23 +88,30 @@ class Differ(GObject.GObject):
     _matcher = MyersSequenceMatcher
     _sync_matcher = SyncPointMyersSequenceMatcher
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Internally, diffs are stored from text1 -> text0 and text1 -> text2.
         super().__init__()
-        self.num_sequences = 0
-        self.seqlength = [0, 0, 0]
-        self.diffs = [[], []]
-        self.syncpoints = []
-        self.conflicts = []
-        self._old_merge_cache = set()
-        self._changed_chunks = tuple()
-        self._merge_cache = []
-        self._line_cache = [[], [], []]
-        self.ignore_blanks = False
-        self._initialised = False
-        self._has_mergeable_changes = (False, False, False, False)
+        self.num_sequences: int = 0
+        self.seqlength: List[int] = [0, 0, 0]
+        self.diffs: List[List[DiffChunk]] = [[], []]
+        self.syncpoints: List[Tuple[int, int]] = []
+        self.conflicts: List[int] = []
+        self._old_merge_cache: Set[Tuple[Optional[DiffChunk], Optional[DiffChunk]]] = set()
+        self._changed_chunks: Tuple[Optional[DiffChunk], Optional[DiffChunk]] = tuple()
+        self._merge_cache: List[Tuple[Optional[DiffChunk], Optional[DiffChunk]]] = []
+        self._line_cache: List[
+            List[Tuple[Optional[int], Optional[int], Optional[int]]]
+        ] = [[], [], []]
+        self.ignore_blanks: bool = False
+        self._initialised: bool = False
+        self._has_mergeable_changes: Tuple[bool, bool, bool, bool] = (
+            False,
+            False,
+            False,
+            False,
+        )
 
-    def _update_merge_cache(self, texts):
+    def _update_merge_cache(self, texts: List[str]) -> None:
         if self.num_sequences == 3:
             self._merge_cache = [c for c in self._merge_diffs(self.diffs[0],
                                                               self.diffs[1],
@@ -143,7 +158,7 @@ class Differ(GObject.GObject):
         self._update_line_cache()
         self.emit("diffs-changed", chunk_changes)
 
-    def _update_line_cache(self):
+    def _update_line_cache(self) -> None:
         """Cache a mapping from line index to per-pane chunk indices
 
         This cache exists so that the UI can quickly query for current,
@@ -156,7 +171,7 @@ class Differ(GObject.GObject):
 
         last_chunk = len(self._merge_cache)
 
-        def find_next(diff, seq, current):
+        def find_next(diff: int, seq: int, current: int) -> Optional[int]:
             next_chunk = None
             if seq == 1 and current + 1 < last_chunk:
                 next_chunk = current + 1
@@ -200,7 +215,9 @@ class Differ(GObject.GObject):
                 chunk_ids = [(None, prev[seq], next[seq])] * (end - last)
                 self._line_cache[seq][last:end] = chunk_ids
 
-    def change_sequence(self, sequence, startidx, sizechange, texts):
+    def change_sequence(
+        self, sequence: int, startidx: int, sizechange: int, texts: List[str]
+    ) -> None:
         assert sequence in (0, 1, 2)
         if sequence == 0 or sequence == 1:
             self._change_sequence(0, sequence, startidx, sizechange, texts)
@@ -208,7 +225,9 @@ class Differ(GObject.GObject):
             self._change_sequence(1, sequence, startidx, sizechange, texts)
         self.seqlength[sequence] += sizechange
 
-        def offset(c, start, o1, o2):
+        def offset(
+            c: Optional[DiffChunk], start: int, o1: int, o2: int
+        ) -> Optional[DiffChunk]:
             """Offset a chunk by o1/o2 if it's after the inserted lines"""
             if c is None:
                 return None
@@ -247,7 +266,7 @@ class Differ(GObject.GObject):
 
         self._update_merge_cache(texts)
 
-    def _locate_chunk(self, whichdiffs, sequence, line):
+    def _locate_chunk(self, whichdiffs: int, sequence: int, line: int) -> int:
         """Find the index of the chunk which contains line."""
         high_index = 2 + 2 * int(sequence != 1)
         for i, c in enumerate(self.diffs[whichdiffs]):
@@ -255,7 +274,7 @@ class Differ(GObject.GObject):
                 return i
         return len(self.diffs[whichdiffs])
 
-    def has_chunk(self, to_pane, chunk):
+    def has_chunk(self, to_pane: int, chunk: DiffChunk) -> bool:
         """Return whether the pane/chunk exists in the current Differ"""
         sequence = 1 if to_pane == 2 else 0
         chunk_index, _, _ = self.locate_chunk(1, chunk.start_a)
@@ -263,7 +282,9 @@ class Differ(GObject.GObject):
             return False
         return self._merge_cache[chunk_index][sequence] == chunk
 
-    def get_chunk(self, index, from_pane, to_pane=None):
+    def get_chunk(
+        self, index: int, from_pane: int, to_pane: Optional[int] = None
+    ) -> Optional[DiffChunk]:
         """Return the index-th change in from_pane
 
         If to_pane is provided, then only changes between from_pane and to_pane
@@ -280,7 +301,7 @@ class Differ(GObject.GObject):
                 chunk = self._merge_cache[index][1]
             return chunk
 
-    def get_chunk_starts(self, index):
+    def get_chunk_starts(self, index: int) -> List[Optional[int]]:
         """Return the starting lines of all chunks at an index"""
         chunks = self._merge_cache[index]
         chunk_starts = [
@@ -290,7 +311,9 @@ class Differ(GObject.GObject):
         ]
         return chunk_starts
 
-    def locate_chunk(self, pane, line):
+    def locate_chunk(
+        self, pane: int, line: int
+    ) -> Tuple[Optional[int], Optional[int], Optional[int]]:
         """Find the index of the chunk which contains line
 
         Returns a tuple containing the current, previous and next chunk
@@ -304,13 +327,20 @@ class Differ(GObject.GObject):
         except IndexError:
             return (None, None, None)
 
-    def diff_count(self):
+    def diff_count(self) -> int:
         return len(self._merge_cache)
 
-    def has_mergeable_changes(self, which):
+    def has_mergeable_changes(self, which: int) -> Tuple[bool, bool]:
         return self._has_mergeable_changes[which:which + 2]
 
-    def _change_sequence(self, which, sequence, startidx, sizechange, texts):
+    def _change_sequence(
+        self,
+        which: int,
+        sequence: int,
+        startidx: int,
+        sizechange: int,
+        texts: List[str],
+    ) -> None:
         diffs = self.diffs[which]
         lines_added = [0, 0, 0]
         lines_added[sequence] = sizechange
@@ -336,7 +366,7 @@ class Differ(GObject.GObject):
         linesx = texts[x][rangex[0]:rangex[1]]
         lines1 = texts[1][range1[0]:range1[1]]
 
-        def offset(c, o1, o2):
+        def offset(c: DiffChunk, o1: int, o2: int) -> DiffChunk:
             return DiffChunk._make((c[0], c[1] + o1, c[2] + o1,
                                     c[3] + o2, c[4] + o2))
 
@@ -349,7 +379,9 @@ class Differ(GObject.GObject):
             self.diffs[which][hiidx:] = offset_diffs
         self.diffs[which][loidx:hiidx] = newdiffs
 
-    def _range_from_lines(self, textindex, lines):
+    def _range_from_lines(
+        self, textindex: int, lines: Tuple[int, int]
+    ) -> Tuple[Optional[int], Optional[int]]:
         lo_line, hi_line = lines
         top_chunk = self.locate_chunk(textindex, lo_line)
         start = top_chunk[0]
@@ -361,10 +393,20 @@ class Differ(GObject.GObject):
             end = bottom_chunk[1]
         return start, end
 
-    def all_changes(self):
+    def all_changes(self) -> Iterator[Tuple[Optional[DiffChunk], Optional[DiffChunk]]]:
         return iter(self._merge_cache)
 
-    def pair_changes(self, fromindex, toindex, lines=(None, None, None, None)):
+    def pair_changes(
+        self,
+        fromindex: int,
+        toindex: int,
+        lines: Tuple[Optional[int], Optional[int], Optional[int], Optional[int]] = (
+            None,
+            None,
+            None,
+            None,
+        ),
+    ) -> Iterator[DiffChunk]:
         """Give all changes between file1 and either file0 or file2.
         """
         if None not in lines:
@@ -391,7 +433,9 @@ class Differ(GObject.GObject):
                     yield reverse_chunk(c[seq])
 
     # FIXME: This is gratuitous copy-n-paste at this point
-    def paired_all_single_changes(self, fromindex, toindex):
+    def paired_all_single_changes(
+        self, fromindex: int, toindex: int
+    ) -> Iterator[DiffChunk]:
         if fromindex == 1:
             seq = toindex // 2
             for c in self._merge_cache:
@@ -403,7 +447,9 @@ class Differ(GObject.GObject):
                 if c[seq]:
                     yield reverse_chunk(c[seq])
 
-    def single_changes(self, textindex, lines=(None, None)):
+    def single_changes(
+        self, textindex: int, lines: Tuple[Optional[int], Optional[int]] = (None, None)
+    ) -> Iterator[DiffChunk]:
         """Give changes for single file only. do not return 'equal' hunks.
         """
         if None not in lines:
@@ -422,11 +468,13 @@ class Differ(GObject.GObject):
             for cs in merge_cache:
                 yield cs[0] or cs[1]
 
-    def sequences_identical(self):
+    def sequences_identical(self) -> bool:
         # check so that we don't call an uninitialised comparison 'identical'
         return self.diffs == [[], []] and self._initialised
 
-    def _merge_blocks(self, using):
+    def _merge_blocks(
+        self, using: List[List[DiffChunk]]
+    ) -> Tuple[int, int, int, int, int, int]:
         lowc = min(using[0][0][LO], using[1][0][LO])
         highc = max(using[0][-1][HI], using[1][-1][HI])
         low = []
@@ -438,7 +486,9 @@ class Differ(GObject.GObject):
             high.append(highc - d[HI] + d[2 + HI])
         return low[0], high[0], lowc, highc, low[1], high[1]
 
-    def _auto_merge(self, using, texts):
+    def _auto_merge(
+        self, using: List[List[DiffChunk]], texts: List[str]
+    ) -> Iterator[Tuple[DiffChunk, DiffChunk]]:
         """Automatically merge two sequences of change blocks"""
         l0, h0, l1, h1, l2, h2 = self._merge_blocks(using)
         if h0 - l0 == h2 - l2 and texts[0][l0:h0] == texts[2][l2:h2]:
@@ -454,7 +504,9 @@ class Differ(GObject.GObject):
         out1 = DiffChunk._make((tag, l1, h1, l2, h2))
         yield out0, out1
 
-    def _merge_diffs(self, seq0, seq1, texts):
+    def _merge_diffs(
+        self, seq0: List[DiffChunk], seq1: List[DiffChunk], texts: List[str]
+    ) -> Iterator[Tuple[Optional[DiffChunk], Optional[DiffChunk]]]:
         seq0, seq1 = seq0[:], seq1[:]
         seq = seq0, seq1
         while len(seq0) or len(seq1):
@@ -502,7 +554,9 @@ class Differ(GObject.GObject):
                 for c in self._auto_merge(using, texts):
                     yield c
 
-    def set_sequences_iter(self, sequences):
+    def set_sequences_iter(
+        self, sequences: List[str]
+    ) -> Generator[Optional[int], None, None]:
         assert 0 <= len(sequences) <= 3
         self.diffs = [[], []]
         self.num_sequences = len(sequences)
@@ -524,7 +578,7 @@ class Differ(GObject.GObject):
         self._update_merge_cache(sequences)
         yield 1
 
-    def clear(self):
+    def clear(self) -> None:
         self.diffs = [[], []]
         self.seqlength = [0] * self.num_sequences
         self._initialised = False
