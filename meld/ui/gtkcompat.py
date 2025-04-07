@@ -1,4 +1,3 @@
-
 # The original C implementation is part of the GTK+ project, under
 #   gtk+/demos/gtk-demo/foreigndrawing.c
 #
@@ -98,48 +97,3 @@ def get_style(parent, selector):
         path = Gtk.WidgetPath.new()
     append_element(path, selector)
     return create_context_for_path(path, parent)
-
-
-def query_size(context, width, height):
-    margin = context.get_margin(context.get_state())
-    border = context.get_border(context.get_state())
-    padding = context.get_padding(context.get_state())
-    min_width = context.get_property('min-width', context.get_state())
-    min_height = context.get_property('min-height', context.get_state())
-    min_width += (
-        margin.left + margin.right + border.left + border.right +
-        padding.left + padding.right)
-    min_height += (
-        margin.top + margin.bottom + border.top + border.bottom +
-        padding.top + padding.bottom)
-    return max(width, min_width), max(height, min_height)
-
-
-def draw_style_common(context, cr, x, y, width, height):
-
-    margin = context.get_margin(context.get_state())
-    border = context.get_border(context.get_state())
-    padding = context.get_padding(context.get_state())
-
-    min_width = context.get_property('min-width', context.get_state())
-    min_height = context.get_property('min-height', context.get_state())
-
-    x += margin.left
-    y += margin.top
-    width -= margin.left + margin.right
-    height -= margin.top + margin.bottom
-
-    width = max(width, min_width)
-    height = max(height, min_height)
-
-    Gtk.render_background(context, cr, x, y, width, height)
-    Gtk.render_frame(context, cr, x, y, width, height)
-
-    contents_x = x + border.left + padding.left
-    contents_y = y + border.top + padding.top
-    contents_width = (
-        width - border.left - border.right - padding.left - padding.right)
-    contents_height = (
-        height - border.top - border.bottom - padding.top - padding.bottom)
-
-    return contents_x, contents_y, contents_width, contents_height
