@@ -40,6 +40,10 @@ class RecentSelector(Gtk.Grid):
     search_entry = Gtk.Template.Child()
     open_button = Gtk.Template.Child()
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.filter_text: str = ''
+
     def do_realize(self) -> Gtk.Widget:
         self.filter_text = ''
         self.recent_chooser.set_filter(self.make_recent_filter())
