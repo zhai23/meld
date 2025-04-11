@@ -1,4 +1,5 @@
 # Copyright (C) 2019 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,14 +15,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import bisect
-from typing import Dict, Optional
+from typing import Dict, Final, List, Optional, Tuple
 
 from gi.repository import Gdk, GdkPixbuf, GObject, Gtk
 
 from meld.conf import _
 from meld.const import ActionMode, ChunkAction
-from meld.settings import get_meld_settings
-from meld.style import get_common_theme
+from meld.settings import MeldSettings, get_meld_settings
+from meld.style import ColourMap, get_common_theme
 from meld.ui.gtkcompat import get_style
 from meld.ui.gtkutil import make_gdk_rgba
 
@@ -31,12 +32,12 @@ class ActionIcons:
     #: Fixed size of the renderer. Ideally this would be font-dependent and
     #: would adjust to other textview attributes, but that's both quite
     #: difficult and not necessarily desirable.
-    pixbuf_height = 16
+    pixbuf_height: Final[int] = 16
     icon_cache: Dict[str, GdkPixbuf.Pixbuf] = {}
-    icon_name_prefix = 'meld-change'
+    icon_name_prefix: str = 'meld-change'
 
     @classmethod
-    def load(cls, icon_name: str):
+    def load(cls, icon_name: str) -> GdkPixbuf.Pixbuf:
         icon = cls.icon_cache.get(icon_name)
 
         if not icon:
@@ -62,11 +63,11 @@ class ActionGutter(Gtk.DrawingArea):
         type=object,
         nick='List of diff chunks for display',
     )
-    def chunks(self):
+    def chunks(self) -> List[object]:
         return self._chunks
 
     @chunks.setter
-    def chunks_set(self, chunks):
+    def chunks_set(self, chunks: List[object]) -> None:
         self._chunks = chunks
         self.chunk_starts = [c.start_a for c in chunks]
 
@@ -80,11 +81,11 @@ class ActionGutter(Gtk.DrawingArea):
         ),
         default=Gtk.TextDirection.LTR,
     )
-    def icon_direction(self):
+    def icon_direction(self) -> Gtk.TextDirection:
         return self._icon_direction
 
     @icon_direction.setter
-    def icon_direction_set(self, direction: Gtk.TextDirection):
+    def icon_direction_set(self, direction: Gtk.TextDirection) -> None:
         if direction not in (Gtk.TextDirection.LTR, Gtk.TextDirection.RTL):
             raise ValueError('Invalid icon direction {}'.format(direction))
 
@@ -107,11 +108,11 @@ class ActionGutter(Gtk.DrawingArea):
         nick='Text view for which action are displayed',
         default=None,
     )
-    def source_view(self):
+    def source_view(self) -> Gtk.TextView:
         return self._source_view
 
     @source_view.setter
-    def source_view_setter(self, view: Gtk.TextView):
+    def source_view_setter(self, view: Gtk.TextView) -> None:
         if self._source_editable_connect_id:
             self._source_view.disconnect(self._source_editable_connect_id)
 
@@ -128,11 +129,11 @@ class ActionGutter(Gtk.DrawingArea):
         nick='Text view to which actions are directed',
         default=None,
     )
-    def target_view(self):
+    def target_view(self) -> Gtk.TextView:
         return self._target_view
 
     @target_view.setter
-    def target_view_setter(self, view: Gtk.TextView):
+    def target_view_setter(self, view: Gtk.TextView) -> None:
         if self._target_editable_connect_id:
             self._target_view.disconnect(self._target_editable_connect_id)
 
@@ -151,17 +152,22 @@ class ActionGutter(Gtk.DrawingArea):
     ) -> None:
         ...
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Object-type defaults
-        self.chunks = []
-        self.action_map = {}
+        self._chunks: List[object] = []
+        self.chunk_starts: List[int] = []
+        self.action_map: Dict[ActionMode, GdkPixbuf.Pixbuf] = {}
+        self._icon_direction: Gtk.TextDirection = Gtk.TextDirection.LTR
+        self.fill_colors: ColourMap = {}
+        self.line_colors: ColourMap = {}
+        self.chunk_highlights: Dict[str, Gdk.RGBA] = {}
 
         # State for "button" implementation
-        self.buttons = []
-        self.pointer_chunk = None
-        self.pressed_chunk = None
+        self.buttons: List[Tuple[int, int, int, int, object]] = []
+        self.pointer_chunk: Optional[object] = None
+        self.pressed_chunk: Optional[object] = None
 
         self.motion_controller = Gtk.EventControllerMotion(widget=self)
         self.motion_controller.set_propagation_phase(Gtk.PropagationPhase.TARGET)
@@ -169,7 +175,7 @@ class ActionGutter(Gtk.DrawingArea):
         self.motion_controller.connect("leave", self.motion_event)
         self.motion_controller.connect("motion", self.motion_event)
 
-    def on_setting_changed(self, settings, key):
+    def on_setting_changed(self, _settings: MeldSettings, key: str) -> None:
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
             alpha = self.fill_colors['current-chunk-highlight'].alpha
@@ -178,7 +184,7 @@ class ActionGutter(Gtk.DrawingArea):
                 for state, colour in self.fill_colors.items()
             }
 
-    def do_realize(self):
+    def do_realize(self) -> Gtk.DrawingArea:
         self.set_events(
             Gdk.EventMask.ENTER_NOTIFY_MASK |
             Gdk.EventMask.LEAVE_NOTIFY_MASK |
@@ -195,7 +201,7 @@ class ActionGutter(Gtk.DrawingArea):
 
         return Gtk.DrawingArea.do_realize(self)
 
-    def update_pointer_chunk(self, x, y):
+    def update_pointer_chunk(self, x: float, y: float) -> None:
         # This is the simplest button/intersection implementation in
         # the world, but it basically works for our purposes.
         for button in self.buttons:
@@ -214,10 +220,10 @@ class ActionGutter(Gtk.DrawingArea):
 
     def motion_event(
         self,
-        controller: Gtk.EventControllerMotion,
-        x: float | None = None,
-        y: float | None = None,
-    ):
+        _controller: Gtk.EventControllerMotion,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+    ) -> None:
         if x is None or y is None:
             # Missing coordinates are leave events
             if self.pointer_chunk:
@@ -227,25 +233,24 @@ class ActionGutter(Gtk.DrawingArea):
             # This is either an enter or motion event; we treat them the same
             self.update_pointer_chunk(x, y)
 
-    def do_button_press_event(self, event):
+    def do_button_press_event(self, event: Gdk.EventButton) -> bool:
         if self.pointer_chunk:
             self.pressed_chunk = self.pointer_chunk
 
         return Gtk.DrawingArea.do_button_press_event(self, event)
 
-    def do_button_release_event(self, event):
+    def do_button_release_event(self, event: Gdk.EventButton) -> bool:
         if self.pointer_chunk and self.pointer_chunk == self.pressed_chunk:
             self.activate(self.pressed_chunk)
         self.pressed_chunk = None
 
         return Gtk.DrawingArea.do_button_press_event(self, event)
 
-    def _action_on_chunk(self, action: ChunkAction, chunk):
+    def _action_on_chunk(self, action: ChunkAction, chunk: object) -> None:
         self.chunk_action_activated.emit(
             action.value, self.source_view, self.target_view, chunk)
 
-    def activate(self, chunk):
-
+    def activate(self, chunk: object) -> None:
         action = self._classify_change_actions(chunk)
 
         # FIXME: When fully transitioned to GAction, we should see
@@ -260,7 +265,7 @@ class ActionGutter(Gtk.DrawingArea):
             copy_menu = self._make_copy_menu(chunk)
             copy_menu.popup_at_pointer(None)
 
-    def _make_copy_menu(self, chunk):
+    def _make_copy_menu(self, chunk: object) -> Gtk.Menu:
         copy_menu = Gtk.Menu()
         copy_up = Gtk.MenuItem.new_with_mnemonic(_('Copy _up'))
         copy_down = Gtk.MenuItem.new_with_mnemonic(_('Copy _down'))
@@ -268,14 +273,14 @@ class ActionGutter(Gtk.DrawingArea):
         copy_menu.append(copy_down)
         copy_menu.show_all()
 
-        def copy_chunk(widget, action):
+        def copy_chunk(_widget: Gtk.Widget, action: ChunkAction) -> None:
             self._action_on_chunk(action, chunk)
 
         copy_up.connect('activate', copy_chunk, ChunkAction.copy_up)
         copy_down.connect('activate', copy_chunk, ChunkAction.copy_down)
         return copy_menu
 
-    def get_chunk_range(self, start_y, end_y):
+    def get_chunk_range(self, start_y: int, end_y: int) -> List[object]:
         start_line = self.source_view.get_line_num_for_y(start_y)
         end_line = self.source_view.get_line_num_for_y(end_y)
 
@@ -287,7 +292,7 @@ class ActionGutter(Gtk.DrawingArea):
 
         return self.chunks[start_idx:end_idx]
 
-    def do_draw(self, context):
+    def do_draw(self, context) -> None:
         view = self.source_view
         if not view or not view.get_realized():
             return
@@ -380,7 +385,7 @@ class ActionGutter(Gtk.DrawingArea):
 
         context.restore()
 
-    def _classify_change_actions(self, change) -> Optional[ActionMode]:
+    def _classify_change_actions(self, change: object) -> Optional[ActionMode]:
         """Classify possible actions for the given change
 
         Returns the action that can be performed given the content and
