@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2009-2010, 2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +23,7 @@ from gi.repository import Gdk, Gio, GLib, Gtk, GtkSource
 from meld.conf import _
 from meld.iohelpers import prompt_save_filename
 from meld.misc import error_dialog
-from meld.settings import get_meld_settings
+from meld.settings import MeldSettings, get_meld_settings
 from meld.sourceview import LanguageManager
 
 
@@ -64,7 +65,7 @@ class PatchDialog(Gtk.Dialog):
         self.textview.set_editable(False)
         meld_settings.connect('changed', self.on_setting_changed)
 
-    def on_setting_changed(self, settings, key):
+    def on_setting_changed(self, settings: MeldSettings, key: str) -> None:
         if key == "font":
             self.textview.modify_font(settings.font)
 

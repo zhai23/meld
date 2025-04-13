@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2009-2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@ import math
 
 from gi.repository import Gdk, Gtk
 
-from meld.settings import get_meld_settings
+from meld.settings import MeldSettings, get_meld_settings
 from meld.style import get_common_theme
 
 # Rounded rectangle corner radius for culled changes display
@@ -45,7 +46,7 @@ class LinkMap(Gtk.DrawingArea):
         self.on_setting_changed(meld_settings, 'style-scheme')
         meld_settings.connect('changed', self.on_setting_changed)
 
-    def on_setting_changed(self, settings, key):
+    def on_setting_changed(self, _settings: MeldSettings, key: str) -> None:
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
 

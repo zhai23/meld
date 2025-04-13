@@ -1,4 +1,5 @@
 # Copyright (C) 2019 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +21,7 @@ from typing import Any, List, Mapping, Tuple
 import cairo
 from gi.repository import Gdk, GObject, Gtk
 
-from meld.settings import get_meld_settings
+from meld.settings import MeldSettings, get_meld_settings
 from meld.style import get_common_theme
 from meld.tree import STATE_ERROR, STATE_MODIFIED, STATE_NEW
 from meld.ui.gtkutil import make_gdk_rgba
@@ -107,7 +108,7 @@ class ChunkMap(Gtk.DrawingArea):
         self._cached_map = None
         return Gtk.DrawingArea.do_size_allocate(self, *args)
 
-    def on_setting_changed(self, settings, key):
+    def on_setting_changed(self, _settings: MeldSettings, key: str) -> None:
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
             self._cached_map = None

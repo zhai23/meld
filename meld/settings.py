@@ -1,4 +1,5 @@
 # Copyright (C) 2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-from typing import Optional
+from typing import Any, Optional
 
 from gi.repository import Gio, GObject, GtkSource, Pango
 
@@ -40,7 +41,7 @@ class MeldSettings(GObject.GObject):
         self.style_scheme = self._style_scheme_from_gsettings()
         settings.connect('changed', self.on_setting_changed)
 
-    def on_setting_changed(self, settings, key):
+    def on_setting_changed(self, _settings: Any, key: str) -> None:
         if key == 'filename-filters':
             self.file_filters = self._filters_from_gsetting(
                 'filename-filters', meld.filters.FilterEntry.SHELL)

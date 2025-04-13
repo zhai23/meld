@@ -1,4 +1,5 @@
 # Copyright (C) 2013-2014 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +19,7 @@ from typing import Any
 
 from gi.repository import Gdk, GtkSource, Pango
 
-from meld.settings import get_meld_settings
+from meld.settings import MeldSettings, get_meld_settings
 from meld.style import get_common_theme
 from meld.ui.gtkutil import make_gdk_rgba
 
@@ -55,7 +56,7 @@ class MeldGutterRenderer:
         self.props.xalign = 0.5
         self.props.yalign = 0.5
 
-    def on_setting_changed(self, settings, key):
+    def on_setting_changed(self, _settings: MeldSettings, key: str) -> None:
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
             alpha = self.fill_colors['current-chunk-highlight'].alpha
