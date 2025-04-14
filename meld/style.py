@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2009 Vincent Legoll <vincent.legoll@gmail.com>
 # Copyright (C) 2012-2019 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import enum
-from typing import Mapping, Optional, Tuple
+from typing import Callable, Dict, Mapping, Optional, Tuple, cast
 
 from gi.repository import Gdk, Gtk, GtkSource
 
@@ -40,7 +41,7 @@ def set_base_style_scheme(
     global base_style_scheme
     global style_scheme
 
-    gtk_settings = Gtk.Settings.get_default()
+    gtk_settings: Optional[Gtk.Settings] = Gtk.Settings.get_default()
     if gtk_settings:
         gtk_settings.props.gtk_application_prefer_dark_theme = prefer_dark
 
@@ -49,16 +50,18 @@ def set_base_style_scheme(
     # Get our text background colour by checking the 'text' style of
     # the user's selected style scheme, falling back to the GTK+ theme
     # background if there is no style scheme background set.
-    style = style_scheme.get_style('text') if style_scheme else None
+    style: Optional[GtkSource.Style] = style_scheme.get_style('text') if style_scheme else None
     if style:
-        background = style.props.background
-        rgba = Gdk.RGBA()
+        background: str = style.props.background
+        rgba: Gdk.RGBA = Gdk.RGBA()
         rgba.parse(background)
     else:
         # This case will only be hit for GtkSourceView style schemes
         # that don't set a text background, like the "Classic" scheme.
         from meld.sourceview import MeldSourceView
-        stylecontext = MeldSourceView().get_style_context()
+        stylecontext: Gtk.StyleContext = MeldSourceView().get_style_context()
+        background_set: bool
+        rgba: Gdk.RGBA
         background_set, rgba = (
             stylecontext.lookup_color('theme_bg_color'))
         if not background_set:
@@ -66,14 +69,14 @@ def set_base_style_scheme(
 
     # This heuristic is absolutely dire. I made it up. There's
     # literally no basis to this.
-    use_dark = (rgba.red + rgba.green + rgba.blue) < 1.0
+    use_dark: bool = (rgba.red + rgba.green + rgba.blue) < 1.0
 
-    base_scheme_name = (
+    base_scheme_name: MeldStyleScheme = (
         MeldStyleScheme.dark if use_dark else MeldStyleScheme.base)
 
-    manager = GtkSource.StyleSchemeManager.get_default()
+    manager: GtkSource.StyleSchemeManager = GtkSource.StyleSchemeManager.get_default()
     base_style_scheme = manager.get_scheme(base_scheme_name.value)
-    base_schemes = (MeldStyleScheme.dark.value, MeldStyleScheme.base.value)
+    base_schemes: Tuple[str, str] = (MeldStyleScheme.dark.value, MeldStyleScheme.base.value)
     if style_scheme and style_scheme.props.id in base_schemes:
         style_scheme = base_style_scheme
 
@@ -81,24 +84,24 @@ def set_base_style_scheme(
 
 
 def colour_lookup_with_fallback(name: str, attribute: str) -> Gdk.RGBA:
-    style = style_scheme.get_style(name) if style_scheme else None
-    style_attr = getattr(style.props, attribute) if style else None
+    style: Optional[GtkSource.Style] = style_scheme.get_style(name) if style_scheme else None
+    style_attr: Optional[str] = getattr(style.props, attribute) if style else None
     if not style or not style_attr:
         try:
-            style = base_style_scheme.get_style(name)
+            style = cast(GtkSource.StyleScheme, base_style_scheme).get_style(name)
             style_attr = getattr(style.props, attribute)
         except AttributeError:
             pass
 
     if not style_attr:
         import sys
-        style_detail = f'{name}-{attribute}'
+        style_detail: str = f'{name}-{attribute}'
         print(_(
-            "Couldn’t find color scheme details for {}; "
+            "Couldn't find color scheme details for {}; "
             "this is a bad install").format(style_detail), file=sys.stderr)
         sys.exit(1)
 
-    colour = Gdk.RGBA()
+    colour: Gdk.RGBA = Gdk.RGBA()
     colour.parse(style_attr)
     return colour
 
@@ -107,8 +110,8 @@ ColourMap = Mapping[str, Gdk.RGBA]
 
 
 def get_common_theme() -> Tuple[ColourMap, ColourMap]:
-    lookup = colour_lookup_with_fallback
-    fill_colours = {
+    lookup: Callable[[str, str], Gdk.RGBA] = colour_lookup_with_fallback
+    fill_colours: Dict[str, Gdk.RGBA] = {
         "insert": lookup("meld:insert", "background"),
         "delete": lookup("meld:insert", "background"),
         "conflict": lookup("meld:conflict", "background"),
@@ -119,7 +122,7 @@ def get_common_theme() -> Tuple[ColourMap, ColourMap]:
             "meld:current-chunk-highlight", "background"),
         "overscroll": lookup("meld:overscroll", "background"),
     }
-    line_colours = {
+    line_colours: Dict[str, Gdk.RGBA] = {
         "insert": lookup("meld:insert", "line-background"),
         "delete": lookup("meld:insert", "line-background"),
         "conflict": lookup("meld:conflict", "line-background"),
