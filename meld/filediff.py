@@ -19,7 +19,7 @@ import functools
 import logging
 import math
 from enum import Enum
-from typing import Optional, Tuple, Type
+from typing import Final, Optional, Tuple, Type
 
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource
 
@@ -95,12 +95,14 @@ def with_scroll_lock(lock_attr):
     return wrap
 
 
-MASK_SHIFT, MASK_CTRL = 1, 2
-PANE_LEFT, PANE_RIGHT = -1, +1
+MASK_SHIFT: Final[int] = 1
+MASK_CTRL: Final[int] = 2
+PANE_LEFT: Final[int] = -1
+PANE_RIGHT: Final[int] = +1
 
-LOAD_PROGRESS_MARK = "meld-load-progress"
+LOAD_PROGRESS_MARK: Final[str] = "meld-load-progress"
 #: Line length at which we'll cancel loads because of potential hangs
-LINE_LENGTH_LIMIT = 8 * 1024
+LINE_LENGTH_LIMIT: Final[int] = 8 * 1024
 
 class CursorDetails:
     __slots__ = (
