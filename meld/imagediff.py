@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2009-2019 Kai Willadsen <kai.willadsen@gmail.com>
 # Copyright (C) 2023 Martin van Zijl <martin.vanzijl@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from collections.abc import Sequence
-from typing import Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from gi.repository import Gdk, GdkPixbuf, Gio, GLib, GObject, Gtk, GtkSource
 
@@ -51,7 +51,7 @@ def get_supported_image_mime_types() -> Sequence[str]:
     return _supported_mime_types
 
 
-def file_is_image(gfile):
+def file_is_image(gfile: Optional[Gio.File]) -> bool:
     """Check if file is an image."""
 
     # Check for null value.
@@ -73,7 +73,7 @@ def file_is_image(gfile):
         raise
 
 
-def files_are_images(gfiles):
+def files_are_images(gfiles: List[Optional[Gio.File]]) -> bool:
     """Check if all files in the list are images."""
 
     for gfile in gfiles:
@@ -117,13 +117,13 @@ class ImageDiff(Gtk.Box, MeldDoc):
 
     def __init__(
         self,
-        num_panes,
+        num_panes: int,
         *,
         comparison_mode: FileComparisonMode = FileComparisonMode.Compare,
     ):
         super().__init__()
 
-        self.files = [None, None, None]
+        self.files: List[Optional[Gio.File]] = [None, None, None]
 
         # FIXME:
         # This unimaginable hack exists because GObject (or GTK+?)
@@ -144,11 +144,12 @@ class ImageDiff(Gtk.Box, MeldDoc):
         ]
         map_widgets_into_lists(self, widget_lists)
 
-        self.warned_bad_comparison = False
-        self._keymask = 0
-        self.meta = {}
-        self.lines_removed = 0
-        self.focus_pane = None
+        self.warned_bad_comparison: bool = False
+        self._keymask: int = 0
+        self.meta: Dict[str, Any] = {}
+        self.lines_removed: int = 0
+        self.focus_pane: Optional[Gtk.Widget] = None
+        self.num_panes: int = 0
 
         # TODO: Add synchronized scrolling for large images.
 
@@ -157,7 +158,7 @@ class ImageDiff(Gtk.Box, MeldDoc):
 
         # Manually handle GAction additions
         # TODO: Highlight the selected image.
-        actions = (
+        actions: Tuple[Tuple[str, Any], ...] = (
             ('copy-full-path', self.action_copy_full_path),
             ('open-external', self.action_open_external),
             ('open-folder', self.action_open_folder),
@@ -180,7 +181,11 @@ class ImageDiff(Gtk.Box, MeldDoc):
 
         self.set_num_panes(num_panes)
 
-    def set_files(self, gfiles, encodings=None):
+    def set_files(
+        self,
+        gfiles: List[Optional[Gio.File]],
+        encodings: Optional[Tuple[Optional[GtkSource.Encoding], ...]] = None,
+    ) -> None:
         """Load the given files
 
         If an element is None, the text of a pane is left as is.
@@ -191,7 +196,7 @@ class ImageDiff(Gtk.Box, MeldDoc):
 
         encodings = encodings or ((None,) * len(gfiles))
 
-        files = []
+        files: List[Tuple[int, Gio.File, Optional[GtkSource.Encoding]]] = []
         for pane, (gfile, encoding) in enumerate(zip(gfiles, encodings)):
             if gfile:
                 files.append((pane, gfile, encoding))
@@ -204,10 +209,8 @@ class ImageDiff(Gtk.Box, MeldDoc):
         self.recompute_label()
 
     def load_file_in_pane(
-            self,
-            pane: int,
-            gfile: Gio.File,
-            encoding: GtkSource.Encoding = None):
+        self, pane: int, gfile: Gio.File, encoding: Optional[GtkSource.Encoding] = None
+    ) -> None:
         """Load a file into the given pane
 
         Don't call this directly; use `set_file()` or `set_files()`,
@@ -219,7 +222,7 @@ class ImageDiff(Gtk.Box, MeldDoc):
 
         self.image_main[pane].set_from_file(gfile.get_path())
 
-    def set_num_panes(self, n):
+    def set_num_panes(self, n: int) -> None:
         if n == self.num_panes or n not in (1, 2, 3):
             return
 
@@ -235,12 +238,12 @@ class ImageDiff(Gtk.Box, MeldDoc):
 
         self.num_panes = n
 
-    def on_delete_event(self):
+    def on_delete_event(self) -> int:
         self.state = ComparisonState.Closing
         self.close_signal.emit(0)
         return Gtk.ResponseType.OK
 
-    def recompute_label(self):
+    def recompute_label(self) -> None:
         filenames = [f.get_path() for f in self.files if f]
         shortnames = misc.shorten_names(*filenames)
 
@@ -255,7 +258,7 @@ class ImageDiff(Gtk.Box, MeldDoc):
         self.label_changed.emit(self.label_text, self.tooltip_text)
 
     @with_focused_pane
-    def action_open_folder(self, pane, *args):
+    def action_open_folder(self, pane: int, *args: Any) -> None:
         gfile = self.files[pane]
         if not gfile:
             return
@@ -265,7 +268,7 @@ class ImageDiff(Gtk.Box, MeldDoc):
             open_files_external(gfiles=[parent])
 
     @with_focused_pane
-    def action_open_external(self, pane, *args):
+    def action_open_external(self, pane: int, *args: Any) -> None:
         gfile = self.files[pane]
         if not gfile:
             return
@@ -274,26 +277,28 @@ class ImageDiff(Gtk.Box, MeldDoc):
         open_files_external(gfiles=gfiles)
 
     @Gtk.Template.Callback()
-    def on_imageview_popup_menu(self, imageview):
+    def on_imageview_popup_menu(self, imageview: Gtk.Widget) -> bool:
         self.popup_menu.popup_at_pointer()
         return True
 
     @Gtk.Template.Callback()
-    def on_imageview_button_press_event(self, event_box, event):
+    def on_imageview_button_press_event(
+        self, event_box: Gtk.EventBox, event: Gdk.EventButton
+    ) -> bool:
         if event.button == 3:
             event_box.grab_focus()
             self.popup_menu.popup_at_pointer(event)
             return True
         return False
 
-    def _get_focused_pane(self):
+    def _get_focused_pane(self) -> int:
         for i in range(self.num_panes):
             if self.image_event_box[i].is_focus():
                 return i
         return -1
 
     @with_focused_pane
-    def action_copy_full_path(self, pane, *args):
+    def action_copy_full_path(self, pane: int, *args: Any) -> None:
         gfile = self.files[pane]
         if not gfile:
             return
@@ -303,7 +308,7 @@ class ImageDiff(Gtk.Box, MeldDoc):
         clip.set_text(path, -1)
         clip.store()
 
-    def _set_external_action_sensitivity(self):
+    def _set_external_action_sensitivity(self) -> None:
         # FIXME: This sensitivity is very confused. Essentially, it's always
         # enabled because we don't unset focus_pane, but the action uses the
         # current pane focus (i.e., _get_focused_pane) instead of focus_pane.
@@ -311,10 +316,14 @@ class ImageDiff(Gtk.Box, MeldDoc):
         self.set_action_enabled("open-external", have_file)
 
     @Gtk.Template.Callback()
-    def on_imageview_focus_in_event(self, view, event):
+    def on_imageview_focus_in_event(
+        self, view: Gtk.Widget, event: Gdk.EventFocus
+    ) -> None:
         self.focus_pane = view
         self._set_external_action_sensitivity()
 
     @Gtk.Template.Callback()
-    def on_imageview_focus_out_event(self, view, event):
+    def on_imageview_focus_out_event(
+        self, view: Gtk.Widget, event: Gdk.EventFocus
+    ) -> None:
         self._set_external_action_sensitivity()
