@@ -16,6 +16,7 @@
 
 import logging
 from enum import Enum
+from typing import Final
 
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource, Pango
 
@@ -470,7 +471,7 @@ class MeldSourceMap(GtkSource.Map, SourceViewHelperMixin):
         default=False,
     )
 
-    COMPACT_MODE_WIDTH = 40
+    COMPACT_MODE_WIDTH: Final[int] = 40
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

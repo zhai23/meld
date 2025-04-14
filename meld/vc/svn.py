@@ -26,12 +26,14 @@ import errno
 import glob
 import os
 import xml.etree.ElementTree as ElementTree
+from typing import Final
 
 from meld.conf import _
 from . import _vc
 
 #: Simple enum constants for differentiating conflict cases.
-CONFLICT_TYPE_MERGE, CONFLICT_TYPE_UPDATE = 1, 2
+CONFLICT_TYPE_MERGE: Final[int] = 1
+CONFLICT_TYPE_UPDATE: Final[int] = 2
 
 
 class Vc(_vc.Vc):
