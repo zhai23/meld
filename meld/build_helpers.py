@@ -332,7 +332,8 @@ class build_i18n(distutils.cmd.Command):
         if "LINGUAS" in os.environ:
             selected_languages = os.environ["LINGUAS"].split()
         elif os.path.isfile(linguas_file):
-            selected_languages = open(linguas_file).read().split()
+            with open(linguas_file) as f:
+                selected_languages = f.read().split()
 
         # If we're on Windows, assume we're building frozen and make a bunch
         # of insane assumptions.
