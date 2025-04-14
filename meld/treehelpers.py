@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2011-2016 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,10 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import Callable, Iterator, List, Optional, Tuple
+
 from gi.repository import Gtk
 
+PathType = List[int]
 
-def tree_path_as_tuple(path):
+
+def tree_path_as_tuple(path: Gtk.TreePath) -> Tuple[int, ...]:
     """Get the path indices as a tuple
 
     This helper only exists because we often want to use tree paths
@@ -26,19 +31,19 @@ def tree_path_as_tuple(path):
     return tuple(path.get_indices())
 
 
-def tree_path_prev(path):
+def tree_path_prev(path: PathType) -> Optional[PathType]:
     if not path or path[-1] == 0:
         return None
     return path[:-1] + [path[-1] - 1]
 
 
-def tree_path_up(path):
+def tree_path_up(path: PathType) -> Optional[PathType]:
     if not path:
         return None
     return path[:-1]
 
 
-def valid_path(model, path):
+def valid_path(model: Gtk.TreeModel, path: Gtk.TreePath) -> bool:
     try:
         model.get_iter(path)
         return True
@@ -46,7 +51,7 @@ def valid_path(model, path):
         return False
 
 
-def refocus_deleted_path(model, path):
+def refocus_deleted_path(model: Gtk.TreeModel, path: Gtk.TreePath) -> Optional[Gtk.TreePath]:
     # Since the passed path has been deleted, either the path is now a
     # valid successor, or there are no successors. If valid, return it.
     # If not, and the path has a predecessor sibling (immediate or
@@ -71,7 +76,7 @@ def refocus_deleted_path(model, path):
 
 class SearchableTreeStore(Gtk.TreeStore):
 
-    def inorder_search_down(self, it):
+    def inorder_search_down(self, it: Gtk.TreeIter) -> Iterator[Gtk.TreeIter]:
         while it:
             child = self.iter_children(it)
             if child:
@@ -91,7 +96,7 @@ class SearchableTreeStore(Gtk.TreeStore):
                             break
             yield it
 
-    def inorder_search_up(self, it):
+    def inorder_search_up(self, it: Gtk.TreeIter) -> Iterator[Gtk.TreeIter]:
         while it:
             path = self.get_path(it)
             if path[-1]:
@@ -111,7 +116,9 @@ class SearchableTreeStore(Gtk.TreeStore):
                     return
             yield it
 
-    def get_previous_next_paths(self, path, match_func):
+    def get_previous_next_paths(
+        self, path: Gtk.TreePath, match_func: Callable[[Gtk.TreeIter], bool]
+    ) -> Tuple[Optional[Gtk.TreePath], Optional[Gtk.TreePath]]:
         prev_path, next_path = None, None
         try:
             start_iter = self.get_iter(path)
