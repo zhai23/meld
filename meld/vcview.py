@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2010-2019 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +23,7 @@ import shutil
 import stat
 import sys
 import tempfile
-from typing import Tuple
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple
 
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk, Pango
 
@@ -74,7 +75,7 @@ atexit.register(cleanup_temp)
 
 class ConsoleStream:
 
-    def __init__(self, textview):
+    def __init__(self, textview: Gtk.TextView) -> None:
         self.textview = textview
         buf = textview.get_buffer()
         self.command_tag = buf.create_tag("command")
@@ -86,16 +87,16 @@ class ConsoleStream:
         self.end_mark = buf.create_mark(None, buf.get_end_iter(),
                                         left_gravity=False)
 
-    def command(self, message):
+    def command(self, message: str) -> None:
         self.write(message, self.command_tag)
 
-    def output(self, message):
+    def output(self, message: str) -> None:
         self.write(message, self.output_tag)
 
-    def error(self, message):
+    def error(self, message: str) -> None:
         self.write(message, self.error_tag)
 
-    def write(self, message, tag):
+    def write(self, message: str, tag: Gtk.TextTag) -> None:
         if not message:
             return
         buf = self.textview.get_buffer()
@@ -108,10 +109,10 @@ COL_LOCATION, COL_STATUS, COL_OPTIONS, COL_END = \
 
 
 class VcTreeStore(tree.DiffTreeStore):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(1, [str] * 5)
 
-    def get_file_path(self, it):
+    def get_file_path(self, it: Gtk.TreeIter) -> str:
         return self.get_value(it, self.column_index(tree.COL_PATH, 0))
 
 
@@ -177,7 +178,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
     name_renderer = Gtk.Template.Child()
     status_column = Gtk.Template.Child()
     status_renderer = Gtk.Template.Child()
-    treeview = Gtk.Template.Child()
+    treeview: Gtk.TreeView = Gtk.Template.Child()
     vc_console_vpaned = Gtk.Template.Child()
 
     def __init__(self):
@@ -292,17 +293,17 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         settings.bind('vc-console-pane-position', self.vc_console_vpaned,
                       'position', Gio.SettingsBindFlags.DEFAULT)
 
-    def on_container_switch_in_event(self, window):
+    def on_container_switch_in_event(self, window: Gtk.Window) -> None:
         super().on_container_switch_in_event(window)
         # FIXME: open-external should be tied to having a treeview selection
         self.set_action_enabled("open-external", True)
         self.scheduler.add_task(self.on_treeview_cursor_changed)
 
-    def on_container_switch_out_event(self, window):
+    def on_container_switch_out_event(self, window: Gtk.Window) -> None:
         self.set_action_enabled("open-external", False)
         super().on_container_switch_out_event(window)
 
-    def get_default_vc(self, vcs):
+    def get_default_vc(self, vcs: List[Tuple[str, Any, bool]]) -> int:
         target_name = self.vc.NAME if self.vc else None
 
         for i, (name, vc, enabled) in enumerate(vcs):
@@ -324,9 +325,9 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
         return 0
 
-    def populate_vcs_for_location(self, location):
+    def populate_vcs_for_location(self, location: Optional[str]) -> None:
         """Display VC plugin(s) that can handle the location"""
-        vcs_model = self.combobox_vcs.get_model()
+        vcs_model: Gtk.TreeModel = self.combobox_vcs.get_model()
         vcs_model.clear()
 
         # VC systems can be executed at the directory level, so make sure
@@ -378,17 +379,17 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.combobox_vcs.set_active(default_active)
 
     @Gtk.Template.Callback()
-    def on_vc_change(self, combobox_vcs):
+    def on_vc_change(self, combobox_vcs: Gtk.ComboBox) -> None:
         active_iter = combobox_vcs.get_active_iter()
         if active_iter is None:
             return
         self.vc = combobox_vcs.get_model()[active_iter][1]
         self._set_location(self.vc.location)
 
-    def set_location(self, location):
+    def set_location(self, location: str) -> None:
         self.populate_vcs_for_location(location)
 
-    def _set_location(self, location):
+    def _set_location(self, location: str) -> None:
         self.location = location
         self.current_path = None
         self.model.clear()
@@ -418,14 +419,14 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.scheduler.add_task(self.on_treeview_selection_changed)
         self.scheduler.add_task(self.on_treeview_cursor_changed)
 
-    def get_comparison(self):
+    def get_comparison(self) -> Tuple[RecentType, List[Gio.File]]:
         if self.location:
             uris = [Gio.File.new_for_path(self.location)]
         else:
             uris = []
         return RecentType.VersionControl, uris
 
-    def recompute_label(self):
+    def recompute_label(self) -> None:
         self.label_text = os.path.basename(self.location)
         self.tooltip_text = "\n".join((
             # TRANSLATORS: This is the name of the version control
@@ -435,13 +436,13 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         ))
         self.label_changed.emit(self.label_text, self.tooltip_text)
 
-    def set_labels(self, labels):
+    def set_labels(self, labels: Optional[List[str]]) -> None:
         if labels:
             self.filelabel.custom_label = labels[0]
 
         self.recompute_label()
 
-    def _search_recursively_iter(self, start_path, replace=False):
+    def _search_recursively_iter(self, start_path: Gtk.TreePath, replace: bool = False) -> Generator[str, None, None]:
 
         # Initial yield so when we add this to our tasks, we don't
         # create iterators that may be invalidated.
@@ -460,8 +461,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         iterstart = self.model.get_iter(start_path)
         rootname = self.model.get_file_path(iterstart)
         display_prefix = len(rootname) + 1
-        symlinks_followed = set()
-        todo = [(self.model.get_path(iterstart), rootname)]
+        symlinks_followed: Set[Tuple[int, int]] = set()
+        todo: List[Tuple[Gtk.TreePath, str]] = [(self.model.get_path(iterstart), rootname)]
 
         flattened = 'flatten' in self.props.status_filters
         active_actions = [
@@ -528,13 +529,13 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         path = file.get_path()
         self.set_location(path)
 
-    def on_delete_event(self):
+    def on_delete_event(self) -> int:
         self.scheduler.remove_all_tasks()
         self.close_signal.emit(0)
         return Gtk.ResponseType.OK
 
     @Gtk.Template.Callback()
-    def on_row_activated(self, treeview, path, tvc):
+    def on_row_activated(self, treeview: Gtk.TreeView, path: Gtk.TreePath, tvc: Gtk.TreeViewColumn) -> None:
         it = self.model.get_iter(path)
         if self.model.iter_has_child(it):
             if self.treeview.row_expanded(path):
@@ -546,13 +547,13 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             if not self.model.is_folder(it, 0, path):
                 self.run_diff(path)
 
-    def run_diff(self, path):
+    def run_diff(self, path: str) -> None:
         if os.path.isdir(path):
             self.create_diff_signal.emit([Gio.File.new_for_path(path)], {})
             return
 
         basename = os.path.basename(path)
-        meta = {
+        meta: Dict[str, Any] = {
             'parent': self,
             'prompt_resolve': False,
         }
@@ -580,7 +581,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                      for c in conflicts]
             temps = [p for p, is_temp in diffs if is_temp]
             diffs = [p for p, is_temp in diffs]
-            kwargs = {
+            kwargs: Dict[str, Any] = {
                 'auto_merge': False,
                 'merge_output': Gio.File.new_for_path(path),
             }
@@ -612,7 +613,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
     def get_filter_visibility(self) -> Tuple[bool, bool, bool]:
         return False, False, True
 
-    def action_filter_state_change(self, action, value):
+    def action_filter_state_change(self, action: Gio.SimpleAction, value: GLib.Variant) -> None:
         action.set_state(value)
 
         active_filters = [
@@ -626,7 +627,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.props.status_filters = active_filters
         self.refresh()
 
-    def on_treeview_selection_changed(self, selection=None):
+    def on_treeview_selection_changed(self, selection: Optional[Gtk.TreeSelection] = None) -> None:
         if selection is None:
             selection = self.treeview.get_selection()
         model, rows = selection.get_selected_rows()
@@ -650,13 +651,13 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         for action, sensitivity in action_sensitivity.items():
             self.set_action_enabled(action, sensitivity)
 
-    def _get_selected_files(self):
+    def _get_selected_files(self) -> List[str]:
         model, rows = self.treeview.get_selection().get_selected_rows()
         sel = [self.model.get_file_path(self.model.get_iter(r)) for r in rows]
         # Remove empty entries and trailing slashes
         return [x[-1] != "/" and x or x[:-1] for x in sel if x is not None]
 
-    def _command_iter(self, command, files, refresh, working_dir):
+    def _command_iter(self, command: List[str], files: List[str], refresh: bool, working_dir: str) -> Generator[int, None, None]:
         """An iterable that runs a VC command on a set of files
 
         This method is intended to be used as a scheduled task, with
@@ -664,8 +665,8 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         consolestream.
         """
 
-        def shelljoin(command):
-            def quote(s):
+        def shelljoin(command: List[str]) -> str:
+            def quote(s: str) -> str:
                 return '"%s"' % s if len(s.split()) > 1 else s
             return " ".join(quote(tok) for tok in command)
 
@@ -696,11 +697,11 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             refresh = functools.partial(self.refresh_partial, working_dir)
             GLib.idle_add(refresh)
 
-    def has_command(self, command):
+    def has_command(self, command: str) -> bool:
         vc_command = self.command_map.get(command)
         return vc_command and hasattr(self.vc, vc_command)
 
-    def command(self, command, files, sync=False):
+    def command(self, command: str, files: List[str], sync: bool = False) -> None:
         """
         Run a command against this view's version control subsystem
 
@@ -709,7 +710,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         resolved from a file comparison.
 
         :param command: The version control command to run, taken from
-            keys in `VCView.command_map`.
+            keys in `VcView.command_map`.
         :param files: File parameters to the command as paths
         :param sync: If True, the command will be executed immediately
             (as opposed to being run by the idle scheduler).
@@ -726,37 +727,37 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         command = getattr(self.vc, self.command_map[command])
         command(runner, files)
 
-    def runner(self, command, files, refresh, working_dir):
+    def runner(self, command: List[str], files: List[str], refresh: bool, working_dir: str) -> None:
         """Schedule a version control command to run as an idle task"""
         self.scheduler.add_task(
             self._command_iter(command, files, refresh, working_dir))
 
-    def sync_runner(self, command, files, refresh, working_dir):
+    def sync_runner(self, command: List[str], files: List[str], refresh: bool, working_dir: str) -> None:
         """Run a version control command immediately"""
         for it in self._command_iter(command, files, refresh, working_dir):
             pass
 
-    def action_update(self, *args):
+    def action_update(self, *args: Any) -> None:
         self.vc.update(self.runner)
 
-    def action_push(self, *args):
+    def action_push(self, *args: Any) -> None:
         response = PushDialog(self).run()
         if response == Gtk.ResponseType.OK:
             self.vc.push(self.runner)
 
-    def action_commit(self, *args):
+    def action_commit(self, *args: Any) -> None:
         response, commit_msg = CommitDialog(self).run()
         if response == Gtk.ResponseType.OK:
             self.vc.commit(
                 self.runner, self._get_selected_files(), commit_msg)
 
-    def action_add(self, *args):
+    def action_add(self, *args: Any) -> None:
         self.vc.add(self.runner, self._get_selected_files())
 
-    def action_unstage(self, *args):
+    def action_unstage(self, *args: Any) -> None:
         self.vc.unstage(self.runner, self._get_selected_files())
 
-    def action_remove(self, *args):
+    def action_remove(self, *args: Any) -> None:
         selected = self._get_selected_files()
         if any(os.path.isdir(p) for p in selected):
             # TODO: Improve and reuse this dialog for the non-VC delete action
@@ -779,13 +780,13 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
         self.vc.remove(self.runner, selected)
 
-    def action_resolved(self, *args):
+    def action_resolved(self, *args: Any) -> None:
         self.vc.resolve(self.runner, self._get_selected_files())
 
-    def action_revert(self, *args):
+    def action_revert(self, *args: Any) -> None:
         self.vc.revert(self.runner, self._get_selected_files())
 
-    def action_delete(self, *args):
+    def action_delete(self, *args: Any) -> None:
         files = self._get_selected_files()
         for name in files:
             gfile = Gio.File.new_for_path(name)
@@ -803,7 +804,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         workdir = os.path.dirname(os.path.commonprefix(files))
         self.refresh_partial(workdir)
 
-    def action_diff(self, *args):
+    def action_diff(self, *args: Any) -> None:
         # TODO: Review the compare/diff action. It doesn't really add much
         # over activate, since the folder compare doesn't work and hasn't
         # for... a long time.
@@ -811,17 +812,17 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         for f in files:
             self.run_diff(f)
 
-    def action_open_external(self, *args):
+    def action_open_external(self, *args: Any) -> None:
         gfiles = [Gio.File.new_for_path(f) for f in self._get_selected_files() if f]
         open_files_external(gfiles)
 
-    def refresh(self):
+    def refresh(self) -> None:
         root = self.model.get_iter_first()
         if root is None:
             return
         self.set_location(self.model.get_file_path(root))
 
-    def refresh_partial(self, where):
+    def refresh_partial(self, where: str) -> None:
         if not self.get_action_state('vc-flatten'):
             it = self.find_iter_by_name(where)
             if not it:
@@ -838,7 +839,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             # XXX fixme
             self.refresh()
 
-    def _update_item_state(self, it, entry):
+    def _update_item_state(self, it: Gtk.TreeIter, entry: Entry) -> None:
         self.model.set_path_state(it, 0, entry.state, entry.isdir)
 
         location = Gio.File.new_for_path(self.vc.location)
@@ -849,7 +850,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         self.model.set_value(it, COL_STATUS, entry.get_status())
         self.model.set_value(it, COL_OPTIONS, entry.options)
 
-    def on_file_changed(self, filename):
+    def on_file_changed(self, filename: str) -> None:
         it = self.find_iter_by_name(filename)
         if it:
             path = self.model.get_file_path(it)
@@ -857,7 +858,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             entry = self.vc.get_entry(path)
             self._update_item_state(it, entry)
 
-    def find_iter_by_name(self, name):
+    def find_iter_by_name(self, name: str) -> Optional[Gtk.TreeIter]:
         it = self.model.get_iter_first()
         path = self.model.get_file_path(it)
         while it:
@@ -879,7 +880,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         return None
 
     @Gtk.Template.Callback()
-    def on_consoleview_populate_popup(self, textview, menu):
+    def on_consoleview_populate_popup(self, textview: Gtk.TextView, menu: Gtk.Menu) -> None:
         buf = textview.get_buffer()
         clear_action = Gtk.MenuItem.new_with_label(_("Clear"))
         clear_action.connect(
@@ -889,16 +890,16 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
         menu.show_all()
 
     @Gtk.Template.Callback()
-    def on_treeview_popup_menu(self, treeview):
+    def on_treeview_popup_menu(self, treeview: Gtk.TreeView) -> bool:
         return tree.TreeviewCommon.on_treeview_popup_menu(self, treeview)
 
     @Gtk.Template.Callback()
-    def on_treeview_button_press_event(self, treeview, event):
+    def on_treeview_button_press_event(self, treeview: Gtk.TreeView, event: Gdk.EventButton) -> bool:
         return tree.TreeviewCommon.on_treeview_button_press_event(
             self, treeview, event)
 
     @Gtk.Template.Callback()
-    def on_treeview_cursor_changed(self, *args):
+    def on_treeview_cursor_changed(self, *args: Any) -> None:
         cursor_path, cursor_col = self.treeview.get_cursor()
         if not cursor_path:
             self.set_action_enabled("previous-change", False)
@@ -938,7 +939,7 @@ class VcView(Gtk.Box, tree.TreeviewCommon, MeldDoc):
             self.set_action_enabled("next-change", next_ is not None)
         self.current_path = cursor_path
 
-    def next_diff(self, direction):
+    def next_diff(self, direction: Gdk.ScrollDirection) -> None:
         if direction == Gdk.ScrollDirection.UP:
             path = self.prev_path
         else:
