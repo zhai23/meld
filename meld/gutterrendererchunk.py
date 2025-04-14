@@ -15,16 +15,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
-from typing import Any
+from typing import Any, Dict, Optional, Tuple
 
+import cairo
 from gi.repository import Gdk, GtkSource, Pango
 
+from meld.matchers.diffutil import Differ
+from meld.matchers.merge import AutoMergeDiffer
 from meld.settings import MeldSettings, get_meld_settings
 from meld.style import get_common_theme
 from meld.ui.gtkutil import make_gdk_rgba
 
 
-def get_background_rgba(renderer):
+def get_background_rgba(renderer: GtkSource.GutterRenderer) -> Optional[Gdk.RGBA]:
     '''Get and cache the expected background for the renderer widget
 
     Current versions of GTK+ don't paint the background of text view
@@ -44,12 +47,12 @@ def get_background_rgba(renderer):
     return _background_rgba
 
 
-_background_rgba = None
+_background_rgba: Optional[Gdk.RGBA] = None
 
 
 class MeldGutterRenderer:
 
-    def set_renderer_defaults(self):
+    def set_renderer_defaults(self) -> None:
         self.set_alignment_mode(GtkSource.GutterRendererAlignmentMode.FIRST)
         self.props.xpad = 3
         self.props.ypad = 0
@@ -66,7 +69,14 @@ class MeldGutterRenderer:
             }
 
     def draw_chunks(
-            self, context, background_area, cell_area, start, end, state):
+            self,
+            context: cairo.Context,
+            background_area: Gdk.Rectangle,
+            cell_area: Gdk.Rectangle,
+            start: GtkSource.GutterRendererState,
+            end: GtkSource.GutterRendererState,
+            state: GtkSource.GutterRendererState
+    ) -> None:
 
         chunk = self._chunk
         if not chunk:
@@ -94,7 +104,12 @@ class MeldGutterRenderer:
             context.rel_line_to(width, 0)
         context.stroke()
 
-    def query_chunks(self, start, end, state):
+    def query_chunks(
+            self,
+            start: GtkSource.GutterRendererState,
+            end: GtkSource.GutterRendererState,
+            state: GtkSource.GutterRendererState
+    ) -> bool:
         line = start.get_line()
         chunk_index = self.linediffer.locate_chunk(self.from_pane, line)[0]
         in_chunk = chunk_index is not None
@@ -129,7 +144,7 @@ class GutterRendererChunkLines(
         GtkSource.GutterRendererText, MeldGutterRenderer):
     __gtype_name__ = "GutterRendererChunkLines"
 
-    def __init__(self, from_pane, to_pane, linediffer):
+    def __init__(self, from_pane: int, to_pane: int, linediffer: AutoMergeDiffer | Differ) -> None:
         super().__init__()
         self.set_renderer_defaults()
         self.from_pane = from_pane
@@ -137,8 +152,13 @@ class GutterRendererChunkLines(
         # FIXME: Don't pass in the linediffer; pass a generator like elsewhere
         self.linediffer = linediffer
 
-        self.num_line_digits = 0
-        self.changed_handler_id = None
+        self.num_line_digits: int = 0
+        self.changed_handler_id: Optional[int] = None
+        self._chunk: Optional[Tuple[str, int, int, int, int]] = None
+        self.fill_colors: Dict[str, Gdk.RGBA] = {}
+        self.line_colors: Dict[str, Gdk.RGBA] = {}
+        self.chunk_highlights: Dict[str, Gdk.RGBA] = {}
+        self.font_string: str = ""
 
         meld_settings = get_meld_settings()
         meld_settings.connect('changed', self.on_setting_changed)
@@ -165,7 +185,7 @@ class GutterRendererChunkLines(
         self.font_string = font_string
         self.recalculate_size(buf, force=need_recalculate)
 
-    def do_change_buffer(self, old_buffer):
+    def do_change_buffer(self, old_buffer: Optional[GtkSource.Buffer]) -> None:
         if old_buffer:
             old_buffer.disconnect(self.changed_handler_id)
 
@@ -177,7 +197,7 @@ class GutterRendererChunkLines(
                     "changed", self.recalculate_size)
                 self.recalculate_size(buf)
 
-    def _measure_markup(self, markup):
+    def _measure_markup(self, markup: str) -> Tuple[float, float]:
         layout = self.get_view().create_pango_layout()
         layout.set_markup(markup)
         w, h = layout.get_size()
@@ -201,13 +221,26 @@ class GutterRendererChunkLines(
         width, height = self._measure_markup(markup)
         self.set_size(width)
 
-    def do_draw(self, context, background_area, cell_area, start, end, state):
+    def do_draw(
+        self,
+        context: cairo.Context,
+        background_area: Gdk.Rectangle,
+        cell_area: Gdk.Rectangle,
+        start: GtkSource.GutterRendererState,
+        end: GtkSource.GutterRendererState,
+        state: GtkSource.GutterRendererState
+    ) -> None:
         GtkSource.GutterRendererText.do_draw(
             self, context, background_area, cell_area, start, end, state)
         self.draw_chunks(
             context, background_area, cell_area, start, end, state)
 
-    def do_query_data(self, start, end, state):
+    def do_query_data(
+        self,
+        start: GtkSource.GutterRendererState,
+        end: GtkSource.GutterRendererState,
+        state: GtkSource.GutterRendererState
+    ) -> None:
         self.query_chunks(start, end, state)
         line = start.get_line() + 1
         current_line = state & GtkSource.GutterRendererState.CURSOR
