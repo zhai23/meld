@@ -17,14 +17,15 @@
 
 
 import math
+from typing import Any, Dict, Final, List, Optional, Union
 
-from gi.repository import Gdk, Gtk
+from gi.repository import Gdk, Gtk, cairo
 
 from meld.settings import MeldSettings, get_meld_settings
 from meld.style import get_common_theme
 
 # Rounded rectangle corner radius for culled changes display
-RADIUS = 3
+RADIUS: Final[int] = 3
 
 
 class LinkMap(Gtk.DrawingArea):
@@ -32,10 +33,14 @@ class LinkMap(Gtk.DrawingArea):
     __gtype_name__ = "LinkMap"
 
     def __init__(self):
-        self.filediff = None
-        self.views = []
+        super().__init__()
+        self.filediff: Optional[Any] = None
+        self.views: List[Any] = []
+        self.view_indices: List[int] = []
+        self.fill_colors: Dict[Union[str, int], Gdk.RGBA] = {}
+        self.line_colors: Dict[Union[str, int], Gdk.RGBA] = {}
 
-    def associate(self, filediff, left_view, right_view):
+    def associate(self, filediff: Any, left_view: Any, right_view: Any) -> None:
         self.filediff = filediff
         self.views = [left_view, right_view]
         if self.get_direction() == Gtk.TextDirection.RTL:
@@ -50,16 +55,16 @@ class LinkMap(Gtk.DrawingArea):
         if key == 'style-scheme':
             self.fill_colors, self.line_colors = get_common_theme()
 
-    def do_draw(self, context):
+    def do_draw(self, context: cairo.Context) -> bool:
         if not self.views:
             return
 
-        pix_start = [t.get_visible_rect().y for t in self.views]
-        y_offset = [
+        pix_start: List[float] = [t.get_visible_rect().y for t in self.views]
+        y_offset: List[float] = [
             t.translate_coordinates(self, 0, 0)[1] + 1 for t in self.views]
 
-        clip_y = min(y_offset) - 1
-        clip_height = max(t.get_visible_rect().height for t in self.views) + 2
+        clip_y: float = min(y_offset) - 1
+        clip_height: float = max(t.get_visible_rect().height for t in self.views) + 2
         allocation = self.get_allocation()
 
         stylecontext = self.get_style_context()
@@ -67,8 +72,8 @@ class LinkMap(Gtk.DrawingArea):
             stylecontext, context, 0, clip_y, allocation.width, clip_height)
         context.set_line_width(1.0)
 
-        height = allocation.height
-        visible = [
+        height: int = allocation.height
+        visible: List[int] = [
             self.views[0].get_line_num_for_y(pix_start[0]),
             self.views[0].get_line_num_for_y(pix_start[0] + height),
             self.views[1].get_line_num_for_y(pix_start[1]),
@@ -76,12 +81,12 @@ class LinkMap(Gtk.DrawingArea):
         ]
 
         # For bezier control points
-        x_steps = [-0.5, allocation.width / 2, allocation.width + 0.5]
-        q_rad = math.pi / 2
+        x_steps: List[float] = [-0.5, allocation.width / 2, allocation.width + 0.5]
+        q_rad: float = math.pi / 2
 
         left, right = self.view_indices
 
-        def view_offset_line(view_idx, line_num):
+        def view_offset_line(view_idx: int, line_num: int) -> float:
             line_start = self.views[view_idx].get_y_for_line_num(line_num)
             return line_start - pix_start[view_idx] + y_offset[view_idx]
 
