@@ -23,17 +23,17 @@ import os
 import shutil
 import stat
 import sys
-import typing
 import unicodedata
 from collections import namedtuple
 from decimal import Decimal
 from mmap import ACCESS_COPY, mmap
-from typing import DefaultDict, Dict, List, NamedTuple, Optional, Tuple
+from typing import DefaultDict, Dict, Final, List, NamedTuple, Optional, Tuple
 
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk
 
 # TODO: Don't from-import whole modules
 from meld import misc, tree
+from meld.chunkmap import TreeViewChunkMap
 from meld.conf import _
 from meld.const import FILE_FILTER_ACTION_FORMAT, MISSING_TIMESTAMP
 from meld.externalhelpers import open_files_external
@@ -50,10 +50,10 @@ from meld.ui.cellrenderers import (
     CellRendererISODate,
 )
 from meld.ui.emblemcellrenderer import EmblemCellRenderer
+from meld.ui.filebutton import MeldFileButton
+from meld.ui.msgarea import MsgAreaController
+from meld.ui.pathlabel import PathLabel
 from meld.ui.util import map_widgets_into_lists
-
-if typing.TYPE_CHECKING:
-    from meld.ui.pathlabel import PathLabel
 
 log = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ _cache = {}
 Same, SameFiltered, DodgySame, DodgyDifferent, Different, FileError = (
     list(range(6)))
 # TODO: Get the block size from os.stat
-CHUNK_SIZE = 4096
+CHUNK_SIZE: Final[int] = 4096
 
 
 def remove_blank_lines(text):
@@ -444,37 +444,37 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
 
     show_overview_map = GObject.Property(type=bool, default=True)
 
-    chunkmap0 = Gtk.Template.Child()
-    chunkmap1 = Gtk.Template.Child()
-    chunkmap2 = Gtk.Template.Child()
-    folder_label: 'List[PathLabel]'
-    folder_label0 = Gtk.Template.Child()
-    folder_label1 = Gtk.Template.Child()
-    folder_label2 = Gtk.Template.Child()
-    folder_open_button0 = Gtk.Template.Child()
-    folder_open_button1 = Gtk.Template.Child()
-    folder_open_button2 = Gtk.Template.Child()
-    treeview0 = Gtk.Template.Child()
-    treeview1 = Gtk.Template.Child()
-    treeview2 = Gtk.Template.Child()
-    scrolledwindow0 = Gtk.Template.Child()
-    scrolledwindow1 = Gtk.Template.Child()
-    scrolledwindow2 = Gtk.Template.Child()
-    linkmap0 = Gtk.Template.Child()
-    linkmap1 = Gtk.Template.Child()
-    msgarea_mgr0 = Gtk.Template.Child()
-    msgarea_mgr1 = Gtk.Template.Child()
-    msgarea_mgr2 = Gtk.Template.Child()
-    overview_map_revealer = Gtk.Template.Child()
-    pane_actionbar0 = Gtk.Template.Child()
-    pane_actionbar1 = Gtk.Template.Child()
-    pane_actionbar2 = Gtk.Template.Child()
-    vbox0 = Gtk.Template.Child()
-    vbox1 = Gtk.Template.Child()
-    vbox2 = Gtk.Template.Child()
-    dummy_toolbar_linkmap0 = Gtk.Template.Child()
-    dummy_toolbar_linkmap1 = Gtk.Template.Child()
-    toolbar_sourcemap_revealer = Gtk.Template.Child()
+    chunkmap0: TreeViewChunkMap = Gtk.Template.Child()
+    chunkmap1: TreeViewChunkMap = Gtk.Template.Child()
+    chunkmap2: TreeViewChunkMap = Gtk.Template.Child()
+    folder_label: List[PathLabel]
+    folder_label0: PathLabel = Gtk.Template.Child()
+    folder_label1: PathLabel = Gtk.Template.Child()
+    folder_label2: PathLabel = Gtk.Template.Child()
+    folder_open_button0: MeldFileButton = Gtk.Template.Child()
+    folder_open_button1: MeldFileButton = Gtk.Template.Child()
+    folder_open_button2: MeldFileButton = Gtk.Template.Child()
+    treeview0: Gtk.TreeView = Gtk.Template.Child()
+    treeview1: Gtk.TreeView = Gtk.Template.Child()
+    treeview2: Gtk.TreeView = Gtk.Template.Child()
+    scrolledwindow0: Gtk.ScrolledWindow = Gtk.Template.Child()
+    scrolledwindow1: Gtk.ScrolledWindow = Gtk.Template.Child()
+    scrolledwindow2: Gtk.ScrolledWindow = Gtk.Template.Child()
+    linkmap0: Gtk.ActionBar = Gtk.Template.Child()
+    linkmap1: Gtk.ActionBar = Gtk.Template.Child()
+    msgarea_mgr0: MsgAreaController = Gtk.Template.Child()
+    msgarea_mgr1: MsgAreaController = Gtk.Template.Child()
+    msgarea_mgr2: MsgAreaController = Gtk.Template.Child()
+    overview_map_revealer: Gtk.Revealer = Gtk.Template.Child()
+    pane_actionbar0: Gtk.ActionBar = Gtk.Template.Child()
+    pane_actionbar1: Gtk.ActionBar = Gtk.Template.Child()
+    pane_actionbar2: Gtk.ActionBar = Gtk.Template.Child()
+    vbox0: Gtk.Box = Gtk.Template.Child()
+    vbox1: Gtk.Box = Gtk.Template.Child()
+    vbox2: Gtk.Box = Gtk.Template.Child()
+    dummy_toolbar_linkmap0: Gtk.ActionBar = Gtk.Template.Child()
+    dummy_toolbar_linkmap1: Gtk.ActionBar = Gtk.Template.Child()
+    toolbar_sourcemap_revealer: Gtk.Revealer = Gtk.Template.Child()
 
     state_actions = {
         tree.STATE_NORMAL: ("normal", "folder-status-same"),
