@@ -16,7 +16,7 @@
 
 import collections
 import logging
-from typing import Any, List, Mapping, Tuple
+from typing import Any, List, Mapping, Optional, Tuple
 
 import cairo
 from gi.repository import Gdk, GObject, Gtk
@@ -259,8 +259,8 @@ class ChunkMap(Gtk.DrawingArea):
     def motion_event(
         self,
         controller: Gtk.EventControllerMotion,
-        x: float | None = None,
-        y: float | None = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
     ):
         if self._have_grab:
             self._scroll_fraction(y, animate=False)
