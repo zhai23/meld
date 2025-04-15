@@ -613,14 +613,16 @@ class DirDiff(Gtk.Box, tree.TreeviewCommon, MeldDoc):
                 ),
             )
 
-        map_widgets_into_lists(
-            self,
-            [
-                "treeview", "folder_label", "scrolledwindow", "chunkmap",
-                "linkmap", "msgarea_mgr", "vbox", "dummy_toolbar_linkmap",
-                "pane_actionbar", "folder_open_button",
-            ],
-        )
+        self.treeview: List[Gtk.TreeView] = [self.treeview0, self.treeview1, self.treeview2]
+        self.folder_label: List[Gtk.Label] = [self.folder_label0, self.folder_label1, self.folder_label2]
+        self.scrolledwindow: List[Gtk.ScrolledWindow] = [self.scrolledwindow0, self.scrolledwindow1, self.scrolledwindow2]
+        self.chunkmap: List[Gtk.Widget] = [self.chunkmap0, self.chunkmap1, self.chunkmap2]
+        self.linkmap: List[Gtk.Widget] = [self.linkmap0, self.linkmap1]
+        self.msgarea_mgr: List[Gtk.Widget] = [self.msgarea_mgr0, self.msgarea_mgr1, self.msgarea_mgr2]
+        self.vbox: List[Gtk.Box] = [self.vbox0, self.vbox1, self.vbox2]
+        self.dummy_toolbar_linkmap: List[Gtk.Toolbar] = [self.dummy_toolbar_linkmap0, self.dummy_toolbar_linkmap1]
+        self.pane_actionbar: List[Gtk.ActionBar] = [self.pane_actionbar0, self.pane_actionbar1, self.pane_actionbar2]
+        self.folder_open_button: List[Gtk.Button] = [self.folder_open_button0, self.folder_open_button1, self.folder_open_button2]
 
         self.ensure_style()
 

@@ -22,7 +22,6 @@ from gi.repository import Gio, GLib, GObject, Gtk
 from meld.conf import _
 from meld.melddoc import LabeledObjectMixin, MeldDoc
 from meld.recent import recent_comparisons
-from meld.ui.util import map_widgets_into_lists
 
 
 class DiffType(enum.IntEnum):
@@ -68,10 +67,9 @@ class NewDiffTab(Gtk.Alignment, LabeledObjectMixin):
 
     def __init__(self, parentapp: Any) -> None:
         super().__init__()
-        self.file_chooser: List[Gtk.FileChooserButton] = []
-        self.dir_chooser: List[Gtk.FileChooserButton] = []
-        self.vc_chooser: List[Gtk.FileChooserButton] = []
-        map_widgets_into_lists(self, ["file_chooser", "dir_chooser", "vc_chooser"])
+        self.file_chooser: List[Gtk.FileChooserButton] = [self.file_chooser0, self.file_chooser1, self.file_chooser2]
+        self.dir_chooser: List[Gtk.FileChooserButton] = [self.dir_chooser0, self.dir_chooser1, self.dir_chooser2]
+        self.vc_chooser: List[Gtk.FileChooserButton] = [self.vc_chooser0]
         self.button_types: List[Gtk.ToggleButton] = [
             self.button_type_file,
             self.button_type_dir,

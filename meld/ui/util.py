@@ -15,34 +15,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from typing import Any, List, Sequence
+from typing import List
 
 from gi.repository import Gio, GObject, Gtk
 
 log = logging.getLogger(__name__)
-
-
-def map_widgets_into_lists(widget: Any, widgetnames: Sequence[str]) -> None:
-    """Put sequentially numbered widgets into lists.
-
-    Given an object with widgets self.button0, self.button1, ...,
-    after a call to object.map_widgets_into_lists(["button"])
-    object.button == [self.button0, self.button1, ...]
-    """
-    for item in widgetnames:
-        i, lst = 0, []
-        while 1:
-            key = "%s%i" % (item, i)
-            try:
-                val = getattr(widget, key)
-            except AttributeError:
-                if i == 0:
-                    log.critical(
-                        f"Tried to map missing attribute {key}")
-                break
-            lst.append(val)
-            i += 1
-        setattr(widget, item, lst)
 
 
 # The functions `extract_accel_from_menu_item` and `extract_accels_from_menu`

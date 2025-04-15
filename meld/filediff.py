@@ -19,7 +19,7 @@ import functools
 import logging
 import math
 from enum import Enum
-from typing import Final, Optional, Tuple, Type
+from typing import Final, List, Optional, Tuple, Type
 
 from gi.repository import Gdk, Gio, GLib, GObject, Gtk, GtkSource
 
@@ -58,10 +58,7 @@ from meld.sourceview import (
     get_custom_encoding_candidates,
 )
 from meld.ui.findbar import FindBar
-from meld.ui.util import (
-    make_multiobject_property_action,
-    map_widgets_into_lists,
-)
+from meld.ui.util import make_multiobject_property_action
 from meld.undo import UndoSequence
 
 log = logging.getLogger(__name__)
@@ -249,16 +246,22 @@ class FileDiff(Gtk.Box, MeldDoc):
         MeldDoc.__init__(self)
         bind_settings(self)
 
-        widget_lists = [
-            "sourcemap", "file_save_button", "file_toolbar",
-            "linkmap", "msgarea_mgr", "readonlytoggle",
-            "scrolledwindow", "textview", "vbox",
-            "dummy_toolbar_linkmap", "filelabel",
-            "file_open_button", "statusbar",
-            "actiongutter", "dummy_toolbar_actiongutter",
-            "chunkmap",
-        ]
-        map_widgets_into_lists(self, widget_lists)
+        self.sourcemap: List[Gtk.Widget] = [self.sourcemap0, self.sourcemap1, self.sourcemap2]
+        self.file_save_button: List[Gtk.Button] = [self.file_save_button0, self.file_save_button1, self.file_save_button2]
+        self.file_toolbar: List[Gtk.Toolbar] = [self.file_toolbar0, self.file_toolbar1, self.file_toolbar2]
+        self.linkmap: List[Gtk.Widget] = [self.linkmap0, self.linkmap1]
+        self.msgarea_mgr: List[Gtk.Widget] = [self.msgarea_mgr0, self.msgarea_mgr1, self.msgarea_mgr2]
+        self.readonlytoggle: List[Gtk.ToggleButton] = [self.readonlytoggle0, self.readonlytoggle1, self.readonlytoggle2]
+        self.scrolledwindow: List[Gtk.ScrolledWindow] = [self.scrolledwindow0, self.scrolledwindow1, self.scrolledwindow2]
+        self.textview: List[Gtk.TextView] = [self.textview0, self.textview1, self.textview2]
+        self.vbox: List[Gtk.Box] = [self.vbox0, self.vbox1, self.vbox2]
+        self.dummy_toolbar_linkmap: List[Gtk.Toolbar] = [self.dummy_toolbar_linkmap0, self.dummy_toolbar_linkmap1]
+        self.filelabel: List[Gtk.Label] = [self.filelabel0, self.filelabel1, self.filelabel2]
+        self.file_open_button: List[Gtk.Button] = [self.file_open_button0, self.file_open_button1, self.file_open_button2]
+        self.statusbar: List[Gtk.Statusbar] = [self.statusbar0, self.statusbar1, self.statusbar2]
+        self.actiongutter: List[Gtk.ActionGutter] = [self.actiongutter0, self.actiongutter1, self.actiongutter2]
+        self.dummy_toolbar_actiongutter: List[Gtk.Toolbar] = [self.dummy_toolbar_actiongutter0, self.dummy_toolbar_actiongutter1, self.dummy_toolbar_actiongutter2]
+        self.chunkmap: List[Gtk.Widget] = [self.chunkmap0, self.chunkmap1, self.chunkmap2]
 
         self.comparison_mode = comparison_mode
         if comparison_mode == FileComparisonMode.AutoMerge:

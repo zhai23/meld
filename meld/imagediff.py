@@ -29,7 +29,6 @@ from meld.externalhelpers import open_files_external
 from meld.melddoc import ComparisonState, MeldDoc
 from meld.misc import with_focused_pane
 from meld.settings import bind_settings
-from meld.ui.util import map_widgets_into_lists
 
 log = logging.getLogger(__name__)
 
@@ -136,13 +135,10 @@ class ImageDiff(Gtk.Box, MeldDoc):
         MeldDoc.__init__(self)
         bind_settings(self)
 
-        widget_lists = [
-            "image_main",
-            "image_event_box",
-            "scroll_window",
-            "viewport",
-        ]
-        map_widgets_into_lists(self, widget_lists)
+        self.image_main: List[Gtk.Image] = [self.image_main0, self.image_main1, self.image_main2]
+        self.image_event_box: List[Gtk.EventBox] = [self.image_event_box0, self.image_event_box1, self.image_event_box2]
+        self.scroll_window: List[Gtk.ScrollWindow] = [self.scroll_window0, self.scroll_window1, self.scroll_window2]
+        self.viewport: List[Gtk.Viewport] = [self.viewport0, self.viewport1, self.viewport2]
 
         self.warned_bad_comparison: bool = False
         self._keymask: int = 0
