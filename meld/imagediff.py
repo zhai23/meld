@@ -198,15 +198,13 @@ class ImageDiff(Gtk.Box, MeldDoc):
                 files.append((pane, gfile, encoding))
 
         for pane, gfile, encoding in files:
-            self.load_file_in_pane(pane, gfile, encoding)
+            self.load_file_in_pane(pane, gfile)
 
         # Update tab label.
         self.files = gfiles
         self.recompute_label()
 
-    def load_file_in_pane(
-        self, pane: int, gfile: Gio.File, encoding: Optional[GtkSource.Encoding] = None
-    ) -> None:
+    def load_file_in_pane(self, pane: int, gfile: Gio.File) -> None:
         """Load a file into the given pane
 
         Don't call this directly; use `set_file()` or `set_files()`,
