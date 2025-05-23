@@ -1,5 +1,20 @@
+# Copyright (C) 2021-2023 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or (at
+# your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Optional
+from typing import Dict, Optional
 
 from gi.repository import Gio, GObject, Gtk
 
@@ -54,7 +69,7 @@ class MeldFileButton(Gtk.Button):
     def file_selected_signal(self, pane: int, file: Gio.File) -> None:
         ...
 
-    icon_action_map = {
+    icon_action_map: Dict[Gtk.FileChooserAction, str] = {
         Gtk.FileChooserAction.OPEN: "document-open-symbolic",
         Gtk.FileChooserAction.SELECT_FOLDER: "folder-open-symbolic",
     }

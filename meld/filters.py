@@ -1,4 +1,5 @@
 # Copyright (C) 2011-2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,11 +16,12 @@
 
 import logging
 import re
+from typing import Final, Optional, Tuple, Union
 
 log = logging.getLogger(__name__)
 
 
-def try_compile(regex, flags=0):
+def try_compile(regex: Union[str, bytes], flags: int = 0) -> Optional[re.Pattern]:
     try:
         compiled = re.compile(regex, flags)
     except re.error:
@@ -33,9 +35,17 @@ class FilterEntry:
 
     __slots__ = ("label", "active", "filter", "byte_filter", "filter_string")
 
-    REGEX, SHELL = 0, 1
+    REGEX: Final[int] = 0
+    SHELL: Final[int] = 1
 
-    def __init__(self, label, active, filter, byte_filter, filter_string):
+    def __init__(
+        self,
+        label: str,
+        active: bool,
+        filter: Optional[re.Pattern],
+        byte_filter: Optional[re.Pattern],
+        filter_string: str,
+    ) -> None:
         self.label = label
         self.active = active
         self.filter = filter
@@ -43,7 +53,9 @@ class FilterEntry:
         self.filter_string = filter_string
 
     @classmethod
-    def compile_regex(cls, regex, byte_regex=False):
+    def compile_regex(
+        cls, regex: Union[str, bytes], byte_regex: bool = False
+    ) -> Optional[re.Pattern]:
         if byte_regex and not isinstance(regex, bytes):
             # TODO: Register a custom error handling function to replace
             # encoding errors with '.'?
@@ -51,7 +63,7 @@ class FilterEntry:
         return try_compile(regex, re.M)
 
     @classmethod
-    def compile_shell_pattern(cls, pattern):
+    def compile_shell_pattern(cls, pattern: str) -> Optional[re.Pattern]:
         bits = pattern.split()
         if not bits:
             # An empty pattern would match everything, so skip it
@@ -64,7 +76,9 @@ class FilterEntry:
         return try_compile(regex)
 
     @classmethod
-    def new_from_gsetting(cls, elements, filter_type):
+    def new_from_gsetting(
+        cls, elements: Tuple[str, bool, str], filter_type: int
+    ) -> 'FilterEntry':
         name, active, filter_string = elements
         if filter_type == cls.REGEX:
             str_re = cls.compile_regex(filter_string)
@@ -79,14 +93,15 @@ class FilterEntry:
         return cls(name, active, str_re, bytes_re, filter_string)
 
     @classmethod
-    def check_filter(cls, filter_string, filter_type):
+    def check_filter(cls, filter_string: str, filter_type: int) -> bool:
+        compiled: Optional[re.Pattern] = None
         if filter_type == cls.REGEX:
             compiled = cls.compile_regex(filter_string)
         elif filter_type == cls.SHELL:
             compiled = cls.compile_shell_pattern(filter_string)
         return compiled is not None
 
-    def __copy__(self):
+    def __copy__(self) -> 'FilterEntry':
         new = type(self)(
             self.label, self.active, None, None, self.filter_string)
         if self.filter is not None:
@@ -97,7 +112,7 @@ class FilterEntry:
         return new
 
 
-def shell_to_regex(pat):
+def shell_to_regex(pat: str) -> str:
     """Translate a shell PATTERN to a regular expression.
 
     Based on fnmatch.translate().

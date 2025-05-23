@@ -1,4 +1,5 @@
 # Copyright (C) 2009-2010 Piotr Piastucki <the_leech@users.berlios.de>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,10 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from meld.matchers import diffutil
-from meld.matchers.myers import MyersSequenceMatcher
+from typing import Final, Generator, Iterator, List, Optional, Tuple
 
-LO, HI = 1, 2
+from meld.matchers import diffutil
+from meld.matchers.myers import DiffChunk, MyersSequenceMatcher
+
+LO: Final[int] = 1
+HI: Final[int] = 2
 
 
 class AutoMergeDiffer(diffutil.Differ):
@@ -24,12 +28,12 @@ class AutoMergeDiffer(diffutil.Differ):
     _matcher = MyersSequenceMatcher
     # _matcher = PatienceSequenceMatcher
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.auto_merge = False
-        self.unresolved = []
+        self.auto_merge: bool = False
+        self.unresolved: List[int] = []
 
-    def _auto_merge(self, using, texts):
+    def _auto_merge(self, using: List[List[DiffChunk]], texts: List[str]) -> Iterator[Tuple[DiffChunk, DiffChunk]]:
         for out0, out1 in super()._auto_merge(using, texts):
             if self.auto_merge and out0[0] == 'conflict':
                 # we will try to resolve more complex conflicts automatically
@@ -174,7 +178,7 @@ class AutoMergeDiffer(diffutil.Differ):
                         return
             yield out0, out1
 
-    def change_sequence(self, sequence, startidx, sizechange, texts):
+    def change_sequence(self, sequence: int, startidx: int, sizechange: int, texts: List[str]) -> None:
         if sequence == 1:
             lo = 0
             for c in self.unresolved:
@@ -199,26 +203,28 @@ class AutoMergeDiffer(diffutil.Differ):
 
         return super().change_sequence(sequence, startidx, sizechange, texts)
 
-    def get_unresolved_count(self):
+    def get_unresolved_count(self) -> int:
         return len(self.unresolved)
 
 
 class Merger(diffutil.Differ):
 
-    def __init__(self, ):
-        self.differ = AutoMergeDiffer()
+    def __init__(self) -> None:
+        super().__init__()
+        self.differ: AutoMergeDiffer = AutoMergeDiffer()
         self.differ.auto_merge = True
         self.differ.unresolved = []
-        self.texts = []
+        self.texts: List[str] = []
+        self.unresolved: List[int] = []
 
-    def initialize(self, sequences, texts):
+    def initialize(self, sequences: List[str], texts: List[str]) -> Generator[Optional[int], None, None]:
         step = self.differ.set_sequences_iter(sequences)
         while next(step) is None:
             yield None
         self.texts = texts
         yield 1
 
-    def _apply_change(self, text, change, mergedtext):
+    def _apply_change(self, text: str, change: DiffChunk, mergedtext: List[str]) -> int:
         if change[0] == 'insert':
             for i in range(change[LO + 2], change[HI + 2]):
                 mergedtext.append(text[i])
@@ -230,11 +236,11 @@ class Merger(diffutil.Differ):
         else:
             return change[HI] - change[LO]
 
-    def merge_3_files(self, mark_conflicts=True):
+    def merge_3_files(self, mark_conflicts: bool = True) -> Generator[Optional[str], None, None]:
         self.unresolved = []
         lastline = 0
         mergedline = 0
-        mergedtext = []
+        mergedtext: List[str] = []
         for change in self.differ.all_changes():
             yield None
             low_mark = lastline
@@ -277,10 +283,10 @@ class Merger(diffutil.Differ):
         # that were merged and use those here instead of assuming '\n'.
         yield "\n".join(mergedtext)
 
-    def merge_2_files(self, fromindex, toindex):
+    def merge_2_files(self, fromindex: int, toindex: int) -> Generator[Optional[str], None, None]:
         self.unresolved = []
         lastline = 0
-        mergedtext = []
+        mergedtext: List[str] = []
         for change in self.differ.pair_changes(toindex, fromindex):
             yield None
             if change[0] == 'conflict':

@@ -1,4 +1,5 @@
 # Copyright (C) 2014 Marco Brito <bcaza@null.net>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,34 +14,36 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import Final, List, Optional, Tuple
+
+import cairo
 from gi.repository import Gdk, GObject, Gtk
 
 
 class DiffGrid(Gtk.Grid):
     __gtype_name__ = "DiffGrid"
 
-    column_count = 10
-    handle_columns = (2, 6)
+    column_count: Final[int] = 10
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._in_drag = False
-        self._drag_pos = -1
-        self._drag_handle = None
-        self._handle1 = HandleWindow()
-        self._handle2 = HandleWindow()
+        self._in_drag: bool = False
+        self._drag_pos: float = -1
+        self._drag_handle: Optional['HandleWindow'] = None
+        self._handle1: 'HandleWindow' = HandleWindow()
+        self._handle2: 'HandleWindow' = HandleWindow()
 
-    def do_realize(self):
+    def do_realize(self) -> None:
         Gtk.Grid.do_realize(self)
         self._handle1.realize(self)
         self._handle2.realize(self)
 
-    def do_unrealize(self):
+    def do_unrealize(self) -> None:
         self._handle1.unrealize()
         self._handle2.unrealize()
         Gtk.Grid.do_unrealize(self)
 
-    def do_map(self):
+    def do_map(self) -> None:
         Gtk.Grid.do_map(self)
 
         drag = self.get_child_at(2, 0)
@@ -48,40 +51,42 @@ class DiffGrid(Gtk.Grid):
         drag = self.get_child_at(6, 0)
         self._handle2.set_visible(drag and drag.get_visible())
 
-    def do_unmap(self):
+    def do_unmap(self) -> None:
         self._handle1.set_visible(False)
         self._handle2.set_visible(False)
         Gtk.Grid.do_unmap(self)
 
-    def _handle_set_prelight(self, window, flag):
+    def _handle_set_prelight(self, window: Gdk.Window, flag: bool) -> None:
         if hasattr(window, "handle"):
             window.handle.set_prelight(flag)
 
-    def do_enter_notify_event(self, event):
+    def do_enter_notify_event(self, event: Gdk.EventCrossing) -> bool:
         if hasattr(event.window, "handle"):
             event.window.handle.set_prelight(True)
+        return False
 
-    def do_leave_notify_event(self, event):
+    def do_leave_notify_event(self, event: Gdk.EventCrossing) -> bool:
         if self._in_drag:
-            return
+            return False
 
         if hasattr(event.window, "handle"):
             event.window.handle.set_prelight(False)
+        return False
 
-    def do_button_press_event(self, event):
+    def do_button_press_event(self, event: Gdk.EventButton) -> bool:
         if event.button & Gdk.BUTTON_PRIMARY:
             self._drag_pos = event.x
             self._in_drag = True
             return True
         return False
 
-    def do_button_release_event(self, event):
+    def do_button_release_event(self, event: Gdk.EventButton) -> bool:
         if event.button & Gdk.BUTTON_PRIMARY:
             self._in_drag = False
             return True
         return False
 
-    def do_motion_notify_event(self, event):
+    def do_motion_notify_event(self, event: Gdk.EventMotion) -> bool:
         if event.state & Gdk.ModifierType.BUTTON1_MASK:
             if hasattr(event.window, "handle"):
                 x, y = event.window.get_position()
@@ -93,8 +98,15 @@ class DiffGrid(Gtk.Grid):
         return False
 
     def _calculate_positions(
-            self, xmin, xmax, pane_sep_width_1, pane_sep_width_2,
-            wpane1, wpane2, wpane3):
+            self,
+            xmin: float,
+            xmax: float,
+            pane_sep_width_1: float,
+            pane_sep_width_2: float,
+            wpane1: float,
+            wpane2: float,
+            wpane3: float
+    ) -> Tuple[int, int]:
         wremain = max(0, xmax - xmin - pane_sep_width_1 - pane_sep_width_2)
         pos1 = self._handle1.get_position(wremain, xmin)
         pos2 = self._handle2.get_position(wremain, xmin + pane_sep_width_1)
@@ -144,7 +156,7 @@ class DiffGrid(Gtk.Grid):
         self._handle2.set_position(pos2)
         return int(round(pos1)), int(round(pos2))
 
-    def do_size_allocate(self, allocation):
+    def do_size_allocate(self, allocation: Gdk.Rectangle) -> None:
         # We should be chaining up here to:
         #     Gtk.Grid.do_size_allocate(self, allocation)
         # However, when we do this, we hit issues with doing multiple
@@ -177,7 +189,7 @@ class DiffGrid(Gtk.Grid):
             wgutter3, wlink2, wgutter4, wpane3, wmap)
         columns = [sum(wcols[:i + 1]) for i in range(len(wcols))]
 
-        def child_allocate(child):
+        def child_allocate(child: Gtk.Widget) -> None:
             if not child.get_visible():
                 return
             left, top, width, height = self.child_get(
@@ -209,7 +221,7 @@ class DiffGrid(Gtk.Grid):
             self._handle2.set_visible(mapped and pane_sep_width_2 > 0)
             self._handle2.move_resize(pos2, ydrag, pane_sep_width_2, hdrag)
 
-    def _get_min_sizes(self):
+    def _get_min_sizes(self) -> Tuple[List[int], List[int]]:
         hrows = [0] * 4
         wcols = [0] * self.column_count
         for row in range(4):
@@ -233,7 +245,7 @@ class DiffGrid(Gtk.Grid):
                     hrows[row] = max(hrows[row], msize.height, nsize.height)
         return wcols, hrows
 
-    def do_draw(self, context):
+    def do_draw(self, context: cairo.Context) -> None:
         Gtk.Grid.do_draw(self, context)
         self._handle1.draw(context)
         self._handle2.draw(context)
@@ -243,28 +255,28 @@ class HandleWindow():
 
     # We restrict the handle width because render_handle doesn't pay
     # attention to orientation.
-    handle_width = 10
+    handle_width: Final[int] = 10
 
-    def __init__(self):
-        self._widget = None
-        self._window = None
-        self._area_x = -1
-        self._area_y = -1
-        self._area_width = 1
-        self._area_height = 1
-        self._prelit = False
-        self._pos = 0.0
-        self._transform = (0, 0)
+    def __init__(self) -> None:
+        self._widget: Optional[Gtk.Widget] = None
+        self._window: Optional[Gdk.Window] = None
+        self._area_x: int = -1
+        self._area_y: int = -1
+        self._area_width: int = 1
+        self._area_height: int = 1
+        self._prelit: bool = False
+        self._pos: float = 0.0
+        self._transform: Tuple[float, float] = (0, 0)
 
-    def get_position(self, width, xtrans):
+    def get_position(self, width: float, xtrans: float) -> float:
         self._transform = (width, xtrans)
         return float(self._pos * width) + xtrans
 
-    def set_position(self, pos):
+    def set_position(self, pos: float) -> None:
         width, xtrans = self._transform
         self._pos = float(pos - xtrans) / width
 
-    def realize(self, widget):
+    def realize(self, widget: Gtk.Widget) -> None:
         attr = Gdk.WindowAttr()
         attr.window_type = Gdk.WindowType.CHILD
         attr.x = self._area_x
@@ -292,28 +304,28 @@ class HandleWindow():
         self._widget = widget
         self._widget.register_window(self._window)
 
-    def unrealize(self):
+    def unrealize(self) -> None:
         self._widget.unregister_window(self._window)
 
-    def set_visible(self, visible):
+    def set_visible(self, visible: bool) -> None:
         if visible:
             self._window.show()
         else:
             self._window.hide()
 
-    def move_resize(self, x, y, width, height):
+    def move_resize(self, x: int, y: int, width: int, height: int) -> None:
         self._window.move_resize(x, y, width, height)
         self._area_x = x
         self._area_y = y
         self._area_width = width
         self._area_height = height
 
-    def set_prelight(self, flag):
+    def set_prelight(self, flag: bool) -> None:
         self._prelit = flag
         self._widget.queue_draw_area(self._area_x, self._area_y,
                                      self._area_width, self._area_height)
 
-    def draw(self, cairocontext):
+    def draw(self, cairocontext: cairo.Context) -> None:
         alloc = self._widget.get_allocation()
         padding = 5
         x = self._area_x - alloc.x + padding

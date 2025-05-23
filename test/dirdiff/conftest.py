@@ -1,6 +1,8 @@
+from typing import Final
+
 import pytest
 
-CHUNK_SIZE = 4096 * 10
+CHUNK_SIZE: Final[int] = 4096 * 10
 
 diff_definition = {
     "a": {

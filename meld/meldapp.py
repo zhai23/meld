@@ -18,6 +18,7 @@ import io
 import logging
 import optparse
 import os
+from typing import List, Optional, Tuple
 
 from gi.repository import Gdk, Gio, GLib, Gtk
 
@@ -39,7 +40,7 @@ optparse._ = _
 
 class MeldApp(Gtk.Application):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             application_id=meld.conf.APPLICATION_ID,
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
@@ -58,11 +59,11 @@ class MeldApp(Gtk.Application):
     def make_resource_path(self, resource_path: str) -> str:
         return f'{self.props.resource_base_path}/{resource_path}'
 
-    def do_startup(self):
+    def do_startup(self) -> None:
         Gtk.Application.do_startup(self)
         meld.accelerators.register_accels(self)
 
-        actions = (
+        actions: Tuple[Tuple[str, callable], ...] = (
             ("preferences", self.preferences_callback),
             ("help", self.help_callback),
             ("about", self.about_callback),
@@ -79,17 +80,17 @@ class MeldApp(Gtk.Application):
 
         self.new_window()
 
-    def do_activate(self):
+    def do_activate(self) -> None:
         self.get_active_window().present()
 
-    def do_command_line(self, command_line):
+    def do_command_line(self, command_line: Gio.ApplicationCommandLine) -> Optional[int | object]:
         tab = self.parse_args(command_line)
 
         if isinstance(tab, int):
             return tab
         elif tab:
 
-            def done(tab, status):
+            def done(tab: object, status: int) -> None:
                 self.release()
                 tab.command_line.set_exit_status(status)
                 tab.command_line = None
@@ -104,7 +105,7 @@ class MeldApp(Gtk.Application):
         self.activate()
         return 0
 
-    def do_window_removed(self, widget):
+    def do_window_removed(self, widget: Gtk.Widget) -> None:
         Gtk.Application.do_window_removed(self, widget)
         if not len(self.get_windows()):
             self.quit()
@@ -115,12 +116,12 @@ class MeldApp(Gtk.Application):
     # def do_local_command_line(self, command_line):
     #     return False
 
-    def preferences_callback(self, action, parameter):
+    def preferences_callback(self, action: Gio.SimpleAction, parameter: None) -> None:
         parent = self.get_active_window()
         dialog = PreferencesDialog(transient_for=parent)
         dialog.present()
 
-    def help_callback(self, action, parameter):
+    def help_callback(self, action: Gio.SimpleAction, parameter: None) -> None:
         if meld.conf.DATADIR_IS_UNINSTALLED:
             uri = "https://meld.app/help/"
         else:
@@ -128,7 +129,7 @@ class MeldApp(Gtk.Application):
         Gtk.show_uri(
             Gdk.Screen.get_default(), uri, Gtk.get_current_event_time())
 
-    def about_callback(self, action, parameter):
+    def about_callback(self, action: Gio.SimpleAction, parameter: None) -> None:
         builder = Gtk.Builder.new_from_resource(
             '/org/gnome/meld/ui/about-dialog.ui')
         dialog = builder.get_object('about-dialog')
@@ -138,7 +139,7 @@ class MeldApp(Gtk.Application):
         dialog.run()
         dialog.destroy()
 
-    def quit_callback(self, action, parameter):
+    def quit_callback(self, action: Gio.SimpleAction, parameter: None) -> None:
         for window in self.get_windows():
             cancelled = window.emit(
                 "delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
@@ -147,13 +148,19 @@ class MeldApp(Gtk.Application):
             window.destroy()
         self.quit()
 
-    def new_window(self):
+    def new_window(self) -> MeldWindow:
         window = MeldWindow()
         self.add_window(window)
         return window
 
     def open_files(
-            self, gfiles, *, window=None, close_on_error=False, **kwargs):
+        self,
+        gfiles: List[Gio.File],
+        *,
+        window: Optional[MeldWindow] = None,
+        close_on_error: bool = False,
+        **kwargs
+    ) -> object:
         """Open a comparison between files in a Meld window
 
         :param gfiles: list of Gio.File to be compared
@@ -169,10 +176,10 @@ class MeldApp(Gtk.Application):
                 self.remove_window(window)
             raise
 
-    def diff_files_callback(self, option, opt_str, value, parser):
+    def diff_files_callback(self, option: optparse.Option, opt_str: str, value: None, parser: optparse.OptionParser) -> None:
         """Gather --diff arguments and append to a list"""
         assert value is None
-        diff_files_args = []
+        diff_files_args: List[str] = []
         while parser.rargs:
             # Stop if we find a short- or long-form arg, or a '--'
             # Note that this doesn't handle negative numbers.
@@ -188,7 +195,7 @@ class MeldApp(Gtk.Application):
                 _("wrong number of arguments supplied to --diff"))
         parser.values.diff.append(diff_files_args)
 
-    def parse_args(self, command_line):
+    def parse_args(self, command_line: Gio.ApplicationCommandLine) -> Optional[int | object]:
         usages = [
             ("", _("Start with an empty window")),
             ("<%s|%s>" % (_("file"), _("folder")),
@@ -211,14 +218,14 @@ class MeldApp(Gtk.Application):
 
         class GLibFriendlyOptionParser(optparse.OptionParser):
 
-            def __init__(self, command_line, *args, **kwargs):
+            def __init__(self, command_line: Gio.ApplicationCommandLine, *args, **kwargs) -> None:
                 self.command_line = command_line
                 self.should_exit = False
                 self.output = io.StringIO()
                 self.exit_status = 0
                 super().__init__(*args, **kwargs)
 
-            def exit(self, status=0, msg=None):
+            def exit(self, status: int = 0, msg: Optional[str] = None) -> None:
                 self.should_exit = True
                 # FIXME: This is... let's say... an unsupported method. Let's
                 # be circumspect about the likelihood of this working.
@@ -229,22 +236,22 @@ class MeldApp(Gtk.Application):
                     print(self.output.getvalue())
                 self.exit_status = status
 
-            def print_usage(self, file=None):
+            def print_usage(self, file: Optional[io.StringIO] = None) -> None:
                 if self.usage:
                     print(self.get_usage(), file=self.output)
 
-            def print_version(self, file=None):
+            def print_version(self, file: Optional[io.StringIO] = None) -> None:
                 if self.version:
                     print(self.get_version(), file=self.output)
 
-            def print_help(self, file=None):
+            def print_help(self, file: Optional[io.StringIO] = None) -> None:
                 print(self.format_help(), file=self.output)
 
-            def error(self, msg):
+            def error(self, msg: str) -> None:
                 self.local_error(msg)
                 raise ValueError()
 
-            def local_error(self, msg):
+            def local_error(self, msg: str) -> None:
                 self.print_usage()
                 error_string = _("Error: %s\n") % msg
                 print(error_string, file=self.output)
@@ -283,7 +290,7 @@ class MeldApp(Gtk.Application):
             dest="diff", default=[],
             help=_("Create a diff tab for the supplied files or folders"))
 
-        def cleanup():
+        def cleanup() -> None:
             if not command_line.get_is_remote():
                 self.quit()
             parser.command_line = None
@@ -327,7 +334,7 @@ class MeldApp(Gtk.Application):
                 return parser.exit_status
             return tab
 
-        def make_file_from_command_line(arg):
+        def make_file_from_command_line(arg: str) -> Optional[Gio.File]:
             f = command_line.create_file_for_arg(arg)
             if not f.query_exists(cancellable=None):
                 # May be a relative path with ':', misinterpreted as a URI
@@ -360,9 +367,9 @@ class MeldApp(Gtk.Application):
 
             return f
 
-        tab = None
-        error = None
-        comparisons = [c for c in [args] + options.diff if c]
+        tab: Optional[object] = None
+        error: Optional[Exception] = None
+        comparisons: List[List[str]] = [c for c in [args] + options.diff if c]
 
         # Every Meld invocation creates at most one window. If there is
         # no existing application, a window is created in do_startup().
@@ -373,7 +380,7 @@ class MeldApp(Gtk.Application):
         # In all cases, all tabs newly created here are attached to the
         # same window, either implicitly by using the most-recently-
         # focused window, or explicitly as below.
-        window = None
+        window: Optional[MeldWindow] = None
         close_on_error = False
         if command_line.get_is_remote() and not options.newtab:
             window = self.new_window()

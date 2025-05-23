@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2010, 2012-2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from typing import Dict, Tuple
+from typing import Dict, Final, Optional, Tuple
 
 import cairo
 from gi.repository import Gdk, GdkPixbuf, GLib, GObject, Gtk
@@ -27,7 +28,7 @@ class EmblemCellRenderer(Gtk.CellRenderer):
 
     __gtype_name__ = "EmblemCellRenderer"
 
-    icon_cache: Dict[Tuple[str, int], GdkPixbuf.Pixbuf] = {}
+    icon_cache: Dict[Tuple[str, int], Optional[GdkPixbuf.Pixbuf]] = {}
 
     icon_name = GObject.Property(
         type=str,
@@ -48,14 +49,14 @@ class EmblemCellRenderer(Gtk.CellRenderer):
         blurb='GDK-parseable color to be used to tint icon',
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._state = None
+        self._state: Optional[Gtk.StateFlags] = None
         # FIXME: hardcoded sizes
-        self._icon_size = 16
-        self._emblem_size = 8
+        self._icon_size: Final[int] = 16
+        self._emblem_size: Final[int] = 8
 
-    def _get_pixbuf(self, name, size):
+    def _get_pixbuf(self, name: str, size: int) -> Optional[GdkPixbuf.Pixbuf]:
         if not name:
             return None
 
@@ -75,7 +76,9 @@ class EmblemCellRenderer(Gtk.CellRenderer):
 
         return self.icon_cache[(name, size)]
 
-    def do_render(self, context, widget, background_area, cell_area, flags):
+    def do_render(self, context: cairo.Context, widget: Gtk.Widget,
+                 background_area: Gdk.Rectangle, cell_area: Gdk.Rectangle,
+                 flags: Gtk.CellRendererState) -> None:
         context.translate(cell_area.x, cell_area.y)
         context.rectangle(0, 0, cell_area.width, cell_area.height)
         context.clip()
@@ -119,7 +122,8 @@ class EmblemCellRenderer(Gtk.CellRenderer):
         context.set_operator(cairo.OPERATOR_OVER)
         context.paint()
 
-    def do_get_size(self, widget, cell_area):
+    def do_get_size(self, widget: Gtk.Widget,
+                   cell_area: Optional[Gdk.Rectangle]) -> Tuple[int, int, int, int]:
         # TODO: Account for cell_area if we have alignment set
         x_offset, y_offset = 0, 0
         width, height = self._icon_size, self._icon_size

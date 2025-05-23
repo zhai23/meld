@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2009 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2012-2014 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import ClassVar, Optional
+from typing import Any, ClassVar, Optional
 
 from gi.repository import GObject, Gtk, GtkSource
 
@@ -48,11 +49,11 @@ class FindBar(Gtk.Grid):
     def activate_secondary(self) -> None:
         self._find_text(backwards=True)
 
-    def __init__(self, parent):
+    def __init__(self, _parent: Optional[Gtk.Widget] = None) -> None:
         super().__init__()
 
-        self.search_context = None
-        self.notify_id = None
+        self.search_context: Optional[GtkSource.SearchContext] = None
+        self.notify_id: Optional[int] = None
         self.set_text_view(None)
 
         # Create and bind our GtkSourceSearchSettings
@@ -72,12 +73,12 @@ class FindBar(Gtk.Grid):
             'replace_mode', self, 'row-spacing', GObject.BindingFlags.DEFAULT,
             lambda binding, replace_mode: 6 if replace_mode else 0)
 
-    def hide(self):
+    def hide(self, *_args: Any) -> None:
         self.set_text_view(None)
         self.wrap_box.set_visible(False)
         Gtk.Widget.hide(self)
 
-    def update_match_state(self, *args):
+    def update_match_state(self, *_args: Any) -> None:
         # Note that -1 here implies that the search is still running
         no_matches = (
             self.search_context.props.occurrences_count == 0 and
@@ -89,7 +90,7 @@ class FindBar(Gtk.Grid):
         else:
             style_context.remove_class(Gtk.STYLE_CLASS_ERROR)
 
-    def set_text_view(self, textview):
+    def set_text_view(self, textview: Optional[Gtk.TextView]) -> None:
         self.textview = textview
         if textview is not None:
             self.search_context = GtkSource.SearchContext.new(
@@ -103,7 +104,7 @@ class FindBar(Gtk.Grid):
                 self.notify_id = None
             self.search_context = None
 
-    def start_find(self, *, textview: Gtk.TextView, replace: bool, text: str):
+    def start_find(self, *, textview: Gtk.TextView, replace: bool, text: str) -> None:
         self.replace_mode = replace
         self.set_text_view(textview)
         if text:
@@ -114,24 +115,24 @@ class FindBar(Gtk.Grid):
         self.show()
         self.find_entry.grab_focus()
 
-    def start_find_next(self, textview):
+    def start_find_next(self, textview: Gtk.TextView) -> None:
         self.set_text_view(textview)
         self._find_text()
 
-    def start_find_previous(self, textview):
+    def start_find_previous(self, textview: Gtk.TextView) -> None:
         self.set_text_view(textview)
         self._find_text(backwards=True)
 
     @Gtk.Template.Callback()
-    def on_find_next_button_clicked(self, button):
+    def on_find_next_button_clicked(self, _button: Gtk.Button) -> None:
         self._find_text()
 
     @Gtk.Template.Callback()
-    def on_find_previous_button_clicked(self, button):
+    def on_find_previous_button_clicked(self, _button: Gtk.Button) -> None:
         self._find_text(backwards=True)
 
     @Gtk.Template.Callback()
-    def on_replace_button_clicked(self, entry):
+    def on_replace_button_clicked(self, _entry: Gtk.Entry) -> None:
         buf = self.textview.get_buffer()
         oldsel = buf.get_selection_bounds()
         match = self._find_text(0)
@@ -144,7 +145,7 @@ class FindBar(Gtk.Grid):
             self._find_text(0)
 
     @Gtk.Template.Callback()
-    def on_replace_all_button_clicked(self, entry):
+    def on_replace_all_button_clicked(self, _entry: Gtk.Entry) -> None:
         buf = self.textview.get_buffer()
         saved_insert = buf.create_mark(
             None, buf.get_iter_at_mark(buf.get_insert()), True)
@@ -155,21 +156,21 @@ class FindBar(Gtk.Grid):
                 buf.get_insert(), 0.25, True, 0.5, 0.5)
 
     @Gtk.Template.Callback()
-    def on_toggle_replace_button_clicked(self, button):
+    def on_toggle_replace_button_clicked(self, _button: Gtk.Button) -> None:
         self.replace_mode = not self.replace_mode
 
     @Gtk.Template.Callback()
-    def on_find_entry_changed(self, entry):
+    def on_find_entry_changed(self, entry: Gtk.SearchEntry) -> None:
         FindBar._cached_search = entry.get_text()
         self._find_text(0)
 
     @Gtk.Template.Callback()
-    def on_stop_search(self, search_entry):
+    def on_stop_search(self, _search_entry: Gtk.SearchEntry) -> None:
         self.hide()
 
-    def _find_text(self, start_offset=1, backwards=False):
+    def _find_text(self, start_offset: int = 1, backwards: bool = False) -> bool:
         if not self.textview or not self.search_context:
-            return
+            return False
 
         buf = self.textview.get_buffer()
         insert = buf.get_iter_at_mark(buf.get_insert())
@@ -192,6 +193,7 @@ class FindBar(Gtk.Grid):
         else:
             buf.place_cursor(buf.get_iter_at_mark(buf.get_insert()))
             self.wrap_box.set_visible(False)
+            return False
 
 
 FindBar.set_css_name('meld-find-bar')

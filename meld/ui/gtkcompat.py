@@ -1,10 +1,10 @@
-
 # The original C implementation is part of the GTK+ project, under
 #   gtk+/demos/gtk-demo/foreigndrawing.c
 #
 # This Python port of portions of the original source code is copyright
 # (C) 2009-2015 Kai Willadsen <kai.willadsen@gmail.com>, and is released
 # under the same LGPL version 2 (or later) license.
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,15 @@
 
 import logging
 import re
+from typing import List, Optional, Tuple
 
 from gi.repository import GObject, Gtk
 
 log = logging.getLogger(__name__)
 
 
-def append_element(path, selector):
-    pseudo_classes = [
+def append_element(path: Gtk.WidgetPath, selector: str) -> None:
+    pseudo_classes: List[Tuple[str, Gtk.StateFlags]] = [
         ('active',        Gtk.StateFlags.ACTIVE),
         ('hover',         Gtk.StateFlags.PRELIGHT),
         ('selected',      Gtk.StateFlags.SELECTED),
@@ -83,7 +84,7 @@ def append_element(path, selector):
             assert False
 
 
-def create_context_for_path(path, parent):
+def create_context_for_path(path: Gtk.WidgetPath, parent: Optional[Gtk.StyleContext]) -> Gtk.StyleContext:
     context = Gtk.StyleContext.new()
     context.set_path(path)
     context.set_parent(parent)
@@ -91,55 +92,10 @@ def create_context_for_path(path, parent):
     return context
 
 
-def get_style(parent, selector):
+def get_style(parent: Optional[Gtk.StyleContext], selector: str) -> Gtk.StyleContext:
     if parent:
         path = Gtk.WidgetPath.copy(parent.get_path())
     else:
         path = Gtk.WidgetPath.new()
     append_element(path, selector)
     return create_context_for_path(path, parent)
-
-
-def query_size(context, width, height):
-    margin = context.get_margin(context.get_state())
-    border = context.get_border(context.get_state())
-    padding = context.get_padding(context.get_state())
-    min_width = context.get_property('min-width', context.get_state())
-    min_height = context.get_property('min-height', context.get_state())
-    min_width += (
-        margin.left + margin.right + border.left + border.right +
-        padding.left + padding.right)
-    min_height += (
-        margin.top + margin.bottom + border.top + border.bottom +
-        padding.top + padding.bottom)
-    return max(width, min_width), max(height, min_height)
-
-
-def draw_style_common(context, cr, x, y, width, height):
-
-    margin = context.get_margin(context.get_state())
-    border = context.get_border(context.get_state())
-    padding = context.get_padding(context.get_state())
-
-    min_width = context.get_property('min-width', context.get_state())
-    min_height = context.get_property('min-height', context.get_state())
-
-    x += margin.left
-    y += margin.top
-    width -= margin.left + margin.right
-    height -= margin.top + margin.bottom
-
-    width = max(width, min_width)
-    height = max(height, min_height)
-
-    Gtk.render_background(context, cr, x, y, width, height)
-    Gtk.render_frame(context, cr, x, y, width, height)
-
-    contents_x = x + border.left + padding.left
-    contents_y = y + border.top + padding.top
-    contents_width = (
-        width - border.left - border.right - padding.left - padding.right)
-    contents_height = (
-        height - border.top - border.bottom - padding.top - padding.bottom)
-
-    return contents_x, contents_y, contents_width, contents_height

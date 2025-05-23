@@ -16,7 +16,7 @@
 
 import enum
 import logging
-from typing import Sequence
+from typing import Final, Sequence
 
 from gi.repository import Gio, GObject, Gtk
 
@@ -29,9 +29,9 @@ log = logging.getLogger(__name__)
 
 class ComparisonState(enum.IntEnum):
     # TODO: Consider use-cases for states in gedit-enum-types.c
-    Normal = 0
-    Closing = 1
-    SavingError = 2
+    Normal: Final[int] = 0
+    Closing: Final[int] = 1
+    SavingError: Final[int] = 2
 
 
 class LabeledObjectMixin(GObject.GObject):

@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2012-2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +18,10 @@
 """Classes to implement scheduling for cooperative threads."""
 
 import traceback
+from typing import Any, Callable, Generator, Iterator, List, Union, cast
+
+TaskType = Union[Callable[[], Any], Iterator[Any], 'SchedulerBase']
+CallbackType = Callable[['SchedulerBase'], None]
 
 
 class SchedulerBase:
@@ -25,19 +30,19 @@ class SchedulerBase:
     Derived classes must implement get_current_task.
     """
 
-    def __init__(self):
-        self.tasks = []
-        self.callbacks = []
+    def __init__(self) -> None:
+        self.tasks: List[TaskType] = []
+        self.callbacks: List[CallbackType] = []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s" % self.tasks
 
-    def connect(self, signal, action):
+    def connect(self, signal: str, action: CallbackType) -> None:
         assert signal == "runnable"
         if action not in self.callbacks:
             self.callbacks.append(action)
 
-    def add_task(self, task, atfront=False):
+    def add_task(self, task: TaskType, atfront: bool = False) -> None:
         """Add a task to the scheduler's task list
 
         The task may be a function, generator or scheduler, and is
@@ -54,34 +59,34 @@ class SchedulerBase:
         for callback in self.callbacks:
             callback(self)
 
-    def remove_task(self, task):
+    def remove_task(self, task: TaskType) -> None:
         """Remove a single task from the scheduler"""
         try:
             self.tasks.remove(task)
         except ValueError:
             pass
 
-    def remove_all_tasks(self):
+    def remove_all_tasks(self) -> None:
         """Remove all tasks from the scheduler"""
         self.tasks = []
 
-    def add_scheduler(self, sched):
+    def add_scheduler(self, sched: 'SchedulerBase') -> None:
         """Adds a subscheduler as a child task of this scheduler"""
         sched.connect("runnable", lambda t: self.add_task(t))
 
-    def remove_scheduler(self, sched):
+    def remove_scheduler(self, sched: 'SchedulerBase') -> None:
         """Remove a sub-scheduler from this scheduler"""
         self.remove_task(sched)
         try:
-            self.callbacks.remove(sched)
+            self.callbacks.remove(cast(CallbackType, sched))
         except ValueError:
             pass
 
-    def get_current_task(self):
+    def get_current_task(self) -> TaskType:
         """Overridden function returning the next task to run"""
         raise NotImplementedError
 
-    def __call__(self):
+    def __call__(self) -> int:
         """Run an iteration of the current task"""
         if len(self.tasks):
             r = self.iteration()
@@ -89,15 +94,15 @@ class SchedulerBase:
                 return r
         return self.tasks_pending()
 
-    def complete_tasks(self):
+    def complete_tasks(self) -> None:
         """Run all of the scheduler's current tasks to completion"""
         while self.tasks_pending():
             self.iteration()
 
-    def tasks_pending(self):
+    def tasks_pending(self) -> int:
         return len(self.tasks) != 0
 
-    def iteration(self):
+    def iteration(self) -> int:
         """Perform one iteration of the current task"""
         try:
             task = self.get_current_task()
@@ -105,9 +110,9 @@ class SchedulerBase:
             return 0
         try:
             if hasattr(task, "__iter__"):
-                ret = next(task)
+                ret = next(cast(Iterator[Any], task))
             else:
-                ret = task()
+                ret = cast(Callable[[], Any], task)()
         except StopIteration:
             pass
         except Exception:
@@ -122,7 +127,7 @@ class SchedulerBase:
 class LifoScheduler(SchedulerBase):
     """Scheduler calling most recently added tasks first"""
 
-    def get_current_task(self):
+    def get_current_task(self) -> TaskType:
         try:
             return self.tasks[-1]
         except IndexError:
@@ -132,7 +137,7 @@ class LifoScheduler(SchedulerBase):
 class FifoScheduler(SchedulerBase):
     """Scheduler calling tasks in the order they were added"""
 
-    def get_current_task(self):
+    def get_current_task(self) -> TaskType:
         try:
             return self.tasks[0]
         except IndexError:
@@ -144,13 +149,13 @@ if __name__ == "__main__":
     import time
     m = LifoScheduler()
 
-    def timetask(t):
+    def timetask(t: float) -> None:
         while time.time() - t < 1:
             print("***")
             time.sleep(0.1)
         print("!!!")
 
-    def sayhello(x):
+    def sayhello(x: int) -> Generator[int, None, None]:
         for i in range(random.randint(2, 8)):
             print("hello", x)
             time.sleep(0.1)

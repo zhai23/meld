@@ -17,6 +17,7 @@
 
 # Modified by Kai Willadsen for the Meld project
 # Copyright (C) 2013-2014 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 
 import distutils.cmd
 import distutils.command.build
@@ -30,6 +31,7 @@ import os.path
 import platform
 import sys
 from distutils.log import info
+from typing import Any, List, Optional, Tuple
 
 try:
     import distro
@@ -43,19 +45,19 @@ except ImportError:
 windows_build = os.name == 'nt'
 
 
-def has_help(self):
+def has_help(self: Any) -> bool:
     return "build_help" in self.distribution.cmdclass and not windows_build
 
 
-def has_icons(self):
+def has_icons(self: Any) -> bool:
     return "build_icons" in self.distribution.cmdclass
 
 
-def has_i18n(self):
+def has_i18n(self: Any) -> bool:
     return "build_i18n" in self.distribution.cmdclass and not windows_build
 
 
-def has_data(self):
+def has_data(self: Any) -> bool:
     return "build_data" in self.distribution.cmdclass
 
 
@@ -68,12 +70,12 @@ distutils.command.build.build.sub_commands.extend([
 
 
 class MeldDistribution(distutils.dist.Distribution):
-    global_options = distutils.dist.Distribution.global_options + [
+    global_options: List[Tuple[str, Optional[str], str]] = distutils.dist.Distribution.global_options + [
         ("no-update-icon-cache", None, "Don't run gtk-update-icon-cache"),
         ("no-compile-schemas", None, "Don't compile gsettings schemas"),
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.no_update_icon_cache = False
         self.no_compile_schemas = False
         super().__init__(*args, **kwargs)
@@ -81,32 +83,32 @@ class MeldDistribution(distutils.dist.Distribution):
 
 class build_data(distutils.cmd.Command):
 
-    gschemas = [
+    gschemas: List[Tuple[str, List[str]]] = [
         ('share/glib-2.0/schemas', ['data/org.gnome.Meld.gschema.xml'])
     ]
 
-    frozen_gschemas = [
+    frozen_gschemas: List[Tuple[str, List[str]]] = [
         ('share/meld', ['data/gschemas.compiled']),
     ]
 
-    win32_settings_ini = '[Settings]\ngtk-application-prefer-dark-theme=0\n'
+    win32_settings_ini: str = '[Settings]\ngtk-application-prefer-dark-theme=0\n'
 
-    style_source = "data/styles/*.style-scheme.xml.in"
-    style_target_dir = 'share/meld/styles'
+    style_source: str = "data/styles/*.style-scheme.xml.in"
+    style_target_dir: str = 'share/meld/styles'
 
     # FIXME: This is way too much hard coding, but I really hope
     # it also doesn't last that long.
-    resource_source = "meld/resources/meld.gresource.xml"
-    resource_target = "org.gnome.Meld.gresource"
+    resource_source: str = "meld/resources/meld.gresource.xml"
+    resource_target: str = "org.gnome.Meld.gresource"
 
-    def initialize_options(self):
+    def initialize_options(self) -> None:
         pass
 
-    def finalize_options(self):
+    def finalize_options(self) -> None:
         pass
 
-    def get_data_files(self):
-        data_files = []
+    def get_data_files(self) -> List[Tuple[str, List[str]]]:
+        data_files: List[Tuple[str, List[str]]] = []
 
         build_path = os.path.join('build', 'data')
         if not os.path.exists(build_path):
@@ -148,7 +150,7 @@ class build_data(distutils.cmd.Command):
             styles = glob.glob(self.style_source)
 
             import shutil
-            targets = []
+            targets: List[str] = []
             for style in styles:
                 assert style.endswith('.in')
                 target = style[:-len('.in')]
@@ -159,23 +161,32 @@ class build_data(distutils.cmd.Command):
 
         return data_files
 
-    def run(self):
+    def run(self) -> None:
         data_files = self.distribution.data_files
         data_files.extend(self.get_data_files())
 
 
 class build_help(distutils.cmd.Command):
 
-    help_dir = 'help'
+    help_dir: str = 'help'
+    selected_languages: List[str] = []
+    C_PAGES: List[str] = []
+    C_EXTRA: List[str] = []
 
-    def initialize_options(self):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.selected_languages = []
+        self.C_PAGES = []
+        self.C_EXTRA = []
+        super().__init__(*args, **kwargs)
+
+    def initialize_options(self) -> None:
         pass
 
-    def finalize_options(self):
+    def finalize_options(self) -> None:
         pass
 
-    def get_data_files(self):
-        data_files = []
+    def get_data_files(self) -> List[Tuple[str, List[str]]]:
+        data_files: List[Tuple[str, List[str]]] = []
         name = self.distribution.metadata.name
 
         if "LINGUAS" in os.environ:
@@ -230,12 +241,12 @@ class build_help(distutils.cmd.Command):
 
         return data_files
 
-    def run(self):
+    def run(self) -> None:
         data_files = self.distribution.data_files
         data_files.extend(self.get_data_files())
         self.check_help()
 
-    def check_help(self):
+    def check_help(self) -> None:
         for lang in self.selected_languages:
             build_path = os.path.join('build', self.help_dir, lang)
             if not os.path.exists(build_path):
@@ -253,26 +264,25 @@ class build_help(distutils.cmd.Command):
 
 
 class build_icons(distutils.cmd.Command):
+    icon_dir: str = os.path.join("data", "icons")
+    target: str = "share/icons"
+    frozen_target: str = "share/meld/icons"
 
-    icon_dir = os.path.join("data", "icons")
-    target = "share/icons"
-    frozen_target = "share/meld/icons"
-
-    def initialize_options(self):
+    def initialize_options(self) -> None:
         pass
 
-    def finalize_options(self):
+    def finalize_options(self) -> None:
         pass
 
-    def run(self):
-        target_dir = self.frozen_target if windows_build else self.target
-        data_files = self.distribution.data_files
+    def run(self) -> None:
+        target_dir: str = self.frozen_target if windows_build else self.target
+        data_files: List[Tuple[str, List[str]]] = self.distribution.data_files
 
         for theme in glob.glob(os.path.join(self.icon_dir, "*")):
             for size in glob.glob(os.path.join(theme, "*")):
                 for category in glob.glob(os.path.join(size, "*")):
-                    icons = (glob.glob(os.path.join(category, "*.png")) +
-                             glob.glob(os.path.join(category, "*.svg")))
+                    icons: List[str] = (glob.glob(os.path.join(category, "*.png")) +
+                                        glob.glob(os.path.join(category, "*.svg")))
                     icons = [
                         icon for icon in icons if not os.path.islink(icon)]
                     if not icons:
@@ -287,37 +297,43 @@ class build_icons(distutils.cmd.Command):
 
 class build_i18n(distutils.cmd.Command):
 
-    bug_contact = None
-    domain = "meld"
-    po_dir = "po"
-    merge_po = False
+    bug_contact: Optional[str] = None
+    domain: str = "meld"
+    po_dir: str = "po"
+    merge_po: bool = False
+    max_po_mtime: float = 0
 
     # FIXME: It's ridiculous to specify these here, but I know of no other
     # way except magically extracting them from self.distribution.data_files
-    desktop_files = [('share/applications', glob.glob("data/*.desktop.in"))]
-    xml_files = [
+    desktop_files: List[Tuple[str, List[str]]] = [('share/applications', glob.glob("data/*.desktop.in"))]
+    xml_files: List[Tuple[str, List[str]]] = [
         ('share/meld/styles', glob.glob("data/styles/*.style-scheme.xml.in")),
         ('share/metainfo', glob.glob("data/*.appdata.xml.in")),
         ('share/mime/packages', glob.glob("data/mime/*.xml.in"))
     ]
-    schemas_files = []
-    key_files = []
+    schemas_files: List[Tuple[str, List[str]]] = []
+    key_files: List[Tuple[str, List[str]]] = []
 
-    def initialize_options(self):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.max_po_mtime = 0
+        super().__init__(*args, **kwargs)
+
+    def initialize_options(self) -> None:
         pass
 
-    def finalize_options(self):
+    def finalize_options(self) -> None:
         pass
 
-    def _rebuild_po(self):
+    def _rebuild_po(self) -> None:
         # If there is a po/LINGUAS file, or the LINGUAS environment variable
         # is set, only compile the languages listed there.
-        selected_languages = None
+        selected_languages: Optional[List[str]] = None
         linguas_file = os.path.join(self.po_dir, "LINGUAS")
         if "LINGUAS" in os.environ:
             selected_languages = os.environ["LINGUAS"].split()
         elif os.path.isfile(linguas_file):
-            selected_languages = open(linguas_file).read().split()
+            with open(linguas_file) as f:
+                selected_languages = f.read().split()
 
         # If we're on Windows, assume we're building frozen and make a bunch
         # of insane assumptions.
@@ -358,7 +374,7 @@ class build_i18n(distutils.cmd.Command):
             self.distribution.data_files.append((targetpath, (mo_file,)))
         self.max_po_mtime = max_po_mtime
 
-    def run(self):
+    def run(self) -> None:
         if self.bug_contact is not None:
             os.environ["XGETTEXT_ARGS"] = "--msgid-bugs-address=%s " % \
                                           self.bug_contact
@@ -377,7 +393,7 @@ class build_i18n(distutils.cmd.Command):
 
         self._rebuild_po()
 
-        intltool_switches = [
+        intltool_switches: List[Tuple[List[Tuple[str, List[str]]], str]] = [
             (self.xml_files, "-x"),
             (self.desktop_files, "-d"),
             (self.schemas_files, "-s"),
@@ -389,7 +405,7 @@ class build_i18n(distutils.cmd.Command):
                 build_target = os.path.join("build", target)
                 if not os.path.exists(build_target):
                     os.makedirs(build_target)
-                files_merged = []
+                files_merged: List[str] = []
                 for file in files:
                     file_merged = os.path.basename(file)
                     if file_merged.endswith(".in"):
@@ -414,10 +430,10 @@ class build_py(distutils.command.build_py.build_py):
     Adapted from gottengeography
     """
 
-    data_line = 'DATADIR = "%s"'
-    locale_line = 'LOCALEDIR = "%s"'
+    data_line: str = 'DATADIR = "%s"'
+    locale_line: str = 'LOCALEDIR = "%s"'
 
-    def build_module(self, module, module_file, package):
+    def build_module(self, module: str, module_file: str, package: str) -> None:
 
         if module_file == 'meld/conf.py':
             with open(module_file) as f:
@@ -457,9 +473,14 @@ class build_py(distutils.command.build_py.build_py):
 
 
 class install(distutils.command.install.install):
+    install_layout: Optional[str] = None
 
-    def finalize_options(self):
-        special_cases = ('debian', 'ubuntu', 'linuxmint')
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.install_layout = None
+        super().__init__(*args, **kwargs)
+
+    def finalize_options(self) -> None:
+        special_cases: Tuple[str, ...] = ('debian', 'ubuntu', 'linuxmint')
         if platform.system() == 'Linux':
             # linux_distribution has been removed in Python 3.8; we require
             # the third-party distro package for future handling.
@@ -481,7 +502,7 @@ class install(distutils.command.install.install):
 
 class install_data(distutils.command.install_data.install_data):
 
-    def run(self):
+    def run(self) -> None:
         distutils.command.install_data.install_data.run(self)
 
         if not self.distribution.no_update_icon_cache:

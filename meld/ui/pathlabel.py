@@ -1,4 +1,5 @@
 # Copyright (C) 2019-2021 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from gi.repository import Gdk, Gio, GObject, Gtk, Pango
 
@@ -120,7 +121,7 @@ class PathLabel(Gtk.MenuButton):
         nick='Custom label override',
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
         self.drag_dest_set(
@@ -169,7 +170,7 @@ class PathLabel(Gtk.MenuButton):
         # prop changes, so we need this notify callback.
         self.connect('notify::label', self.label_changed_cb)
 
-    def label_changed_cb(self, *args):
+    def label_changed_cb(self, *_args: Any) -> None:
         # Our label needs ellipsization to avoid forcing minimum window
         # sizes for long filenames. This child iteration hack is
         # required as GtkButton has no label access.
@@ -177,7 +178,7 @@ class PathLabel(Gtk.MenuButton):
             if isinstance(child, Gtk.Label):
                 child.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
 
-    def get_display_label(self, binding, from_value) -> str:
+    def get_display_label(self, _binding: GObject.Binding, _from_value: Any) -> str:
         if self.custom_label:
             return self.custom_label
         elif self.path_label:
@@ -185,7 +186,7 @@ class PathLabel(Gtk.MenuButton):
         else:
             return self.MISSING_FILE_NAME
 
-    def get_display_path(self, binding, from_value):
+    def get_display_path(self, _binding: GObject.Binding, from_value: Optional[Gio.File]) -> str:
         if from_value:
             return from_value.get_parse_name()
         return ''
@@ -229,7 +230,7 @@ class PathLabel(Gtk.MenuButton):
         self._path_label = format_parent_relative_path(parent, descendant)
         self.notify('path_label')
 
-    def action_copy_full_path(self, *args):
+    def action_copy_full_path(self, *_args: Any) -> None:
         if not self.gfile:
             return
 
@@ -238,7 +239,7 @@ class PathLabel(Gtk.MenuButton):
         clip.set_text(path, -1)
         clip.store()
 
-    def action_open_folder(self, *args):
+    def action_open_folder(self, *_args: Any) -> None:
         if not self.gfile:
             return
 

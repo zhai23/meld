@@ -1,4 +1,5 @@
 # Copyright (C) 2019 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from typing import Any
 
 from gi.repository import GObject, Gtk
 
@@ -31,14 +33,18 @@ class RecentSelector(Gtk.Grid):
         ),
         arg_types=(str,),
     )
-    def open_recent(self, uri: str) -> None:
+    def open_recent(self, _uri: str) -> None:
         ...
 
     recent_chooser = Gtk.Template.Child()
     search_entry = Gtk.Template.Child()
     open_button = Gtk.Template.Child()
 
-    def do_realize(self):
+    def __init__(self) -> None:
+        super().__init__()
+        self.filter_text: str = ''
+
+    def do_realize(self) -> Gtk.Widget:
         self.filter_text = ''
         self.recent_chooser.set_filter(self.make_recent_filter())
 
@@ -73,7 +79,7 @@ class RecentSelector(Gtk.Grid):
         return recent_filter
 
     @Gtk.Template.Callback()
-    def on_filter_text_changed(self, *args):
+    def on_filter_text_changed(self, *_args: Any) -> None:
         self.filter_text = self.search_entry.get_text().lower()
 
         # This feels unnecessary, but there's no other good way to get
@@ -81,12 +87,12 @@ class RecentSelector(Gtk.Grid):
         self.recent_chooser.set_filter(self.make_recent_filter())
 
     @Gtk.Template.Callback()
-    def on_selection_changed(self, *args):
+    def on_selection_changed(self, *_args: Any) -> None:
         have_selection = bool(self.recent_chooser.get_current_uri())
         self.open_button.set_sensitive(have_selection)
 
     @Gtk.Template.Callback()
-    def on_activate(self, *args):
+    def on_activate(self, *_args: Any) -> None:
         uri = self.recent_chooser.get_current_uri()
         if uri:
             self.open_recent.emit(uri)

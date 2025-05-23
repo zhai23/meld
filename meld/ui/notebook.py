@@ -1,4 +1,5 @@
 # Copyright (C) 2015-2019 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,6 +13,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from typing import Any, Optional
 
 from gi.repository import Gdk, Gio, GObject, Gtk
 
@@ -80,10 +83,10 @@ class MeldNotebook(Gtk.Notebook):
         Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
-        self.action_group = Gio.SimpleActionGroup()
+        self.action_group: Gio.SimpleActionGroup = Gio.SimpleActionGroup()
 
         actions = (
             ("tabmoveleft", self.on_tab_move_left),
@@ -107,10 +110,10 @@ class MeldNotebook(Gtk.Notebook):
         self.connect('page-added', self.on_page_added)
         self.connect('page-removed', self.on_page_removed)
 
-    def do_tab_switch(self, page_num):
+    def do_tab_switch(self, page_num: int) -> None:
         self.set_current_page(page_num)
 
-    def on_popup_menu(self, widget, event=None):
+    def on_popup_menu(self, widget: Gtk.Widget, event: Optional[Gdk.Event] = None) -> bool:
         self.action_group.lookup_action("tabmoveleft").set_enabled(
             self.get_current_page() > 0)
         self.action_group.lookup_action("tabmoveright").set_enabled(
@@ -131,32 +134,32 @@ class MeldNotebook(Gtk.Notebook):
             )
         return True
 
-    def on_button_press_event(self, widget, event):
+    def on_button_press_event(self, widget: Gtk.Widget, event: Gdk.EventButton) -> bool:
         if (event.triggers_context_menu() and
                 event.type == Gdk.EventType.BUTTON_PRESS):
             return self.on_popup_menu(widget, event)
         return False
 
-    def on_tab_move_left(self, *args):
+    def on_tab_move_left(self, *_args: Any) -> None:
         page_num = self.get_current_page()
         child = self.get_nth_page(page_num)
         page_num = page_num - 1 if page_num > 0 else 0
         self.reorder_child(child, page_num)
 
-    def on_tab_move_right(self, *args):
+    def on_tab_move_right(self, *_args: Any) -> None:
         page_num = self.get_current_page()
         child = self.get_nth_page(page_num)
         self.reorder_child(child, page_num + 1)
 
-    def on_page_added(self, notebook, child, page_num, *args):
+    def on_page_added(self, _notebook: Gtk.Notebook, child: Gtk.Widget, _page_num: int, *_args: Any) -> None:
         child.connect("label-changed", self.on_label_changed)
         self.props.show_tabs = self.get_n_pages() > 1
 
-    def on_page_removed(self, notebook, child, page_num, *args):
+    def on_page_removed(self, _notebook: Gtk.Notebook, child: Gtk.Widget, _page_num: int, *_args: Any) -> None:
         child.disconnect_by_func(self.on_label_changed)
         self.props.show_tabs = self.get_n_pages() > 1
 
-    def on_label_changed(self, page, text: str, tooltip: str) -> None:
+    def on_label_changed(self, page: Gtk.Widget, text: str, tooltip: str) -> None:
         nbl = self.get_tab_label(page)
         nbl.props.label_text = text
         nbl.set_tooltip_text(tooltip)

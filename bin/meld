@@ -2,6 +2,7 @@
 
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2009-2014 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@ import signal
 import subprocess
 import sys
 from multiprocessing import freeze_support
+from typing import Any, Dict, NoReturn, TextIO
 
 # On Windows, pythonw.exe (which doesn't display a console window) supplies
 # dummy stdout and stderr streams that silently throw away any output. However,
@@ -40,24 +42,24 @@ if sys.executable.endswith("pythonw.exe") or sys.stdout is None:
 freeze_support()
 
 
-def disable_stdout_buffering():
+def disable_stdout_buffering() -> None:
 
     class Unbuffered:
 
-        def __init__(self, file):
+        def __init__(self, file: TextIO) -> None:
             self.file = file
 
-        def write(self, arg):
+        def write(self, arg: str) -> None:
             self.file.write(arg)
             self.file.flush()
 
-        def __getattr__(self, attr):
+        def __getattr__(self, attr: str) -> Any:
             return getattr(self.file, attr)
 
     sys.stdout = Unbuffered(sys.stdout)
 
 
-def get_meld_dir():
+def get_meld_dir() -> str:
     global frozen
     if frozen:
         return os.path.dirname(sys.executable)
@@ -162,7 +164,7 @@ except WindowsError as e:
         "work.\n{}".format(e))
 
 
-def show_error_and_exit(error_text):
+def show_error_and_exit(error_text: str) -> NoReturn:
     """
     Show error in a robust way: always print to stdout and try to
     display gui message via gtk or tkinter (first available).
@@ -200,7 +202,7 @@ def show_error_and_exit(error_text):
     sys.exit(1)
 
 
-def check_requirements():
+def check_requirements() -> None:
 
     import importlib
     from typing import NamedTuple, Optional
@@ -212,7 +214,7 @@ def check_requirements():
         major_version: int
         minor_version: int
 
-        def check(self):
+        def check(self) -> None:
             if self.gi_version:
                 import gi
                 gi.require_version(self.module, self.gi_version)
@@ -236,7 +238,7 @@ def check_requirements():
             if version < (self.major_version, self.minor_version):
                 raise RuntimeError('Unsupported version')
 
-        def __str__(self):
+        def __str__(self) -> str:
             return '{} {}.{}'.format(
                 self.name, self.major_version, self.minor_version)
 
@@ -258,7 +260,7 @@ def check_requirements():
         show_error_and_exit(_('Meld requires %s.') % str(r))
 
 
-def setup_resources():
+def setup_resources() -> None:
     from gi.repository import Gio, GtkSource
 
     resource_filename = meld.conf.APPLICATION_ID + ".gresource"
@@ -298,7 +300,7 @@ def setup_resources():
                 shutil.copyfile(path + '.in', path)
 
 
-def setup_settings():
+def setup_settings() -> None:
     import meld.conf
 
     schema_path = os.path.join(meld.conf.DATADIR, "org.gnome.meld.gschema.xml")
@@ -319,7 +321,7 @@ def setup_settings():
     meld.settings.create_settings()
 
 
-def setup_logging():
+def setup_logging() -> None:
     log = logging.getLogger()
 
     # If we're running uninstalled and from Git, turn up the logging level
@@ -336,7 +338,7 @@ def setup_logging():
         log.setLevel(logging.INFO)
 
         # Set excepthook so that we get exceptions on Windows
-        def logging_except_hook(exc_type, exc_instance, tb):
+        def logging_except_hook(exc_type: type, exc_instance: BaseException, tb: Any) -> None:
             log.error(
                 'Unhandled exception', exc_info=(exc_type, exc_instance, tb))
 
@@ -350,7 +352,7 @@ def setup_logging():
     log.addHandler(handler)
 
 
-def setup_glib_logging():
+def setup_glib_logging() -> None:
     from gi.repository import GLib
     levels = {
         GLib.LogLevelFlags.LEVEL_DEBUG: logging.DEBUG,
@@ -369,7 +371,7 @@ def setup_glib_logging():
     log_domain = "Gtk"
     log = logging.getLogger(log_domain)
 
-    def silence(message):
+    def silence(message: str) -> bool:
         if "Drawing a gadget with negative dimensions" in message:
             return True
         if "resource overlay" in message:
@@ -378,7 +380,7 @@ def setup_glib_logging():
 
     # This logging handler is for "old" glib logging using a simple
     # syslog-style API.
-    def log_adapter(domain, level, message, user_data):
+    def log_adapter(domain: str, level: GLib.LogLevelFlags, message: str, user_data: Any) -> None:
         if not silence(message):
             log.log(levels.get(level, logging.WARNING), message)
 
@@ -392,7 +394,7 @@ def setup_glib_logging():
     # API. Unfortunately, it was added in such a way that the old
     # redirection API became a no-op, so we need to hack both of these
     # handlers to get it to work.
-    def structured_log_adapter(level, fields, field_count, user_data):
+    def structured_log_adapter(level: GLib.LogLevelFlags, fields: Dict[str, Any], field_count: int, user_data: Any) -> GLib.LogWriterOutput:
         # Don't even format the message if it will be discarded
         py_logging_level = levels.get(level, logging.WARNING)
         if log.isEnabledFor(py_logging_level):
@@ -412,7 +414,7 @@ def setup_glib_logging():
         pass
 
 
-def environment_hacks():
+def environment_hacks() -> None:
     # MSYSTEM is set by git, and confuses our
     # msys-packaged version's library search path -
     # for frozen build the lib subdirectory is excluded.
@@ -437,7 +439,7 @@ def environment_hacks():
         os.environ['PANGOCAIRO_BACKEND'] = 'fontconfig'
 
 
-def run_application():
+def run_application() -> int:
     from meld.meldapp import MeldApp
 
     app = MeldApp()
@@ -450,7 +452,7 @@ def run_application():
     return app.run(sys.argv)
 
 
-def main():
+def main() -> int:
     environment_hacks()
     setup_logging()
     disable_stdout_buffering()

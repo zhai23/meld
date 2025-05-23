@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2011-2015 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,9 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 from gi.module import get_introspection_module
-from gi.repository import Gdk, GLib, GObject, Pango
+from gi.repository import Gdk, GLib, GObject, Gtk, Pango
 
 from meld.style import colour_lookup_with_fallback
 from meld.treehelpers import SearchableTreeStore
@@ -60,7 +62,7 @@ COL_TYPES = (str, str, str, str, Gdk.RGBA, Gdk.RGBA, Pango.Style,
 
 class DiffTreeStore(SearchableTreeStore):
 
-    def __init__(self, ntree, types):
+    def __init__(self, ntree: int, types: Tuple[Any, ...]) -> None:
         full_types = []
         for col_type in (COL_TYPES + tuple(types)):
             full_types.extend([col_type] * ntree)
@@ -72,7 +74,7 @@ class DiffTreeStore(SearchableTreeStore):
         self.ntree = ntree
         self._setup_default_styles()
 
-    def _setup_default_styles(self, style=None):
+    def _setup_default_styles(self, style: Optional[Any] = None) -> None:
         roman, italic = Pango.Style.NORMAL, Pango.Style.ITALIC
         normal, bold = Pango.Weight.NORMAL, Pango.Weight.BOLD
 
@@ -122,34 +124,34 @@ class DiffTreeStore(SearchableTreeStore):
 
         assert len(self.icon_details) == len(self.text_attributes) == STATE_MAX
 
-    def value_paths(self, it):
+    def value_paths(self, it: Gtk.TreeIter) -> List[str]:
         return [self.value_path(it, i) for i in range(self.ntree)]
 
-    def value_path(self, it, pane):
+    def value_path(self, it: Gtk.TreeIter, pane: int) -> str:
         return self.get_value(it, self.column_index(COL_PATH, pane))
 
-    def is_folder(self, it, pane, path):
+    def is_folder(self, it: Gtk.TreeIter, pane: int, path: str) -> bool:
         # A folder may no longer exist, and is only tracked by VC.
         # Therefore, check the icon instead, as the pane already knows.
         icon = self.get_value(it, self.column_index(COL_ICON, pane))
         return icon == "folder" or (bool(path) and os.path.isdir(path))
 
-    def column_index(self, col, pane):
+    def column_index(self, col: int, pane: int) -> int:
         return self.ntree * col + pane
 
-    def add_entries(self, parent, names):
+    def add_entries(self, parent: Optional[Gtk.TreeIter], names: List[str]) -> Gtk.TreeIter:
         it = self.append(parent)
         for pane, path in enumerate(names):
             self.unsafe_set(it, pane, {COL_PATH: path})
         return it
 
-    def add_empty(self, parent, text="empty folder"):
+    def add_empty(self, parent: Optional[Gtk.TreeIter], text: str = "empty folder") -> Gtk.TreeIter:
         it = self.append(parent)
         for pane in range(self.ntree):
             self.set_state(it, pane, STATE_EMPTY, text)
         return it
 
-    def add_error(self, parent, msg, pane, defaults={}):
+    def add_error(self, parent: Optional[Gtk.TreeIter], msg: str, pane: int, defaults: Dict[int, Any] = {}) -> None:
         it = self.append(parent)
         key_values = {COL_STATE: str(STATE_ERROR)}
         key_values.update(defaults)
@@ -157,13 +159,13 @@ class DiffTreeStore(SearchableTreeStore):
             self.unsafe_set(it, i, key_values)
         self.set_state(it, pane, STATE_ERROR, msg)
 
-    def set_path_state(self, it, pane, state, isdir=0, display_text=None):
+    def set_path_state(self, it: Gtk.TreeIter, pane: int, state: int, isdir: int = 0, display_text: Optional[str] = None) -> None:
         if not display_text:
             fullname = self.get_value(it, self.column_index(COL_PATH, pane))
             display_text = GLib.markup_escape_text(os.path.basename(fullname))
         self.set_state(it, pane, state, display_text, isdir)
 
-    def set_state(self, it, pane, state, label, isdir=0):
+    def set_state(self, it: Gtk.TreeIter, pane: int, state: int, label: str, isdir: int = 0) -> None:
         icon = self.icon_details[state][1 if isdir else 0]
         tint = None if isdir else self.icon_details[state][2]
         fg, style, weight, strike = self.text_attributes[state]
@@ -178,22 +180,22 @@ class DiffTreeStore(SearchableTreeStore):
             COL_STRIKE: strike
         })
 
-    def get_state(self, it, pane):
+    def get_state(self, it: Gtk.TreeIter, pane: int) -> Optional[int]:
         state_idx = self.column_index(COL_STATE, pane)
         try:
             return int(self.get_value(it, state_idx))
         except TypeError:
             return None
 
-    def _find_next_prev_diff(self, start_path):
-        def match_func(it):
+    def _find_next_prev_diff(self, start_path: Gtk.TreePath) -> Tuple[Optional[Gtk.TreePath], Optional[Gtk.TreePath]]:
+        def match_func(it: Gtk.TreeIter) -> bool:
             # TODO: It works, but matching on the first pane only is very poor
             return self.get_state(it, 0) not in (
                 STATE_NORMAL, STATE_NOCHANGE, STATE_EMPTY)
 
         return self.get_previous_next_paths(start_path, match_func)
 
-    def state_rows(self, states):
+    def state_rows(self, states: List[int]) -> Generator[Gtk.TreeIter, None, None]:
         """Generator of rows in one of the given states
 
         Tree iterators are returned in depth-first tree order.
@@ -204,7 +206,7 @@ class DiffTreeStore(SearchableTreeStore):
             if state in states:
                 yield it
 
-    def unsafe_set(self, treeiter, pane, keys_values):
+    def unsafe_set(self, treeiter: Gtk.TreeIter, pane: int, keys_values: Dict[int, Any]) -> None:
         """ This must be fastest than super.set,
         at the cost that may crash the application if you don't
         know what your're passing here.
@@ -233,7 +235,7 @@ class DiffTreeStore(SearchableTreeStore):
 
 class TreeviewCommon:
 
-    def on_treeview_popup_menu(self, treeview):
+    def on_treeview_popup_menu(self, treeview: Gtk.TreeView) -> bool:
         cursor_path, cursor_col = treeview.get_cursor()
         if not cursor_path:
             self.popup_menu.popup_at_pointer(None)
@@ -253,7 +255,7 @@ class TreeviewCommon:
         )
         return True
 
-    def on_treeview_button_press_event(self, treeview, event):
+    def on_treeview_button_press_event(self, treeview: Gtk.TreeView, event: Gdk.EventButton) -> bool:
 
         # If we have multiple treeviews, unselect clear other tree selections
         num_panes = getattr(self, 'num_panes', 1)
@@ -284,7 +286,7 @@ class TreeviewCommon:
         return False
 
 
-def treeview_search_cb(model, column, key, it, data):
+def treeview_search_cb(model: DiffTreeStore, column: int, key: str, it: Gtk.TreeIter, data: Any) -> bool:
     # If the key contains a path separator, search the whole path,
     # otherwise just use the filename. If the key is all lower-case, do a
     # case-insensitive match.

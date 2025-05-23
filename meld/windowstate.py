@@ -1,4 +1,5 @@
 # Copyright (C) 2016 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,7 +19,7 @@ from gi.repository import Gdk, Gio, GObject
 
 from meld.settings import load_settings_schema
 
-WINDOW_STATE_SCHEMA = 'org.gnome.meld.WindowState'
+WINDOW_STATE_SCHEMA: str = 'org.gnome.meld.WindowState'
 
 
 class SavedWindowState(GObject.GObject):
@@ -35,7 +36,7 @@ class SavedWindowState(GObject.GObject):
     is_fullscreen = GObject.Property(
         type=bool, nick='Is window fullscreen', default=False)
 
-    def bind(self, window):
+    def bind(self, window: Gdk.Window) -> None:
         window.connect('size-allocate', self.on_size_allocate)
         # FIXME: just `maximized` and `fullscreened` for GTK 4
         window.connect("notify::is-maximized", self.on_window_state_event)
@@ -43,11 +44,11 @@ class SavedWindowState(GObject.GObject):
 
         # Don't re-read from gsettings after initialisation; we've seen
         # what looked like issues with buggy debounce here.
-        bind_flags = (
+        bind_flags: Gio.SettingsBindFlags = (
             Gio.SettingsBindFlags.DEFAULT |
             Gio.SettingsBindFlags.GET_NO_CHANGES
         )
-        self.settings = load_settings_schema(WINDOW_STATE_SCHEMA)
+        self.settings: Gio.Settings = load_settings_schema(WINDOW_STATE_SCHEMA)
         self.settings.bind('width', self, 'width', bind_flags)
         self.settings.bind('height', self, 'height', bind_flags)
         self.settings.bind('is-maximized', self, 'is-maximized', bind_flags)
@@ -56,7 +57,7 @@ class SavedWindowState(GObject.GObject):
         if self.props.is_maximized:
             window.maximize()
 
-    def on_size_allocate(self, window, allocation):
+    def on_size_allocate(self, window: Gdk.Window, allocation: Gdk.Rectangle) -> None:
         if not (self.props.is_maximized or self.props.is_fullscreen):
             width, height = window.get_size()
             if width != self.props.width:
@@ -64,13 +65,13 @@ class SavedWindowState(GObject.GObject):
             if height != self.props.height:
                 self.props.height = height
 
-    def on_window_state_event(self, window, param):
-        is_maximized = window.is_maximized()
+    def on_window_state_event(self, window: Gdk.Window, param: str) -> None:
+        is_maximized: bool = window.is_maximized()
         if is_maximized != self.props.is_maximized:
             self.props.is_maximized = is_maximized
 
         # TODO: Migrate to use is_fullscreen in GTK 4
-        state = window.props.window.get_state()
-        is_fullscreen = state & Gdk.WindowState.FULLSCREEN
+        state: Gdk.WindowState = window.props.window.get_state()
+        is_fullscreen: bool = bool(state & Gdk.WindowState.FULLSCREEN)
         if is_fullscreen != self.props.is_fullscreen:
             self.props.is_fullscreen = is_fullscreen

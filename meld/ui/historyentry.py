@@ -1,4 +1,5 @@
 # Copyright (C) 2008-2011, 2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@
 import configparser
 import os
 import sys
+from typing import Any, Final
 
 from gi.repository import GLib, GObject, Gtk, Pango
 
@@ -24,11 +26,11 @@ from gi.repository import GLib, GObject, Gtk, Pango
 #  * libgnomeui/libgnomeui/gnome-file-entry.c
 # roughly based on Colin Walters' Python translation of msgarea.py from Hotwire
 
-MIN_ITEM_LEN = 3
-HISTORY_ENTRY_HISTORY_LENGTH_DEFAULT = 10
+MIN_ITEM_LEN: Final[int] = 3
+HISTORY_ENTRY_HISTORY_LENGTH_DEFAULT: Final[int] = 10
 
 
-def _remove_item(store, text):
+def _remove_item(store: Gtk.ListStore, text: str) -> bool:
     if text is None:
         return False
 
@@ -39,7 +41,7 @@ def _remove_item(store, text):
     return False
 
 
-def _clamp_list_store(liststore, max_items):
+def _clamp_list_store(liststore: Gtk.ListStore, max_items: int) -> None:
     try:
         # -1 because TreePath counts from 0
         it = liststore.get_iter(max_items - 1)
@@ -69,7 +71,7 @@ class HistoryCombo(Gtk.ComboBox):
         default=HISTORY_ENTRY_HISTORY_LENGTH_DEFAULT,
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
         if sys.platform == "win32":
@@ -80,8 +82,8 @@ class HistoryCombo(Gtk.ComboBox):
         if not os.path.exists(pref_dir):
             os.makedirs(pref_dir)
 
-        self.history_file = os.path.join(pref_dir, "history.ini")
-        self.config = configparser.RawConfigParser()
+        self.history_file: str = os.path.join(pref_dir, "history.ini")
+        self.config: configparser.RawConfigParser = configparser.RawConfigParser()
         if os.path.exists(self.history_file):
             self.config.read(self.history_file, encoding='utf8')
 
@@ -97,17 +99,17 @@ class HistoryCombo(Gtk.ComboBox):
         self.connect('notify::history-length',
                      lambda *args: self._load_history())
 
-    def prepend_history(self, text):
+    def prepend_history(self, text: str) -> None:
         self._insert_history_item(text, True)
 
-    def append_history(self, text):
+    def append_history(self, text: str) -> None:
         self._insert_history_item(text, False)
 
-    def clear(self):
+    def clear(self) -> None:
         self.get_model().clear()
         self._save_history()
 
-    def _insert_history_item(self, text, prepend):
+    def _insert_history_item(self, text: str, prepend: bool) -> None:
         if not text or len(text) <= MIN_ITEM_LEN:
             return
 
@@ -123,7 +125,7 @@ class HistoryCombo(Gtk.ComboBox):
             store.append(row)
         self._save_history()
 
-    def _load_history(self):
+    def _load_history(self) -> None:
         section_key = self.props.history_id
         if section_key is None or not self.config.has_section(section_key):
             return
@@ -137,7 +139,7 @@ class HistoryCombo(Gtk.ComboBox):
             firstline = message.splitlines()[0]
             store.append((firstline, message))
 
-    def _save_history(self):
+    def _save_history(self) -> None:
         section_key = self.props.history_id
         if section_key is None:
             return

@@ -1,5 +1,6 @@
 # Copyright (C) 2009-2013 Piotr Piastucki <the_leech@users.berlios.de>
 # Copyright (C) 2012-2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,13 +16,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import difflib
-import typing
+from typing import Callable, Generator, List, NamedTuple, Optional, Tuple
 
-if typing.TYPE_CHECKING:
-    from gi.repository import Gtk
+from gi.repository import Gtk
 
 
-def find_common_prefix(a, b):
+def find_common_prefix(a: str, b: str) -> int:
     if not a or not b:
         return 0
     if a[0] == b[0]:
@@ -38,7 +38,7 @@ def find_common_prefix(a, b):
     return 0
 
 
-def find_common_suffix(a, b):
+def find_common_suffix(a: str, b: str) -> int:
     if not a or not b:
         return 0
     if a[-1] == b[-1]:
@@ -57,7 +57,7 @@ def find_common_suffix(a, b):
     return 0
 
 
-class DiffChunk(typing.NamedTuple):
+class DiffChunk(NamedTuple):
     tag: str
     start_a: int
     end_a: int
@@ -85,34 +85,36 @@ class DiffChunk(typing.NamedTuple):
 
 class MyersSequenceMatcher(difflib.SequenceMatcher):
 
-    def __init__(self, isjunk=None, a="", b=""):
+    def __init__(
+        self, isjunk: Optional[Callable[[str], bool]] = None, a: str = "", b: str = ""
+    ) -> None:
+        super().__init__(isjunk, a[:], b[:])
         if isjunk is not None:
             raise NotImplementedError('isjunk is not supported yet')
         # The sequences we're comparing must be considered immutable;
         # calling e.g., GtkTextBuffer methods to retrieve these line-by-line
         # isn't really a thing we can or should do.
-        self.a = a[:]
-        self.b = b[:]
-        self.matching_blocks = self.opcodes = None
-        self.aindex = []
-        self.bindex = []
+        self.matching_blocks: Optional[List[Tuple[int, int, int]]] = None
+        self.opcodes: Optional[List[DiffChunk]] = None
+        self.aindex: List[int] = []
+        self.bindex: List[int] = []
         self.common_prefix = self.common_suffix = 0
         self.lines_discarded = False
 
-    def get_matching_blocks(self):
+    def get_matching_blocks(self) -> List[Tuple[int, int, int]]:
         if self.matching_blocks is None:
             for i in self.initialise():
                 pass
         return self.matching_blocks
 
-    def get_opcodes(self):
+    def get_opcodes(self) -> List[DiffChunk]:
         opcodes = super().get_opcodes()
         return [DiffChunk._make(chunk) for chunk in opcodes]
 
-    def get_difference_opcodes(self):
+    def get_difference_opcodes(self) -> List[DiffChunk]:
         return [chunk for chunk in self.get_opcodes() if chunk.tag != "equal"]
 
-    def preprocess_remove_prefix_suffix(self, a, b):
+    def preprocess_remove_prefix_suffix(self, a: str, b: str) -> Tuple[str, str]:
         # remove common prefix and common suffix
         self.common_prefix = self.common_suffix = 0
         self.common_prefix = find_common_prefix(a, b)
@@ -127,14 +129,14 @@ class MyersSequenceMatcher(difflib.SequenceMatcher):
                 b = b[:len(b) - self.common_suffix]
         return (a, b)
 
-    def preprocess_discard_nonmatching_lines(self, a, b):
+    def preprocess_discard_nonmatching_lines(self, a: str, b: str) -> Tuple[str, str]:
         # discard lines that do not match any line from the other file
         if len(a) == 0 or len(b) == 0:
             self.aindex = []
             self.bindex = []
             return (a, b)
 
-        def index_matching(a, b):
+        def index_matching(a: str, b: str) -> Tuple[str, List[int]]:
             aset = frozenset(a)
             matches, index = [], []
             for i, line in enumerate(b):
@@ -155,7 +157,7 @@ class MyersSequenceMatcher(difflib.SequenceMatcher):
             b = indexed_b
         return (a, b)
 
-    def preprocess(self):
+    def preprocess(self) -> Tuple[str, str]:
         """
         Pre-processing optimizations:
         1) remove common prefix and common suffix
@@ -164,7 +166,7 @@ class MyersSequenceMatcher(difflib.SequenceMatcher):
         a, b = self.preprocess_remove_prefix_suffix(self.a, self.b)
         return self.preprocess_discard_nonmatching_lines(a, b)
 
-    def postprocess(self):
+    def postprocess(self) -> None:
         """
         Perform some post-processing cleanup to reduce 'chaff' and make
         the result more human-readable. Since Myers diff is a greedy
@@ -192,7 +194,7 @@ class MyersSequenceMatcher(difflib.SequenceMatcher):
         mb.reverse()
         self.matching_blocks = mb
 
-    def build_matching_blocks(self, lastsnake):
+    def build_matching_blocks(self, lastsnake: Optional[Tuple]) -> None:
         """Build list of matching blocks based on snakes
 
         The resulting blocks take into consideration multiple preprocessing
@@ -244,7 +246,7 @@ class MyersSequenceMatcher(difflib.SequenceMatcher):
         # clean-up to free memory
         self.aindex = self.bindex = None
 
-    def initialise(self):
+    def initialise(self) -> Generator[Optional[int], None, None]:
         """
         Optimized implementation of the O(NP) algorithm described by Sun Wu,
         Udi Manber, Gene Myers, Webb Miller
@@ -334,14 +336,14 @@ class MyersSequenceMatcher(difflib.SequenceMatcher):
 
 class InlineMyersSequenceMatcher(MyersSequenceMatcher):
 
-    def preprocess_discard_nonmatching_lines(self, a, b):
+    def preprocess_discard_nonmatching_lines(self, a: str, b: str) -> Tuple[str, str]:
 
         if len(a) <= 2 and len(b) <= 2:
             self.aindex = []
             self.bindex = []
             return (a, b)
 
-        def index_matching_kmers(a, b):
+        def index_matching_kmers(a: str, b: str) -> Tuple[str, List[int]]:
             aset = set([a[i:i + 3] for i in range(len(a) - 2)])
             matches, index = [], []
             next_poss_match = 0
@@ -371,12 +373,19 @@ class InlineMyersSequenceMatcher(MyersSequenceMatcher):
 
 class SyncPointMyersSequenceMatcher(MyersSequenceMatcher):
 
-    def __init__(self, isjunk=None, a="", b="", syncpoints=None):
+    def __init__(
+        self,
+        isjunk: Optional[Callable[[str], bool]] = None,
+        a: str = "",
+        b: str = "",
+        syncpoints: Optional[List[Tuple[int, int]]] = None,
+    ) -> None:
         super().__init__(isjunk, a, b)
         self.isjunk = isjunk
         self.syncpoints = syncpoints
+        self.split_matching_blocks: Optional[List[Tuple[int, int, int]]] = None
 
-    def initialise(self):
+    def initialise(self) -> Generator[Optional[int], None, None]:
         if self.syncpoints is None or len(self.syncpoints) == 0:
             for i in super().initialise():
                 yield i
@@ -391,8 +400,8 @@ class SyncPointMyersSequenceMatcher(MyersSequenceMatcher):
             if ai < len(self.a) or bi < len(self.b):
                 chunks.append((ai, bi, self.a[ai:], self.b[bi:]))
 
-            self.split_matching_blocks = []
-            self.matching_blocks = []
+            self.split_matching_blocks: List[List[Tuple[int, int, int]]] = []
+            self.matching_blocks: List[Tuple[int, int, int]] = []
             for ai, bi, a, b in chunks:
                 matching_blocks = []
                 matcher = MyersSequenceMatcher(self.isjunk, a, b)
@@ -418,7 +427,7 @@ class SyncPointMyersSequenceMatcher(MyersSequenceMatcher):
             self.matching_blocks.append((len(self.a), len(self.b), 0))
             yield 1
 
-    def get_opcodes(self):
+    def get_opcodes(self) -> List[DiffChunk]:
         # This is just difflib.SequenceMatcher.get_opcodes in which we instead
         # iterate over our internal set of split matching blocks.
         if self.opcodes is not None:

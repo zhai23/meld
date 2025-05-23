@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2009 Vincent Legoll <vincent.legoll@gmail.com>
 # Copyright (C) 2012-2013 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,14 +26,15 @@ import os
 import shutil
 import subprocess
 from pathlib import PurePath
+from re import Pattern
 from typing import (
     TYPE_CHECKING,
+    Any,
     AnyStr,
     Callable,
     Generator,
     List,
     Optional,
-    Pattern,
     Sequence,
     Tuple,
     Union,
@@ -45,24 +47,26 @@ from meld.conf import _
 if TYPE_CHECKING:
     from meld.vcview import ConsoleStream
 
-
 if os.name != "nt":
     from select import select
 else:
     import time
 
-    def select(rlist, wlist, xlist, timeout):
+    def select(
+        rlist: List, wlist: List, xlist: List, timeout: float
+    ) -> Tuple[List, List, List]:
         time.sleep(timeout)
         return rlist, wlist, xlist
 
 
-def with_focused_pane(function):
+def with_focused_pane(function: Callable) -> Callable:
     @functools.wraps(function)
-    def wrap_function(*args, **kwargs):
+    def wrap_function(*args, **kwargs) -> Any:
         pane = args[0]._get_focused_pane()
         if pane == -1:
             return
         return function(args[0], pane, *args[1:], **kwargs)
+
     return wrap_function
 
 
@@ -87,8 +91,12 @@ def error_dialog(primary: str, secondary: str) -> Gtk.ResponseType:
     Primary must be plain text. Secondary must be valid markup.
     """
     return modal_dialog(
-        primary, secondary, Gtk.ButtonsType.CLOSE, parent=None,
-        messagetype=Gtk.MessageType.ERROR)
+        primary,
+        secondary,
+        Gtk.ButtonsType.CLOSE,
+        parent=None,
+        messagetype=Gtk.MessageType.ERROR,
+    )
 
 
 def modal_dialog(
@@ -131,8 +139,7 @@ def modal_dialog(
     return response
 
 
-def user_critical(
-        primary: str, message: str) -> Callable[[Callable], Callable]:
+def user_critical(primary: str, message: str) -> Callable[[Callable], Callable]:
     """Decorator for when the user must be told about failures
 
     The use case here is for e.g., saving a file, where even if we
@@ -142,9 +149,9 @@ def user_critical(
     potential side effect should be considered a candidate.
     """
 
-    def wrap(function):
+    def wrap(function: Callable) -> Callable:
         @functools.wraps(function)
-        def wrap_function(locked, *args, **kwargs):
+        def wrap_function(locked, *args, **kwargs) -> Any:
             try:
                 return function(locked, *args, **kwargs)
             except Exception:
@@ -158,7 +165,9 @@ def user_critical(
                     ),
                 )
                 raise
+
         return wrap_function
+
     return wrap
 
 
@@ -195,31 +204,37 @@ def shorten_names(*names: str) -> List[str]:
     basenames = [p.name for p in paths]
 
     if all_same(basenames):
+
         def firstpart(path: PurePath) -> str:
             if len(path.parts) > 1 and path.parts[0]:
                 return "[%s] " % path.parts[0]
             else:
                 return ""
+
         return [firstpart(p) + p.name for p in paths]
 
     return [name or _("[None]") for name in basenames]
 
 
 @functools.lru_cache
-def guess_if_remote_x11():
+def guess_if_remote_x11() -> bool:
     """Try to guess whether we're being X11 forwarded"""
     display = os.environ.get("DISPLAY")
     ssh_connection = os.environ.get("SSH_CONNECTION")
     return bool(display and ssh_connection)
 
 
-def get_hide_window_startupinfo():
-    if os.name != "nt":
+if os.name != "nt":
+
+    def get_hide_window_startupinfo() -> Optional[Any]:
         return None
 
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    return startupinfo
+else:
+
+    def get_hide_window_startupinfo() -> Optional[subprocess.STARTUPINFO]:
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        return startupinfo
 
 
 SubprocessGenerator = Generator[Union[Tuple[int, str], None], None, None]
@@ -237,6 +252,7 @@ def read_pipe_iter(
     this function yields None.
     When all the data is read, the entire string is yielded.
     """
+
     class Sentinel:
 
         proc: Optional[subprocess.Popen]
@@ -253,8 +269,11 @@ def read_pipe_iter(
 
         def __call__(self) -> SubprocessGenerator:
             self.proc = subprocess.Popen(
-                command, cwd=workdir, stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                command,
+                cwd=workdir,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 universal_newlines=True,
                 startupinfo=get_hide_window_startupinfo(),
             )
@@ -348,8 +367,7 @@ def copytree(src: str, dst: str) -> None:
             raise
 
 
-def merge_intervals(
-        interval_list: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+def merge_intervals(interval_list: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     """Merge a list of intervals
 
     Returns a list of itervals as 2-tuples with all overlapping
@@ -387,7 +405,7 @@ def merge_intervals(
 def apply_text_filters(
     txt: AnyStr,
     regexes: Sequence[Pattern],
-    apply_fn: Optional[Callable[[int, int], None]] = None
+    apply_fn: Optional[Callable[[int, int], None]] = None,
 ) -> AnyStr:
     """Apply text filters
 

@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2006 Stephen Kennedy <stevek@gnome.org>
 # Copyright (C) 2010-2011 Kai Willadsen <kai.willadsen@gmail.com>
+# Copyright (C) 2025 Christoph Brill <opensource@christophbrill.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +34,7 @@ def on_undo_button_pressed():
 
 import logging
 import weakref
+from typing import Any, Callable, Dict, List, Optional
 
 from gi.repository import GObject
 
@@ -42,19 +44,19 @@ log = logging.getLogger(__name__)
 class GroupAction:
     """A group action combines several actions into one logical action.
     """
-    def __init__(self, seq):
+    def __init__(self, seq: 'UndoSequence') -> None:
         self.seq = seq
         # TODO: If a GroupAction affects more than one sequence, our logic
         # breaks. Currently, this isn't a problem.
         self.buffer = seq.actions[0].buffer
 
-    def undo(self):
+    def undo(self) -> List[Any]:
         actions = []
         while self.seq.can_undo():
             actions.extend(self.seq.undo())
         return actions
 
-    def redo(self):
+    def redo(self) -> List[Any]:
         actions = []
         while self.seq.can_redo():
             actions.extend(self.seq.redo())
@@ -80,7 +82,7 @@ class UndoSequence(GObject.GObject):
         ),
     }
 
-    def __init__(self, buffers):
+    def __init__(self, buffers: List[Any]) -> None:
         """Create an empty UndoSequence
 
         An undo sequence is tied to a collection of GtkTextBuffers, and
@@ -88,10 +90,12 @@ class UndoSequence(GObject.GObject):
         buffers for the lifetime of the UndoSequence.
         """
         super().__init__()
-        self.buffer_refs = [weakref.ref(buf) for buf in buffers]
+        self.group: Optional['UndoSequence'] = None
+        self.busy: bool = False
+        self.buffer_refs: List[Callable[[], Any]] = [weakref.ref(buf) for buf in buffers]
         self.clear()
 
-    def clear(self):
+    def clear(self) -> None:
         """Remove all undo and redo actions from this sequence
 
         If the sequence was previously able to undo and/or redo, the
@@ -101,25 +105,25 @@ class UndoSequence(GObject.GObject):
             self.emit('can-undo', 0)
         if self.can_redo():
             self.emit('can-redo', 0)
-        self.actions = []
-        self.next_redo = 0
-        self.checkpoints = {
+        self.actions: List[Any] = []
+        self.next_redo: int = 0
+        self.checkpoints: Dict[Any, List[Optional[int]]] = {
             # Each buffer's checkpoint starts at zero and has no end
             ref(): [0, None] for ref in self.buffer_refs
         }
-        self.group = None
-        self.busy = False
+        self.group: Optional['UndoSequence'] = None
+        self.busy: bool = False
 
-    def can_undo(self):
+    def can_undo(self) -> bool:
         """Return whether an undo is possible."""
         return getattr(self, 'next_redo', 0) > 0
 
-    def can_redo(self):
+    def can_redo(self) -> bool:
         """Return whether a redo is possible."""
         next_redo = getattr(self, 'next_redo', 0)
         return next_redo < len(getattr(self, 'actions', []))
 
-    def add_action(self, action):
+    def add_action(self, action: Any) -> None:
         """Add an action to the undo list.
 
         Arguments:
@@ -137,7 +141,7 @@ class UndoSequence(GObject.GObject):
             else:
                 # If we go back in the undo stack before the checkpoint starts,
                 # and then modify the buffer, we lose the checkpoint altogether
-                start, end = self.checkpoints.get(action.buffer, (None, None))
+                start, _ = self.checkpoints.get(action.buffer, (None, None))
                 if start is not None and start > self.next_redo:
                     self.checkpoints[action.buffer] = (None, None)
             could_undo = self.can_undo()
@@ -152,7 +156,7 @@ class UndoSequence(GObject.GObject):
         else:
             self.group.add_action(action)
 
-    def undo(self):
+    def undo(self) -> List[Any]:
         """Undo an action.
 
         Raises an AssertionError if the sequence is not undoable.
@@ -174,7 +178,7 @@ class UndoSequence(GObject.GObject):
             self.emit('checkpointed', buf, True)
         return actions
 
-    def redo(self):
+    def redo(self) -> List[Any]:
         """Redo an action.
 
         Raises and AssertionError if the sequence is not undoable.
@@ -197,7 +201,7 @@ class UndoSequence(GObject.GObject):
             self.emit('checkpointed', buf, True)
         return actions
 
-    def checkpoint(self, buf):
+    def checkpoint(self, buf: Any) -> None:
         start = self.next_redo
         while start > 0 and self.actions[start - 1].buffer != buf:
             start -= 1
@@ -210,7 +214,7 @@ class UndoSequence(GObject.GObject):
         self.checkpoints[buf] = [start, end]
         self.emit('checkpointed', buf, True)
 
-    def checkpointed(self, buf):
+    def checkpointed(self, buf: Any) -> bool:
         # While the main undo sequence should always have checkpoints
         # recorded, grouped subsequences won't.
         start, end = self.checkpoints.get(buf, (None, None))
@@ -220,7 +224,7 @@ class UndoSequence(GObject.GObject):
             end = len(self.actions)
         return start <= self.next_redo <= end
 
-    def begin_group(self):
+    def begin_group(self) -> None:
         """Group several actions into a single logical action.
 
         When you wrap several calls to add_action() inside begin_group()
@@ -238,7 +242,7 @@ class UndoSequence(GObject.GObject):
             buffers = [ref() for ref in self.buffer_refs]
             self.group = UndoSequence(buffers)
 
-    def end_group(self):
+    def end_group(self) -> None:
         """End a logical group action
 
         This must always be paired with a begin_group() call. However,
@@ -266,7 +270,7 @@ class UndoSequence(GObject.GObject):
             elif len(group.actions) > 1:
                 self.add_action(GroupAction(group))
 
-    def abort_group(self):
+    def abort_group(self) -> None:
         """Clear the currently grouped actions
 
         This discards all actions since the last begin_group() was
@@ -285,5 +289,5 @@ class UndoSequence(GObject.GObject):
         else:
             self.group = None
 
-    def in_grouped_action(self):
+    def in_grouped_action(self) -> bool:
         return self.group is not None
