@@ -17,7 +17,7 @@
 import logging
 from enum import Enum
 
-from gi.repository import Gdk, Gio, GLib, GObject, Graphene, Gtk, GtkSource, Pango
+from gi.repository import Gdk, Gio, GLib, GObject, Graphene, Gsk, Gtk, GtkSource, Pango
 
 from meld.meldbuffer import MeldBuffer
 from meld.settings import bind_settings, get_meld_settings, settings
@@ -353,26 +353,29 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
             x = 0
             width = self.get_width() + 1
 
+            rect = Graphene.Rect()
+            rounded_rect = Gsk.RoundedRect()
+
             # Paint chunk backgrounds and outlines
             for change in self.chunk_iter(bounds):
                 ypos0 = self.get_y_for_line_num(change[1])
                 ypos1 = self.get_y_for_line_num(change[2])
-                height = max(0, ypos1 - ypos0 - 1)
+                height = max(1, ypos1 - ypos0 - 1)
 
-                cairo = snapshot.append_cairo(Graphene.Rect(x, ypos0 + 0.5, width, height))
-                cairo.set_line_width(1.0)
+                rect.init(x, ypos0 + 0.5, width, height)
                 if change[1] != change[2]:
                     color = self.fill_colors[change[0]]
-                    cairo.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-                    cairo.fill_preserve()
+                    snapshot.append_color(color, rect)
                     if self.current_chunk_check(change):
                         highlight = self.fill_colors['current-chunk-highlight']
-                        cairo.set_source_rgba(highlight.red, highlight.green, highlight.blue, highlight.alpha)
-                        cairo.fill_preserve()
+                        snapshot.append_color(highlight, rect)
 
                 color = self.line_colors[change[0]]
-                cairo.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-                cairo.stroke()
+                rounded_rect.init_from_rect(rect, 0.0)
+                snapshot.append_border(
+                    rounded_rect,
+                    [1.0, 1.0, 1.0, 1.0],
+                    [color, color, color, color])
 
             textbuffer = self.get_buffer()
 
@@ -382,21 +385,17 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
             end_y += end_height
             visible_bottom_margin = self.get_width() - end_y
             if visible_bottom_margin > 0:
-                cairo = snapshot.append_cairo(Graphene.Rect(x + 1, end_y, width - 1, visible_bottom_margin))
-                cairo.set_line_width(1.0)
+                rect.init(x + 1, end_y, width - 1, visible_bottom_margin)
                 color = self.fill_colors['overscroll']
-                cairo.set_source_rgba(color.red, color.green, color.blue, color.alpha)
-                cairo.fill()
+                snapshot.append_color(color, rect)
 
             # Paint current line highlight
             if self.props.highlight_current_line_local:
                 it = textbuffer.get_iter_at_mark(textbuffer.get_insert())
                 ypos, line_height = self.get_line_yrange(it)
-                cairo = snapshot.append_cairo(Graphene.Rect(x, ypos, width, line_height))
-                cairo.set_line_width(1.0)
+                rect.init(x, ypos, width, line_height)
                 highlight = self.highlight_color
-                cairo.set_source_rgba(highlight.red, highlight.green, highlight.blue, highlight.alpha)
-                cairo.fill()
+                snapshot.append_color(highlight, rect)
 
             # Draw syncpoint indicator lines
             for syncpoint in self.syncpoints:
@@ -404,22 +403,26 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
                     continue
                 syncline = textbuffer.get_iter_at_mark(syncpoint).get_line()
                 if bounds[0] <= syncline <= bounds[1]:
+                    it = textbuffer.get_iter_at_mark(textbuffer.get_insert())
                     ypos = self.get_y_for_line_num(syncline)
                     ypos, line_height = self.get_line_yrange(it)
-                    cairo = snapshot.append_cairo(Graphene.Rect(x, ypos - 0.5, width, 1))
-                    cairo.set_line_width(1.0)
+                    rect.init(x, ypos - 0.5, width, 1)
                     syncpoint = self.syncpoint_color
-                    cairo.set_source_rgba(syncpoint.red, syncpoint.green, syncpoint.blue, syncpoint.alpha)
-                    cairo.stroke()
+                    rounded_rect.init_from_rect(rect, 0.0)
+                    snapshot.append_border(
+                        rounded_rect,
+                        [1.0, 1.0, 1.0, 1.0],
+                        [syncpoint, syncpoint, syncpoint, syncpoint])
 
             # Overdraw all animated chunks, and update animation states
             new_anim_chunks = []
             for c in self.animating_chunks:
                 current_time = GLib.get_monotonic_time()
-                # percent = min(
-                #     1.0, (current_time - c.start_time) / float(c.duration))
-                # rgba_pairs = zip(c.start_rgba, c.end_rgba) TODO4
-                # rgba = [s + (e - s) * percent for s, e in rgba_pairs]
+                percent = min(
+                    1.0, (current_time - c.start_time) / float(c.duration))
+                rgba_pairs = zip(c.start_rgba, c.end_rgba)
+                rgba = [s + (e - s) * percent for s, e in rgba_pairs]
+                rgba = Gdk.RGBA(*rgba)
 
                 it = textbuffer.get_iter_at_mark(c.start_mark)
                 ystart, _ = self.get_line_yrange(it)
@@ -428,13 +431,15 @@ class MeldSourceView(GtkSource.View, SourceViewHelperMixin):
                 if ystart == yend:
                     ystart -= 1
 
-                cairo = snapshot.append_cairo(Graphene.Rect(x, ystart, width, yend - ystart))
-                cairo.set_line_width(1.0)
-                cairo.set_source_rgba(1,0,1,1) # TODO4 use rgba from above
+                rect.init(x, ystart, width, yend - ystart)
                 if c.anim_type == TextviewLineAnimationType.stroke:
-                    cairo.stroke()
+                    rounded_rect.init_from_rect(rect, 0.0)
+                    snapshot.append_border(
+                        rounded_rect,
+                        [1.0, 1.0, 1.0, 1.0],
+                        [rgba, rgba, rgba, rgba])
                 else:
-                    cairo.fill()
+                    snapshot.append_color(rgba, rect)
 
                 if current_time <= c.start_time + c.duration:
                     new_anim_chunks.append(c)
