@@ -1,0 +1,54 @@
+name: Build Windows Meld
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    
+    defaults:
+      run:
+        shell: msys2 {0}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-adwaita-icon-theme
+          mingw-w64-x86_64-gsettings-desktop-schemas
+          mingw-w64-x86_64-gtk-update-icon-cache
+          mingw-w64-x86_64-gtk3
+          mingw-w64-x86_64-gtksourceview4
+          mingw-w64-x86_64-python-cx-freeze
+          mingw-w64-x86_64-python-gobject
+          mingw-w64-x86_64-python-pytest
+          mingw-w64-x86_64-python-setuptools
+          glib2-devel
+          intltool
+    
+    - name: Compile GLib schemas
+      run: |
+        glib-compile-schemas data
+    
+    - name: Build MSI installer
+      run: |
+        python3 setup_win32.py bdist_dumb --bdist-dir build/bdist.mingw/msi --keep-temp bdist_msi --keep-temp
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: meld-windows-installer
+        path: dist/
+        retention-days: 7
+      if: always()  # Upload artifacts even if build fails
