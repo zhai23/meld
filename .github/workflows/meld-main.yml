@@ -1,4 +1,4 @@
-name: Build Windows Meld (Simplified)
+name: Build Windows Meld
 
 on:
   push:
@@ -24,47 +24,149 @@ jobs:
           mingw-w64-x86_64-python
           mingw-w64-x86_64-python-gobject
           mingw-w64-x86_64-python-cairo
+          mingw-w64-x86_64-python-cx-freeze
           mingw-w64-x86_64-gtk3
           mingw-w64-x86_64-gtksourceview4
           mingw-w64-x86_64-adwaita-icon-theme
+          mingw-w64-x86_64-gsettings-desktop-schemas
           mingw-w64-x86_64-meson
           mingw-w64-x86_64-ninja
           mingw-w64-x86_64-gettext
+          mingw-w64-x86_64-glib2
           mingw-w64-x86_64-itstool
+          mingw-w64-x86_64-libxml2
+          intltool
     
-    - name: Configure and Build
+    - name: Check available meson options
       shell: msys2 {0}
       run: |
-        # 配置时禁用帮助文档（避免 itstool 错误）
+        echo "=== Checking meson_options.txt ==="
+        if [ -f "meson_options.txt" ]; then
+          cat meson_options.txt
+        else
+          echo "No meson_options.txt found"
+        fi
+        
+        echo -e "\n=== Checking for help directory ==="
+        if [ -d "help" ]; then
+          echo "Help directory exists"
+          if [ -f "help/meson.build" ]; then
+            echo "help/meson.build contents:"
+            head -30 help/meson.build
+          fi
+        fi
+    
+    - name: Configure build (attempt 1 - with profile)
+      shell: msys2 {0}
+      run: |
         meson setup _build \
           --prefix=/mingw64 \
-          -Dprofile=Devel \
-          -Dhelp=false
-        
-        # 构建
-        ninja -C _build
-        
-        # 安装
-        ninja -C _build install
+          -Dprofile=Devel
+      continue-on-error: true
     
-    - name: Package
+    - name: Configure build (attempt 2 - without profile)
+      if: failure()
       shell: msys2 {0}
       run: |
-        # 创建发布目录
-        mkdir -p release/meld-windows
+        rm -rf _build
+        meson setup _build --prefix=/mingw64
+      continue-on-error: true
+    
+    - name: Configure build (attempt 3 - skip subdirectories)
+      if: failure()
+      shell: msys2 {0}
+      run: |
+        # 如果 help 目录导致问题，可以临时重命名它
+        if [ -d "help" ] && [ -f "help/meson.build" ]; then
+          mv help help.bak
+        fi
         
-        # 复制 Meld
-        cp -r /mingw64/bin/meld* release/meld-windows/
-        cp -r /mingw64/share/meld release/meld-windows/
+        rm -rf _build
+        meson setup _build --prefix=/mingw64
+    
+    - name: Build
+      shell: msys2 {0}
+      run: |
+        ninja -C _build
+    
+    - name: Install to staging
+      shell: msys2 {0}
+      run: |
+        DESTDIR=$(pwd)/staging ninja -C _build install
+    
+    - name: Create portable package
+      shell: msys2 {0}
+      run: |
+        # 创建便携版目录
+        mkdir -p portable/meld
         
-        # 创建便携版
-        cd release
-        tar -czf meld-windows-portable.tar.gz meld-windows/
+        # 复制 meld
+        if [ -d "staging/mingw64" ]; then
+          cp -r staging/mingw64/* portable/meld/
+        else
+          # 如果没有 staging，直接从构建目录复制
+          cp -r _build/bin portable/meld/
+          cp -r _build/data portable/meld/
+          cp -r _build/meld portable/meld/
+        fi
         
-    - name: Upload Build
+        # 复制必要的运行时库
+        mkdir -p portable/meld/bin
+        ldd /mingw64/bin/python3.exe | grep mingw64 | awk '{print $3}' | xargs -I {} cp {} portable/meld/bin/ || true
+        
+        # 创建启动脚本
+        cat > portable/meld/meld.bat << 'EOF'
+@echo off
+setlocal
+set MELD_DIR=%~dp0
+set PATH=%MELD_DIR%bin;%PATH%
+set PYTHONPATH=%MELD_DIR%lib\python3.12\site-packages
+set GI_TYPELIB_PATH=%MELD_DIR%lib\girepository-1.0
+"%MELD_DIR%bin\python.exe" "%MELD_DIR%bin\meld" %*
+EOF
+        
+        # 打包
+        cd portable
+        tar -czf ../meld-windows-portable.tar.gz meld/
+    
+    - name: Build MSI (if possible)
+      shell: msys2 {0}
+      run: |
+        # 检查是否存在 Windows 安装脚本
+        if [ -f "setup_win32.py" ]; then
+          echo "Found setup_win32.py, building MSI..."
+          python3 setup_win32.py bdist_msi
+        elif [ -f "build-aux/windows/build_installer.py" ]; then
+          echo "Found build_installer.py..."
+          python3 build-aux/windows/build_installer.py
+        else
+          echo "No Windows installer script found"
+          
+          # 尝试使用 cx_Freeze
+          if command -v cxfreeze &> /dev/null; then
+            echo "Trying cx_Freeze..."
+            cat > setup_cx.py << 'EOF'
+from cx_Freeze import setup, Executable
+setup(
+    name = "Meld",
+    version = "3.23.1",
+    description = "Visual diff and merge tool",
+    executables = [Executable("bin/meld", base="Win32GUI")]
+)
+EOF
+            python3 setup_cx.py build_exe || true
+          fi
+        fi
+      continue-on-error: true
+    
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: meld-windows-build
+        name: meld-windows-${{ github.sha }}
         path: |
-          release/*.tar.gz
-          _build/
+          meld-windows-portable.tar.gz
+          dist/*.msi
+          dist/*.exe
+          build_exe/
+        if-no-files-found: warn
+        retention-days: 7
