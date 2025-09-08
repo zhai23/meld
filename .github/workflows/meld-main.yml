@@ -1,4 +1,4 @@
-name: Build Windows Meld
+name: Build Windows Meld (Simplified)
 
 on:
   push:
@@ -21,131 +21,50 @@ jobs:
         msystem: MINGW64
         update: true
         install: >-
-          git
-          base-devel
-          mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-python
-          mingw-w64-x86_64-python-pip
           mingw-w64-x86_64-python-gobject
           mingw-w64-x86_64-python-cairo
-          mingw-w64-x86_64-python-cx-freeze
           mingw-w64-x86_64-gtk3
           mingw-w64-x86_64-gtksourceview4
           mingw-w64-x86_64-adwaita-icon-theme
-          mingw-w64-x86_64-gsettings-desktop-schemas
           mingw-w64-x86_64-meson
           mingw-w64-x86_64-ninja
           mingw-w64-x86_64-gettext
-          mingw-w64-x86_64-glib2
-          intltool
+          mingw-w64-x86_64-itstool
     
-    - name: Check build system
+    - name: Configure and Build
       shell: msys2 {0}
       run: |
-        echo "=== Checking for build files ==="
-        if [ -f "meson.build" ]; then
-          echo "Found meson.build - using Meson build system"
-          echo "BUILD_SYSTEM=meson" >> $GITHUB_ENV
-        elif [ -f "setup_win32.py" ]; then
-          echo "Found setup_win32.py - using legacy build system"
-          echo "BUILD_SYSTEM=legacy" >> $GITHUB_ENV
-        else
-          echo "No recognized build system found"
-          ls -la
-        fi
-    
-    - name: Build with Meson
-      if: env.BUILD_SYSTEM == 'meson'
-      shell: msys2 {0}
-      run: |
-        # 编译 GLib schemas
-        if [ -d "data" ]; then
-          glib-compile-schemas data || true
-        fi
-        
-        # 设置构建目录
-        meson setup _build --prefix=/mingw64
+        # 配置时禁用帮助文档（避免 itstool 错误）
+        meson setup _build \
+          --prefix=/mingw64 \
+          -Dprofile=Devel \
+          -Dhelp=false
         
         # 构建
-        cd _build
-        ninja
-    
-    - name: Build with Legacy system
-      if: env.BUILD_SYSTEM == 'legacy'
-      shell: msys2 {0}
-      run: |
-        # 编译 GLib schemas
-        if [ -d "data" ]; then
-          glib-compile-schemas data
-        fi
+        ninja -C _build
         
-        # 构建 MSI
-        python3 setup_win32.py bdist_dumb --bdist-dir build/bdist.mingw/msi --keep-temp bdist_msi --keep-temp
-      continue-on-error: true
+        # 安装
+        ninja -C _build install
     
-    - name: Create installer package
+    - name: Package
       shell: msys2 {0}
       run: |
-        # 对于 Meson 构建，可能需要额外的打包步骤
-        if [ "$BUILD_SYSTEM" = "meson" ] && [ -d "_build" ]; then
-          cd _build
-          
-          # 尝试安装到临时目录
-          DESTDIR=$(pwd)/install ninja install
-          
-          # 如果有 Windows 特定的打包脚本
-          if [ -f "../build-aux/windows/package.sh" ]; then
-            ../build-aux/windows/package.sh
-          fi
-          
-          # 或者尝试查找任何 cx_Freeze 设置
-          if [ -f "../setup_win32.py" ]; then
-            cd ..
-            python3 setup_win32.py bdist_msi || echo "MSI creation failed"
-          fi
-        fi
-    
-    - name: List output files
-      shell: pwsh
-      run: |
-        Write-Host "=== Checking for output files ==="
-        if (Test-Path "dist") {
-          Get-ChildItem -Path "dist" -Recurse
-        }
-        if (Test-Path "_build") {
-          Get-ChildItem -Path "_build" -Recurse -Include "*.exe","*.msi"
-        }
-    
-    - name: Upload artifacts
+        # 创建发布目录
+        mkdir -p release/meld-windows
+        
+        # 复制 Meld
+        cp -r /mingw64/bin/meld* release/meld-windows/
+        cp -r /mingw64/share/meld release/meld-windows/
+        
+        # 创建便携版
+        cd release
+        tar -czf meld-windows-portable.tar.gz meld-windows/
+        
+    - name: Upload Build
       uses: actions/upload-artifact@v4
       with:
         name: meld-windows-build
         path: |
-          dist/*.msi
-          dist/*.exe
-          _build/install/
-          _build/*.msi
-          _build/*.exe
-        if-no-files-found: warn
-        retention-days: 7
-
-  # 可选：创建发布
-  release:
-    needs: windows-build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    
-    steps:
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: meld-windows-build
-    
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          *.msi
-          *.exe
-        draft: true
-        generate_release_notes: true
+          release/*.tar.gz
+          _build/
