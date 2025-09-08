@@ -115,21 +115,19 @@ jobs:
         ldd /mingw64/bin/python3.exe | grep mingw64 | awk '{print $3}' | xargs -I {} cp {} portable/meld/bin/ || true
         
         # 创建启动脚本
-        cat > portable/meld/meld.bat << 'EOF'
-@echo off
-setlocal
-set MELD_DIR=%~dp0
-set PATH=%MELD_DIR%bin;%PATH%
-set PYTHONPATH=%MELD_DIR%lib\python3.12\site-packages
-set GI_TYPELIB_PATH=%MELD_DIR%lib\girepository-1.0
-"%MELD_DIR%bin\python.exe" "%MELD_DIR%bin\meld" %*
-EOF
+        echo '@echo off' > portable/meld/meld.bat
+        echo 'setlocal' >> portable/meld/meld.bat
+        echo 'set MELD_DIR=%~dp0' >> portable/meld/meld.bat
+        echo 'set PATH=%MELD_DIR%bin;%PATH%' >> portable/meld/meld.bat
+        echo 'set PYTHONPATH=%MELD_DIR%lib\python3.12\site-packages' >> portable/meld/meld.bat
+        echo 'set GI_TYPELIB_PATH=%MELD_DIR%lib\girepository-1.0' >> portable/meld/meld.bat
+        echo '"%MELD_DIR%bin\python.exe" "%MELD_DIR%bin\meld" %*' >> portable/meld/meld.bat
         
         # 打包
         cd portable
         tar -czf ../meld-windows-portable.tar.gz meld/
     
-    - name: Build MSI (if possible)
+    - name: Build MSI if possible
       shell: msys2 {0}
       run: |
         # 检查是否存在 Windows 安装脚本
@@ -145,15 +143,13 @@ EOF
           # 尝试使用 cx_Freeze
           if command -v cxfreeze &> /dev/null; then
             echo "Trying cx_Freeze..."
-            cat > setup_cx.py << 'EOF'
-from cx_Freeze import setup, Executable
-setup(
-    name = "Meld",
-    version = "3.23.1",
-    description = "Visual diff and merge tool",
-    executables = [Executable("bin/meld", base="Win32GUI")]
-)
-EOF
+            echo 'from cx_Freeze import setup, Executable' > setup_cx.py
+            echo 'setup(' >> setup_cx.py
+            echo '    name = "Meld",' >> setup_cx.py
+            echo '    version = "3.23.1",' >> setup_cx.py
+            echo '    description = "Visual diff and merge tool",' >> setup_cx.py
+            echo '    executables = [Executable("bin/meld", base="Win32GUI")]' >> setup_cx.py
+            echo ')' >> setup_cx.py
             python3 setup_cx.py build_exe || true
           fi
         fi
