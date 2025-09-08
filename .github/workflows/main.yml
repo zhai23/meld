@@ -1,0 +1,34 @@
+name: Build Meld for Windows
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  windows_build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Install MSYS2 Dependencies
+      run: |
+        choco install msys2
+        msys2_shell.cmd -defterm -noexit -c "pacman -Syu --noconfirm"
+        msys2_shell.cmd -defterm -noexit -c "pacman -S --noconfirm mingw-w64-x86_64-gtk3 mingw-w64-x86_64-gtksourceview4 mingw-w64-x86_64-python-gobject"
+
+    - name: Build Meld on Windows
+      run: |
+        # Run MSYS2 shell commands to build Meld
+        C:\msys64\usr\bin\bash --login -c "./setup_win32.py bdist_dumb --bdist-dir build\\bdist.mingw\\msi --keep-temp bdist_msi --keep-temp"
+
+    - name: Upload Windows Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: meld-windows
+        path: ./dist
