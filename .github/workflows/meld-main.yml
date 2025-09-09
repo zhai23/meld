@@ -1,4 +1,4 @@
-name: Build Windows Meld (Direct Install)
+name: Build Windows Meld (WSL Fix)
 
 on:
   push:
@@ -35,151 +35,164 @@ jobs:
           mingw-w64-x86_64-gettext
           mingw-w64-x86_64-glib2
     
-    - name: Create dummy tools
+    - name: Patch meson files to skip problematic scripts
       shell: msys2 {0}
       run: |
-        mkdir -p /usr/local/bin
-        for tool in itstool update-desktop-database appstreamcli desktop-file-validate; do
-          echo -e '#!/bin/bash\nexit 0' > /usr/local/bin/$tool
-          chmod +x /usr/local/bin/$tool
-        done
-        export PATH=/usr/local/bin:$PATH
+        echo "=== Patching meson build files ==="
+        
+        # Remove help directory if it exists
+        if grep -q "^subdir('help')" meson.build; then
+          sed -i "s/^subdir('help')/#subdir('help')/" meson.build
+        fi
+        
+        # Patch data/meson.build to skip update-desktop-database
+        if [ -f "data/meson.build" ]; then
+          cp data/meson.build data/meson.build.backup
+          
+          # Comment out update-desktop-database calls
+          sed -i "s/meson.add_install_script('update-desktop-database'/#&/" data/meson.build
+          sed -i "/update.*desktop.*database/s/^/#/" data/meson.build
+          
+          # Show what we changed
+          echo "=== Changes to data/meson.build ==="
+          diff -u data/meson.build.backup data/meson.build || true
+        fi
+    
+    - name: Create dummy executables in PATH
+      shell: msys2 {0}
+      run: |
+        # Create dummy executables that meson can find directly
+        mkdir -p /mingw64/bin_dummy
+        
+        # itstool - Python script
+        cat > /mingw64/bin_dummy/itstool << 'EOF'
+        #!/usr/bin/env python3
+        import sys
+        sys.exit(0)
+        EOF
+        chmod +x /mingw64/bin_dummy/itstool
+        
+        # update-desktop-database - exe wrapper
+        gcc -o /mingw64/bin_dummy/update-desktop-database.exe -x c - << 'EOF'
+        #include <stdio.h>
+        int main() { return 0; }
+        EOF
+        
+        # appstreamcli
+        cp /mingw64/bin_dummy/update-desktop-database.exe /mingw64/bin_dummy/appstreamcli.exe
+        
+        # desktop-file-validate  
+        cp /mingw64/bin_dummy/update-desktop-database.exe /mingw64/bin_dummy/desktop-file-validate.exe
+        
+        # Add to PATH
+        export PATH=/mingw64/bin_dummy:$PATH
+        echo "PATH=$PATH" >> $GITHUB_ENV
     
     - name: Configure and build
       shell: msys2 {0}
       run: |
-        export PATH=/usr/local/bin:$PATH
+        export PATH=/mingw64/bin_dummy:$PATH
         
-        # Disable help if needed
-        grep -q "^subdir('help')" meson.build && sed -i "s/^subdir('help')/#subdir('help')/" meson.build
+        # Create install directory
+        install_dir="$(pwd)/meld_install"
+        mkdir -p "$install_dir"
         
-        # Use a simple local directory as prefix
-        mkdir -p $(pwd)/meld_install
+        # Configure
+        meson setup _build --prefix="$install_dir" --buildtype=release
         
-        meson setup _build --prefix=$(pwd)/meld_install --buildtype=release
+        # Build
         cd _build
         ninja
+        
+        # Install
         ninja install
     
     - name: Create portable package
       shell: msys2 {0}
       run: |
-        # Now files should be in meld_install/
-        if [ ! -d "meld_install" ]; then
-          echo "ERROR: meld_install directory not found"
-          ls -la
-          exit 1
-        fi
-        
-        # Create portable directory
+        # Setup directories
         mkdir -p portable/meld
+        
+        # Copy installed files
         cp -r meld_install/* portable/meld/
         
-        # Find Python version and actual DLL names
+        # Find Python details
         python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
         
-        echo "=== Looking for Python DLLs ==="
-        ls -la /mingw64/bin/ | grep -i python | head -10
-        
-        # Copy Python and find the correct DLL name
+        # Copy Python executable
         cp /mingw64/bin/python3.exe portable/meld/bin/
+        cp /mingw64/bin/python.exe portable/meld/bin/ 2>/dev/null || true
         
-        # Copy Python DLL (try different possible names)
-        for dll in libpython${python_version}.dll libpython3.dll python${python_version}.dll python3.dll; do
-          if [ -f "/mingw64/bin/$dll" ]; then
-            echo "Found Python DLL: $dll"
-            cp "/mingw64/bin/$dll" portable/meld/bin/
-            break
-          fi
-        done
-        
-        # Copy all DLLs that Python needs
+        # Find and copy DLLs
         cd portable/meld/bin
-        echo "=== Copying dependencies ==="
         
-        # Use ldd to find all dependencies
-        for exe in python3.exe meld; do
-          if [ -f "$exe" ]; then
-            ldd "$exe" 2>/dev/null | grep -E "(mingw64|msys64)" | awk '{print $3}' | sort -u | while read dll; do
-              if [ -f "$dll" ]; then
-                cp "$dll" . 2>/dev/null || true
-              fi
-            done
-          fi
-        done
+        # Method 1: Copy all DLLs from mingw64/bin (safest approach)
+        echo "=== Copying all potentially needed DLLs ==="
+        cp /mingw64/bin/*.dll . 2>/dev/null || true
         
-        # Manually copy important GTK/GLib DLLs that might be missed
-        cd /mingw64/bin
-        for pattern in libgtk-3 libgdk-3 libgtksourceview-4 libglib-2 libgobject-2 libgio-2 \
-                       libpango libcairo libgdk_pixbuf libatk libintl zlib1 libffi \
-                       libgcc_s libwinpthread libstdc++ libiconv libharfbuzz libpng \
-                       libfribidi libepoxy libgraphite2; do
-          cp ${pattern}*.dll "$OLDPWD" 2>/dev/null || true
-        done
-        cd "$OLDPWD"
+        # Clean up obviously unnecessary DLLs
+        rm -f *test*.dll *example*.dll 2>/dev/null || true
         
         cd ../../..
         
-        # Copy Python libraries
-        echo "=== Copying Python libraries ==="
+        # Copy Python runtime
         cp -r /mingw64/lib/python${python_version} portable/meld/lib/
         
-        # Copy GTK runtime
-        for dir in gdk-pixbuf-2.0 gtk-3.0 girepository-1.0; do
-          [ -d "/mingw64/lib/$dir" ] && cp -r /mingw64/lib/$dir portable/meld/lib/
+        # Copy GTK runtime directories
+        for dir in gdk-pixbuf-2.0 gtk-3.0 girepository-1.0 gio; do
+          [ -d "/mingw64/lib/$dir" ] && cp -r "/mingw64/lib/$dir" portable/meld/lib/
         done
         
-        # Copy share files
-        mkdir -p portable/meld/share
-        cp -r /mingw64/share/glib-2.0 portable/meld/share/ 2>/dev/null || true
-        cp -r /mingw64/share/gtksourceview-4 portable/meld/share/ 2>/dev/null || true
-        cp -r /mingw64/share/icons portable/meld/share/ 2>/dev/null || true
-        cp -r /mingw64/share/themes portable/meld/share/ 2>/dev/null || true
+        # Copy share directories
+        for dir in glib-2.0 gtksourceview-4 icons themes locale; do
+          [ -d "/mingw64/share/$dir" ] && cp -r "/mingw64/share/$dir" portable/meld/share/
+        done
         
-        # Also copy locale for translations
-        if [ -d "meld_install/share/locale" ]; then
-          cp -r meld_install/share/locale portable/meld/share/
+        # Ensure schemas are compiled
+        if [ -f "/mingw64/bin/glib-compile-schemas.exe" ] && [ -d "portable/meld/share/glib-2.0/schemas" ]; then
+          /mingw64/bin/glib-compile-schemas.exe portable/meld/share/glib-2.0/schemas
         fi
         
-        # Compile schemas
-        if [ -d "portable/meld/share/glib-2.0/schemas" ]; then
-          glib-compile-schemas portable/meld/share/glib-2.0/schemas || true
-        fi
-        
-        # Create batch launcher
-        cat > portable/meld/meld.bat << 'EOF'
+        # Create simple launcher
+        cat > portable/meld/meld.cmd << 'EOF'
         @echo off
-        set DIR=%~dp0
-        set PATH=%DIR%bin;%PATH%
-        set PYTHONPATH=%DIR%lib\python3.12;%DIR%lib\python3.12\site-packages
-        set GI_TYPELIB_PATH=%DIR%lib\girepository-1.0
-        set GSETTINGS_SCHEMA_DIR=%DIR%share\glib-2.0\schemas
-        set GTK_DATA_PREFIX=%DIR%
-        set GTK_EXE_PREFIX=%DIR%
-        set GTK_PATH=%DIR%
-        
-        cd /d "%DIR%"
-        start "" "%DIR%bin\python3.exe" "%DIR%bin\meld" %*
+        "%~dp0bin\python3.exe" "%~dp0bin\meld" %*
         EOF
         
-        # Test if meld script exists
-        echo "=== Checking meld executable ==="
-        if [ -f "portable/meld/bin/meld" ]; then
-          echo "Found meld script"
-          head -5 portable/meld/bin/meld
-        else
-          echo "ERROR: meld script not found!"
-        fi
+        # Create full environment launcher
+        cat > portable/meld/meld_full.cmd << 'EOF'
+        @echo off
+        setlocal
+        set MELD_DIR=%~dp0
+        set PATH=%MELD_DIR%bin;%PATH%
+        set PYTHONPATH=%MELD_DIR%lib\python3.12\site-packages;%MELD_DIR%lib\python3.12
+        set GI_TYPELIB_PATH=%MELD_DIR%lib\girepository-1.0
+        set GSETTINGS_SCHEMA_DIR=%MELD_DIR%share\glib-2.0\schemas
+        set GTK_DATA_PREFIX=%MELD_DIR%
+        set GTK_EXE_PREFIX=%MELD_DIR%
+        set GTK_PATH=%MELD_DIR%
+        set XDG_DATA_DIRS=%MELD_DIR%share
+        
+        "%MELD_DIR%bin\python3.exe" "%MELD_DIR%bin\meld" %*
+        endlocal
+        EOF
+        
+        # Test structure
+        echo "=== Verifying package structure ==="
+        [ -f "portable/meld/bin/meld" ] && echo "✓ meld script found" || echo "✗ meld script missing"
+        [ -f "portable/meld/bin/python3.exe" ] && echo "✓ python3.exe found" || echo "✗ python3.exe missing"
+        [ -d "portable/meld/lib/python${python_version}" ] && echo "✓ Python libs found" || echo "✗ Python libs missing"
+        [ -d "portable/meld/share/glib-2.0" ] && echo "✓ GLib share found" || echo "✗ GLib share missing"
         
         # Create archive
         cd portable
-        7z a ../meld-windows.zip meld/ || zip -r ../meld-windows.zip meld/
-        tar -czf ../meld-windows.tar.gz meld/
+        7z a ../meld-windows-portable.zip meld/
+        tar -czf ../meld-windows-portable.tar.gz meld/
     
-    - name: Upload artifact
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: meld-windows
+        name: meld-windows-portable
         path: |
-          meld-windows.zip
-          meld-windows.tar.gz
+          meld-windows-portable.zip
+          meld-windows-portable.tar.gz
