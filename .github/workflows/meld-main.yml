@@ -1,4 +1,4 @@
-name: Build Windows Meld (Final Fix)
+name: Build Windows Meld (Fixed Packaging)
 
 on:
   push:
@@ -37,150 +37,149 @@ jobs:
           mingw-w64-x86_64-libxml2
           mingw-w64-x86_64-libxslt
     
-    - name: Create dummy tools for Windows build
+    - name: Create dummy tools
       shell: msys2 {0}
       run: |
-        echo "=== Creating dummy tools for missing Linux utilities ==="
         mkdir -p /usr/local/bin
         
-        # Create dummy itstool
-        cat > /usr/local/bin/itstool << 'EOF'
-        #!/usr/bin/env python3
-        import sys
-        sys.exit(0)
-        EOF
-        chmod +x /usr/local/bin/itstool
-        
-        # Create dummy update-desktop-database
-        cat > /usr/local/bin/update-desktop-database << 'EOF'
+        # Create dummy tools
+        for tool in itstool update-desktop-database appstreamcli desktop-file-validate; do
+          cat > /usr/local/bin/$tool << 'EOF'
         #!/bin/bash
         exit 0
         EOF
-        chmod +x /usr/local/bin/update-desktop-database
-        
-        # Create dummy appstreamcli
-        cat > /usr/local/bin/appstreamcli << 'EOF'
-        #!/bin/bash
-        exit 0
-        EOF
-        chmod +x /usr/local/bin/appstreamcli
-        
-        # Create dummy desktop-file-validate
-        cat > /usr/local/bin/desktop-file-validate << 'EOF'
-        #!/bin/bash
-        exit 0
-        EOF
-        chmod +x /usr/local/bin/desktop-file-validate
+          chmod +x /usr/local/bin/$tool
+        done
         
         export PATH=/usr/local/bin:$PATH
         echo "PATH=$PATH" >> $GITHUB_ENV
-    
-    - name: Patch build files for Windows
-      shell: msys2 {0}
-      run: |
-        echo "=== Patching for Windows compatibility ==="
-        
-        # Disable help directory if it exists
-        if grep -q "^subdir('help')" meson.build; then
-          sed -i "s/^subdir('help')/#subdir('help')/" meson.build
-          echo "Disabled help subdirectory"
-        fi
     
     - name: Configure build
       shell: msys2 {0}
       run: |
         export PATH=/usr/local/bin:$PATH
         
-        echo "=== Configuring with meson (without profile option) ==="
-        meson setup _build --prefix=/mingw64 --buildtype=release || {
-            echo "=== Configuration failed, showing end of log ==="
-            tail -50 _build/meson-logs/meson-log.txt
-            exit 1
-        }
+        # Disable help directory if needed
+        if grep -q "^subdir('help')" meson.build; then
+          sed -i "s/^subdir('help')/#subdir('help')/" meson.build
+        fi
+        
+        # Configure with a local prefix instead of /mingw64
+        meson setup _build --prefix=/usr --buildtype=release
     
     - name: Build
       shell: msys2 {0}
       run: |
-        echo "=== Building with ninja ==="
         cd _build
         ninja
     
     - name: Create portable package
-      if: success()
       shell: msys2 {0}
       run: |
         cd _build
         
-        # Install to staging
+        # Install to a local staging directory
         DESTDIR=$(pwd)/staging ninja install
         
         cd ..
         
         # Create portable directory
         mkdir -p portable/meld
-        cp -r _build/staging/mingw64/* portable/meld/
+        
+        # Copy from the correct staging location
+        if [ -d "_build/staging/usr" ]; then
+          echo "=== Found installed files in staging/usr ==="
+          cp -r _build/staging/usr/* portable/meld/
+        else
+          echo "=== Looking for installed files ==="
+          find _build/staging -type f | head -20
+        fi
         
         # Get Python version
         python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+        echo "Python version: $python_version"
         
-        # Copy Python runtime
+        # Copy Python executable and core DLLs
+        mkdir -p portable/meld/bin
         cp /mingw64/bin/python3.exe portable/meld/bin/
         cp /mingw64/bin/python${python_version}.dll portable/meld/bin/
         
-        # Copy essential DLLs (using a more reliable method)
+        # Use ldd to find dependencies for the Python executable
+        echo "=== Finding dependencies ==="
         cd portable/meld/bin
-        for exe in python3.exe meld; do
-          if [ -f "$exe" ]; then
-            echo "=== Dependencies for $exe ==="
-            ldd "$exe" | grep mingw64 | awk '{print $3}' | while read dll; do
-              if [ -f "$dll" ] && [ ! -f "$(basename "$dll")" ]; then
-                cp "$dll" .
-                echo "Copied $(basename "$dll")"
-              fi
-            done
+        ldd python3.exe | grep mingw64 | awk '{print $3}' | sort -u | while read dll; do
+          if [ -f "$dll" ] && [ ! -f "$(basename "$dll")" ]; then
+            cp "$dll" .
+            echo "Copied $(basename "$dll")"
           fi
         done
-        cd ../../..
         
-        # Copy Python libraries
-        cp -r /mingw64/lib/python${python_version} portable/meld/lib/
-        
-        # Copy GTK runtime directories
-        for dir in gdk-pixbuf-2.0 gtk-3.0 girepository-1.0; do
-          [ -d "/mingw64/lib/$dir" ] && cp -r /mingw64/lib/$dir portable/meld/lib/
+        # Also copy GTK and related DLLs that might not show up in ldd
+        for lib in gtk-3-0 gdk-3-0 gtksourceview-4-0 pango-1.0-0 pangocairo-1.0-0 \
+                   cairo-2 cairo-gobject-2 gdk_pixbuf-2.0-0 rsvg-2-2; do
+          [ -f "/mingw64/bin/lib${lib}.dll" ] && cp "/mingw64/bin/lib${lib}.dll" .
         done
         
-        # Copy required share directories
+        cd ../../..
+        
+        # Copy Python standard library
+        mkdir -p portable/meld/lib
+        cp -r /mingw64/lib/python${python_version} portable/meld/lib/
+        
+        # Copy GTK runtime files
+        for dir in gdk-pixbuf-2.0 gtk-3.0 girepository-1.0; do
+          if [ -d "/mingw64/lib/$dir" ]; then
+            cp -r "/mingw64/lib/$dir" portable/meld/lib/
+          fi
+        done
+        
+        # Copy share files
         mkdir -p portable/meld/share
-        for dir in glib-2.0/schemas gtksourceview-4 icons/Adwaita icons/hicolor locale; do
-          src="/mingw64/share/$dir"
+        for item in glib-2.0/schemas gtksourceview-4 icons/Adwaita icons/hicolor; do
+          src="/mingw64/share/$item"
           if [ -d "$src" ]; then
-            dest="portable/meld/share/$(dirname "$dir")"
+            dest="portable/meld/share/$(dirname "$item")"
             mkdir -p "$dest"
             cp -r "$src" "$dest/"
           fi
         done
         
-        # Compile schemas
-        if [ -d "portable/meld/share/glib-2.0/schemas" ]; then
+        # Copy locale files for translations
+        if [ -d "/mingw64/share/locale" ]; then
+          mkdir -p portable/meld/share
+          cp -r /mingw64/share/locale portable/meld/share/
+        fi
+        
+        # Compile GSettings schemas
+        if [ -f "portable/meld/bin/glib-compile-schemas.exe" ]; then
+          portable/meld/bin/glib-compile-schemas.exe portable/meld/share/glib-2.0/schemas
+        elif command -v glib-compile-schemas &> /dev/null; then
           glib-compile-schemas portable/meld/share/glib-2.0/schemas
         fi
         
-        # Create Windows launcher
-        cat > portable/meld/meld.cmd << 'LAUNCHER_END'
+        # Create launcher script
+        cat > portable/meld/meld.cmd << 'BATCH_SCRIPT'
         @echo off
-        set SCRIPT_DIR=%~dp0
-        set SCRIPT_DIR=%SCRIPT_DIR:~0,-1%
+        setlocal
         
-        set PATH=%SCRIPT_DIR%\bin;%PATH%
-        set PYTHONPATH=%SCRIPT_DIR%\lib\python3.12\site-packages;%SCRIPT_DIR%\lib\python3.12
-        set GI_TYPELIB_PATH=%SCRIPT_DIR%\lib\girepository-1.0
-        set GSETTINGS_SCHEMA_DIR=%SCRIPT_DIR%\share\glib-2.0\schemas
-        set GTK_DATA_PREFIX=%SCRIPT_DIR%
-        set GTK_THEME=Windows-10
+        set MELD_ROOT=%~dp0
+        set MELD_ROOT=%MELD_ROOT:~0,-1%
         
-        "%SCRIPT_DIR%\bin\python3.exe" "%SCRIPT_DIR%\bin\meld" %*
-        LAUNCHER_END
+        set PATH=%MELD_ROOT%\bin;%PATH%
+        set PYTHONPATH=%MELD_ROOT%\lib\python3.12;%MELD_ROOT%\lib\python3.12\site-packages
+        set GI_TYPELIB_PATH=%MELD_ROOT%\lib\girepository-1.0
+        set GSETTINGS_SCHEMA_DIR=%MELD_ROOT%\share\glib-2.0\schemas
+        set GTK_DATA_PREFIX=%MELD_ROOT%
+        set GTK_EXE_PREFIX=%MELD_ROOT%
+        set GTK_PATH=%MELD_ROOT%
+        
+        cd /d "%MELD_ROOT%"
+        "%MELD_ROOT%\bin\python3.exe" "%MELD_ROOT%\bin\meld" %*
+        BATCH_SCRIPT
+        
+        # Show what we've packaged
+        echo "=== Package structure ==="
+        find portable/meld -type f -name "*.exe" -o -name "meld" | head -10
         
         # Create archives
         cd portable
