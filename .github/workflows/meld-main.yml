@@ -1,4 +1,4 @@
-name: Build Windows Meld
+name: Debug and Build Windows Meld
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  windows-build:
+  windows-build-debug:
     runs-on: windows-latest
     
     steps:
@@ -24,145 +24,132 @@ jobs:
           mingw-w64-x86_64-python
           mingw-w64-x86_64-python-gobject
           mingw-w64-x86_64-python-cairo
-          mingw-w64-x86_64-python-cx-freeze
           mingw-w64-x86_64-gtk3
           mingw-w64-x86_64-gtksourceview4
           mingw-w64-x86_64-adwaita-icon-theme
           mingw-w64-x86_64-gsettings-desktop-schemas
           mingw-w64-x86_64-meson
           mingw-w64-x86_64-ninja
+          mingw-w64-x86_64-pkg-config
           mingw-w64-x86_64-gettext
           mingw-w64-x86_64-glib2
-          mingw-w64-x86_64-itstool
-          mingw-w64-x86_64-libxml2
-          intltool
     
-    - name: Check available meson options
+    - name: Debug - Show project files
       shell: msys2 {0}
       run: |
-        echo "=== Checking meson_options.txt ==="
-        if [ -f "meson_options.txt" ]; then
-          cat meson_options.txt
-        else
-          echo "No meson_options.txt found"
-        fi
+        echo "=== Root directory files ==="
+        ls -la
         
-        echo -e "\n=== Checking for help directory ==="
-        if [ -d "help" ]; then
-          echo "Help directory exists"
-          if [ -f "help/meson.build" ]; then
-            echo "help/meson.build contents:"
-            head -30 help/meson.build
+        echo -e "\n=== meson.build first 30 lines ==="
+        head -30 meson.build
+        
+        echo -e "\n=== Checking subdirectories ==="
+        for dir in data help meld po; do
+          if [ -d "$dir" ]; then
+            echo "Directory $dir exists"
+            if [ -f "$dir/meson.build" ]; then
+              echo "  Has meson.build"
+            fi
           fi
-        fi
+        done
     
-    - name: Configure build (attempt 1 - with profile)
+    - name: Debug - Test meson setup
       shell: msys2 {0}
       run: |
-        meson setup _build \
-          --prefix=/mingw64 \
-          -Dprofile=Devel
-      continue-on-error: true
-    
-    - name: Configure build (attempt 2 - without profile)
-      if: failure()
-      shell: msys2 {0}
-      run: |
-        rm -rf _build
-        meson setup _build --prefix=/mingw64
-      continue-on-error: true
-    
-    - name: Configure build (attempt 3 - skip subdirectories)
-      if: failure()
-      shell: msys2 {0}
-      run: |
-        # 如果 help 目录导致问题，可以临时重命名它
-        if [ -d "help" ] && [ -f "help/meson.build" ]; then
-          mv help help.bak
-        fi
-        
-        rm -rf _build
-        meson setup _build --prefix=/mingw64
-    
-    - name: Build
-      shell: msys2 {0}
-      run: |
-        ninja -C _build
-    
-    - name: Install to staging
-      shell: msys2 {0}
-      run: |
-        DESTDIR=$(pwd)/staging ninja -C _build install
-    
-    - name: Create portable package
-      shell: msys2 {0}
-      run: |
-        # 创建便携版目录
-        mkdir -p portable/meld
-        
-        # 复制 meld
-        if [ -d "staging/mingw64" ]; then
-          cp -r staging/mingw64/* portable/meld/
-        else
-          # 如果没有 staging，直接从构建目录复制
-          cp -r _build/bin portable/meld/
-          cp -r _build/data portable/meld/
-          cp -r _build/meld portable/meld/
-        fi
-        
-        # 复制必要的运行时库
-        mkdir -p portable/meld/bin
-        ldd /mingw64/bin/python3.exe | grep mingw64 | awk '{print $3}' | xargs -I {} cp {} portable/meld/bin/ || true
-        
-        # 创建启动脚本
-        echo '@echo off' > portable/meld/meld.bat
-        echo 'setlocal' >> portable/meld/meld.bat
-        echo 'set MELD_DIR=%~dp0' >> portable/meld/meld.bat
-        echo 'set PATH=%MELD_DIR%bin;%PATH%' >> portable/meld/meld.bat
-        echo 'set PYTHONPATH=%MELD_DIR%lib\python3.12\site-packages' >> portable/meld/meld.bat
-        echo 'set GI_TYPELIB_PATH=%MELD_DIR%lib\girepository-1.0' >> portable/meld/meld.bat
-        echo '"%MELD_DIR%bin\python.exe" "%MELD_DIR%bin\meld" %*' >> portable/meld/meld.bat
-        
-        # 打包
-        cd portable
-        tar -czf ../meld-windows-portable.tar.gz meld/
-    
-    - name: Build MSI if possible
-      shell: msys2 {0}
-      run: |
-        # 检查是否存在 Windows 安装脚本
-        if [ -f "setup_win32.py" ]; then
-          echo "Found setup_win32.py, building MSI..."
-          python3 setup_win32.py bdist_msi
-        elif [ -f "build-aux/windows/build_installer.py" ]; then
-          echo "Found build_installer.py..."
-          python3 build-aux/windows/build_installer.py
-        else
-          echo "No Windows installer script found"
+        echo "=== Testing meson setup with full output ==="
+        meson setup _build --prefix=/mingw64 2>&1 | tee meson-output.log || {
+          echo -e "\n=== MESON FAILED ==="
+          echo "Exit code: $?"
           
-          # 尝试使用 cx_Freeze
-          if command -v cxfreeze &> /dev/null; then
-            echo "Trying cx_Freeze..."
-            echo 'from cx_Freeze import setup, Executable' > setup_cx.py
-            echo 'setup(' >> setup_cx.py
-            echo '    name = "Meld",' >> setup_cx.py
-            echo '    version = "3.23.1",' >> setup_cx.py
-            echo '    description = "Visual diff and merge tool",' >> setup_cx.py
-            echo '    executables = [Executable("bin/meld", base="Win32GUI")]' >> setup_cx.py
-            echo ')' >> setup_cx.py
-            python3 setup_cx.py build_exe || true
+          if [ -f "_build/meson-logs/meson-log.txt" ]; then
+            echo -e "\n=== Full meson log ==="
+            cat _build/meson-logs/meson-log.txt
           fi
-        fi
-      continue-on-error: true
+          
+          echo -e "\n=== Captured output ==="
+          cat meson-output.log
+          
+          # Don't exit, let's try to fix it
+        }
     
-    - name: Upload artifacts
+    - name: Fix - Remove problematic subdirs
+      shell: msys2 {0}
+      run: |
+        # Clean up previous attempt
+        rm -rf _build
+        
+        echo "=== Creating modified meson.build ==="
+        cp meson.build meson.build.original
+        
+        # Remove problematic subdirectories from build
+        # Common issues: help (needs itstool), po (needs gettext tools)
+        cat meson.build.original | \
+          sed "s/^subdir('help')/#subdir('help')/" | \
+          sed "s/^subdir('po')/#subdir('po')/" > meson.build
+        
+        echo -e "\n=== Diff of changes ==="
+        diff -u meson.build.original meson.build || true
+        
+        echo -e "\n=== Attempting build without help/po ==="
+        meson setup _build --prefix=/mingw64
+    
+    - name: Build if configuration succeeded
+      if: success()
+      shell: msys2 {0}
+      run: |
+        cd _build
+        ninja -j2
+    
+    - name: Create minimal package
+      if: success()
+      shell: msys2 {0}
+      run: |
+        cd _build
+        
+        # Install to staging
+        DESTDIR=$(pwd)/staging ninja install
+        
+        # Create archive of what we built
+        cd staging
+        tar -czf ../../meld-windows-minimal.tar.gz mingw64/
+        
+        echo "=== Package contents ==="
+        tar -tzf ../../meld-windows-minimal.tar.gz | head -20
+    
+    - name: Alternative - Direct run from source
+      if: failure()
+      shell: msys2 {0}
+      run: |
+        echo "=== Trying to run Meld directly from source ==="
+        
+        # Check if meld script exists
+        if [ -f "bin/meld" ]; then
+          echo "Found bin/meld"
+          python3 bin/meld --version || echo "Direct run failed"
+        fi
+        
+        # Check for meld module
+        if [ -d "meld" ] && [ -f "meld/__main__.py" ]; then
+          echo "Found meld module"
+          python3 -m meld --version || echo "Module run failed"
+        fi
+        
+        # Package source as-is
+        echo "=== Creating source package ==="
+        tar -czf meld-source.tar.gz \
+          --exclude='.git' \
+          --exclude='_build' \
+          --exclude='*.tar.gz' \
+          .
+    
+    - name: Upload all outputs
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: meld-windows-${{ github.sha }}
+        name: meld-debug-output
         path: |
-          meld-windows-portable.tar.gz
-          dist/*.msi
-          dist/*.exe
-          build_exe/
+          meson-output.log
+          meld-windows-minimal.tar.gz
+          meld-source.tar.gz
+          _build/meson-logs/
         if-no-files-found: warn
-        retention-days: 7
