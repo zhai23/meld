@@ -1,4 +1,4 @@
-name: Build Windows Meld (Simplified)
+name: Build Windows Meld (Fixed YAML)
 
 on:
   push:
@@ -44,11 +44,6 @@ jobs:
         # Main meson.build - disable help
         sed -i "s/^subdir('help')/#subdir('help')/" meson.build 2>/dev/null || true
         
-        # Create a modified meson_options.txt if needed
-        if [ -f "meson_options.txt" ]; then
-          cp meson_options.txt meson_options.txt.backup
-        fi
-        
         # Patch data/meson.build to make all post-install scripts optional
         if [ -f "data/meson.build" ]; then
           cp data/meson.build data/meson.build.backup
@@ -69,10 +64,10 @@ jobs:
         
         # Create simple executable scripts
         for tool in itstool appstreamcli desktop-file-validate update-desktop-database; do
-          cat > "$HOME/dummy_tools/$tool" << 'EOF'
-#!/bin/sh
-exit 0
-EOF
+          cat > "$HOME/dummy_tools/$tool" << 'TOOL_END'
+        #!/bin/sh
+        exit 0
+        TOOL_END
           chmod +x "$HOME/dummy_tools/$tool"
         done
         
@@ -148,20 +143,23 @@ EOF
         fi
         
         # Create launcher script
-        cat > meld-portable/meld.bat << EOF
-@echo off
-setlocal
-set MELD_HOME=%~dp0
-set PATH=%MELD_HOME%bin;%PATH%
-set PYTHONPATH=%MELD_HOME%lib\python${PYTHON_VERSION};%MELD_HOME%lib\python${PYTHON_VERSION}\site-packages
-set GI_TYPELIB_PATH=%MELD_HOME%lib\girepository-1.0
-set GSETTINGS_SCHEMA_DIR=%MELD_HOME%share\glib-2.0\schemas
-set GTK_DATA_PREFIX=%MELD_HOME%
-set GTK_EXE_PREFIX=%MELD_HOME%
-set GTK_PATH=%MELD_HOME%
-
-"%MELD_HOME%bin\python3.exe" "%MELD_HOME%bin\meld" %*
-EOF
+        cat > meld-portable/meld.bat << 'BATCH_END'
+        @echo off
+        setlocal
+        set MELD_HOME=%~dp0
+        set PATH=%MELD_HOME%bin;%PATH%
+        set PYTHONPATH=%MELD_HOME%lib\pythonPYVER;%MELD_HOME%lib\pythonPYVER\site-packages
+        set GI_TYPELIB_PATH=%MELD_HOME%lib\girepository-1.0
+        set GSETTINGS_SCHEMA_DIR=%MELD_HOME%share\glib-2.0\schemas
+        set GTK_DATA_PREFIX=%MELD_HOME%
+        set GTK_EXE_PREFIX=%MELD_HOME%
+        set GTK_PATH=%MELD_HOME%
+        
+        "%MELD_HOME%bin\python3.exe" "%MELD_HOME%bin\meld" %*
+        BATCH_END
+        
+        # Replace PYVER with actual version
+        sed -i "s/pythonPYVER/python${PYTHON_VERSION}/g" meld-portable/meld.bat
         
         # Verify package
         echo "=== Package contents verification ==="
