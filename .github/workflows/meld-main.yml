@@ -1,4 +1,22 @@
-name: Build Windows Meld (Fixed YAML)
+
+The user is showing me another error from the GitHub Actions workflow. The issue is that meson is looking for update-desktop-database and can't find it.
+
+The error:
+
+Program update-desktop-database found: NO
+meson.build:61:6: ERROR: Program 'update-desktop-database' not found or not executable
+It seems my previous approach of creating dummy tools in $HOME/dummy_tools didn't work properly - either the PATH wasn't set correctly or meson is looking for these tools in a different way.
+
+I need to:
+
+Make sure the dummy tools are in the PATH when meson runs
+Or find a better way to make meson skip these checks
+Or patch the meson.build file more aggressively
+Let me check the previous steps - it looks like the dummy tools were created but meson still can't find them. This might be because the PATH environment variable isn't being passed properly between steps in GitHub Actions.
+
+I should create the dummy tools directly in a location that's already in PATH, like /mingw64/bin, or ensure the PATH is set correctly in the Build step. 问题是 update-desktop-database 程序没有被 meson 找到。看起来之前创建的假工具没有被正确添加到 PATH 中。让我修复这个问题：
+
+name: Build Windows Meld (PATH Fix)
 
 on:
   push:
@@ -36,54 +54,67 @@ jobs:
           mingw-w64-x86_64-glib2
           mingw-w64-x86_64-gcc
     
-    - name: Patch build to skip optional tools
+    - name: Create all dummy tools
       shell: msys2 {0}
       run: |
-        echo "=== Patching meson.build files ==="
+        echo "=== Creating dummy tools ==="
         
-        # Main meson.build - disable help
-        sed -i "s/^subdir('help')/#subdir('help')/" meson.build 2>/dev/null || true
+        # Create dummy tools directly in /usr/bin (which is in PATH)
+        cd /usr/bin
         
-        # Patch data/meson.build to make all post-install scripts optional
-        if [ -f "data/meson.build" ]; then
-          cp data/meson.build data/meson.build.backup
-          
-          # Replace meson.add_install_script with comments
-          sed -i "s/meson\.add_install_script(/# meson.add_install_script(/g" data/meson.build
-          
-          # Show changes
-          echo "=== Changes made to data/meson.build ==="
-          diff -u data/meson.build.backup data/meson.build || true
-        fi
-    
-    - name: Create tool wrappers
-      shell: msys2 {0}
-      run: |
-        # Create a tools directory
-        mkdir -p "$HOME/dummy_tools"
-        
-        # Create simple executable scripts
-        for tool in itstool appstreamcli desktop-file-validate update-desktop-database; do
-          cat > "$HOME/dummy_tools/$tool" << 'TOOL_END'
+        # Create update-desktop-database
+        cat > update-desktop-database << 'SCRIPT_END'
         #!/bin/sh
         exit 0
-        TOOL_END
-          chmod +x "$HOME/dummy_tools/$tool"
+        SCRIPT_END
+        chmod +x update-desktop-database
+        
+        # Create other dummy tools
+        for tool in desktop-file-validate appstreamcli itstool msgfmt-desktop gtk4-update-icon-cache; do
+          cp update-desktop-database "$tool"
         done
         
-        # Add to PATH for this step and future steps
-        export PATH="$HOME/dummy_tools:$PATH"
-        echo "PATH=$PATH" >> $GITHUB_ENV
+        # Verify they're accessible
+        echo "=== Verifying tools are in PATH ==="
+        which update-desktop-database && echo "✓ update-desktop-database found" || echo "✗ update-desktop-database NOT found"
+        which desktop-file-validate && echo "✓ desktop-file-validate found" || echo "✗ desktop-file-validate NOT found"
+        which appstreamcli && echo "✓ appstreamcli found" || echo "✗ appstreamcli NOT found"
     
-    - name: Build Meld
+    - name: Patch meson files
       shell: msys2 {0}
       run: |
-        # Create build and install directories
-        mkdir -p build
-        mkdir -p install
+        echo "=== Patching build files ==="
         
-        # Configure with absolute path for prefix
-        meson setup build --prefix="$(pwd)/install" --buildtype=release
+        # Disable help subdir
+        sed -i "s/^subdir('help')/#subdir('help')/" meson.build 2>/dev/null || true
+        
+        # Make update-desktop-database optional in main meson.build
+        if grep -q "find_program('update-desktop-database'" meson.build; then
+          sed -i "s/find_program('update-desktop-database'/find_program('update-desktop-database', required: false/" meson.build
+        fi
+        
+        # Also patch data/meson.build if it exists
+        if [ -f "data/meson.build" ]; then
+          # Make all desktop tools optional
+          sed -i "s/find_program('update-desktop-database'/find_program('update-desktop-database', required: false/" data/meson.build 2>/dev/null || true
+          sed -i "s/find_program('desktop-file-validate'/find_program('desktop-file-validate', required: false/" data/meson.build 2>/dev/null || true
+          sed -i "s/find_program('appstreamcli'/find_program('appstreamcli', required: false/" data/meson.build 2>/dev/null || true
+          
+          # Show what we changed
+          echo "=== Checking for find_program calls ==="
+          grep -n "find_program" data/meson.build || true
+        fi
+    
+    - name: Build and Install Meld
+      shell: msys2 {0}
+      run: |
+        # Verify tools are still in PATH
+        echo "=== PATH check ==="
+        echo "PATH=$PATH"
+        which update-desktop-database || echo "WARNING: update-desktop-database not in PATH"
+        
+        # Configure
+        meson setup build --prefix="$(pwd)/meld_install" --buildtype=release
         
         # Build
         ninja -C build
@@ -94,94 +125,112 @@ jobs:
     - name: Create portable package
       shell: msys2 {0}
       run: |
-        # Create portable structure
-        mkdir -p meld-portable/{bin,lib,share}
+        # Setup portable directory
+        mkdir -p portable/meld
         
         # Copy installed files
-        cp -r install/* meld-portable/
+        cp -r meld_install/* portable/meld/
         
         # Get Python version
         PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
         echo "Python version: $PYTHON_VERSION"
         
-        # Copy Python executable and libraries
-        cp /mingw64/bin/python3.exe meld-portable/bin/
-        cp -r /mingw64/lib/python${PYTHON_VERSION} meld-portable/lib/
+        # Copy Python
+        cp /mingw64/bin/python3.exe portable/meld/bin/
+        cp /mingw64/bin/python.exe portable/meld/bin/ 2>/dev/null || true
         
-        # Copy all required DLLs (simplified approach)
-        cd meld-portable/bin
+        # Copy Python runtime
+        cp -r /mingw64/lib/python${PYTHON_VERSION} portable/meld/lib/
         
-        # Copy DLLs that Python and GTK need
-        for dll in /mingw64/bin/*.dll; do
-          # Skip obviously large/unnecessary DLLs
-          basename=$(basename "$dll")
-          case "$basename" in
-            *test*|*example*|*demo*) continue ;;
-            *) cp "$dll" . 2>/dev/null || true ;;
-          esac
+        # Copy all DLLs from mingw64/bin
+        echo "=== Copying DLLs ==="
+        cd portable/meld/bin
+        
+        # First, get DLLs that the executables directly need
+        for exe in python3.exe meld; do
+          if [ -f "$exe" ]; then
+            echo "Dependencies for $exe:"
+            ldd "$exe" 2>/dev/null | grep mingw64 | awk '{print $3}' | while read dll; do
+              if [ -f "$dll" ] && [ ! -f "$(basename "$dll")" ]; then
+                cp "$dll" .
+                echo "  - Copied $(basename "$dll")"
+              fi
+            done
+          fi
         done
         
-        cd ../..
+        # Then copy additional GTK/Python related DLLs
+        for pattern in libgtk libgdk libcairo libpango libgobject libgio libglib \
+                      libintl libatk libepoxy libharfbuzz libpixman libpng libzstd \
+                      libgtksourceview libbz2 libffi libgcc libwinpthread zlib; do
+          cp /mingw64/bin/${pattern}*.dll . 2>/dev/null || true
+        done
+        
+        cd ../../..
         
         # Copy GTK runtime data
         for dir in gtk-3.0 gdk-pixbuf-2.0 girepository-1.0; do
-          [ -d "/mingw64/lib/$dir" ] && cp -r "/mingw64/lib/$dir" meld-portable/lib/
+          [ -d "/mingw64/lib/$dir" ] && cp -r "/mingw64/lib/$dir" portable/meld/lib/
         done
         
-        # Copy themes and icons
-        for dir in themes icons; do
-          [ -d "/mingw64/share/$dir" ] && cp -r "/mingw64/share/$dir" meld-portable/share/
+        # Copy required share directories
+        mkdir -p portable/meld/share
+        for dir in glib-2.0 gtksourceview-4 icons themes; do
+          [ -d "/mingw64/share/$dir" ] && cp -r "/mingw64/share/$dir" portable/meld/share/
         done
         
-        # Copy other required share directories
-        [ -d "/mingw64/share/glib-2.0" ] && cp -r /mingw64/share/glib-2.0 meld-portable/share/
-        [ -d "/mingw64/share/gtksourceview-4" ] && cp -r /mingw64/share/gtksourceview-4 meld-portable/share/
-        
-        # Ensure schemas are compiled
-        if [ -d "meld-portable/share/glib-2.0/schemas" ]; then
-          glib-compile-schemas meld-portable/share/glib-2.0/schemas || true
+        # Compile schemas if needed
+        if [ -d "portable/meld/share/glib-2.0/schemas" ]; then
+          cd portable/meld/share/glib-2.0/schemas
+          /mingw64/bin/glib-compile-schemas . || true
+          cd ../../../../..
         fi
         
-        # Create launcher script
-        cat > meld-portable/meld.bat << 'BATCH_END'
+        # Create launcher
+        cat > portable/meld/run_meld.bat << 'BATCH_END'
         @echo off
-        setlocal
-        set MELD_HOME=%~dp0
-        set PATH=%MELD_HOME%bin;%PATH%
-        set PYTHONPATH=%MELD_HOME%lib\pythonPYVER;%MELD_HOME%lib\pythonPYVER\site-packages
-        set GI_TYPELIB_PATH=%MELD_HOME%lib\girepository-1.0
-        set GSETTINGS_SCHEMA_DIR=%MELD_HOME%share\glib-2.0\schemas
-        set GTK_DATA_PREFIX=%MELD_HOME%
-        set GTK_EXE_PREFIX=%MELD_HOME%
-        set GTK_PATH=%MELD_HOME%
+        setlocal enabledelayedexpansion
         
-        "%MELD_HOME%bin\python3.exe" "%MELD_HOME%bin\meld" %*
+        :: Get the directory of this script
+        set "MELD_DIR=%~dp0"
+        :: Remove trailing backslash
+        if "!MELD_DIR:~-1!"=="\" set "MELD_DIR=!MELD_DIR:~0,-1!"
+        
+        :: Set environment
+        set "PATH=!MELD_DIR!\bin;%PATH%"
+        set "PYTHONPATH=!MELD_DIR!\lib\python3.12;!MELD_DIR!\lib\python3.12\site-packages"
+        set "GI_TYPELIB_PATH=!MELD_DIR!\lib\girepository-1.0"
+        set "GSETTINGS_SCHEMA_DIR=!MELD_DIR!\share\glib-2.0\schemas"
+        set "GTK_DATA_PREFIX=!MELD_DIR!"
+        set "GTK_EXE_PREFIX=!MELD_DIR!"
+        set "GTK_PATH=!MELD_DIR!"
+        
+        :: Run Meld
+        "!MELD_DIR!\bin\python3.exe" "!MELD_DIR!\bin\meld" %*
         BATCH_END
         
-        # Replace PYVER with actual version
-        sed -i "s/pythonPYVER/python${PYTHON_VERSION}/g" meld-portable/meld.bat
+        # Fix Python version in batch file
+        sed -i "s/python3\.12/python${PYTHON_VERSION}/g" portable/meld/run_meld.bat
         
-        # Verify package
-        echo "=== Package contents verification ==="
-        echo "Checking for key files:"
-        [ -f "meld-portable/bin/meld" ] && echo "✓ meld script" || echo "✗ meld script"
-        [ -f "meld-portable/bin/python3.exe" ] && echo "✓ python3.exe" || echo "✗ python3.exe"
-        [ -d "meld-portable/lib/python${PYTHON_VERSION}" ] && echo "✓ Python libs" || echo "✗ Python libs"
-        [ -d "meld-portable/share/glib-2.0/schemas" ] && echo "✓ GLib schemas" || echo "✗ GLib schemas"
-        [ -f "meld-portable/share/glib-2.0/schemas/gschemas.compiled" ] && echo "✓ Compiled schemas" || echo "✗ Compiled schemas"
+        # Verification
+        echo "=== Verifying portable package ==="
+        [ -f "portable/meld/bin/meld" ] && echo "✓ meld script" || echo "✗ meld script"
+        [ -f "portable/meld/bin/python3.exe" ] && echo "✓ python3.exe" || echo "✗ python3.exe"
+        [ -d "portable/meld/lib/python${PYTHON_VERSION}" ] && echo "✓ Python libs" || echo "✗ Python libs"
+        [ -d "portable/meld/share/glib-2.0/schemas" ] && echo "✓ GLib schemas" || echo "✗ GLib schemas"
+        [ -f "portable/meld/run_meld.bat" ] && echo "✓ Launcher script" || echo "✗ Launcher script"
         
-        # Create archive
-        echo "=== Creating archive ==="
-        7z a meld-windows-portable.zip meld-portable/
-        
-        # Also create a self-extracting archive if possible
-        7z a -sfx7z.sfx meld-windows-portable.exe meld-portable/ 2>/dev/null || true
+        # Create archives
+        echo "=== Creating archives ==="
+        cd portable
+        7z a ../meld-portable-windows.zip meld/
+        tar czf ../meld-portable-windows.tar.gz meld/
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: meld-windows-portable
         path: |
-          meld-windows-portable.zip
-          meld-windows-portable.exe
+          meld-portable-windows.zip
+          meld-portable-windows.tar.gz
         if-no-files-found: warn
